@@ -24,3 +24,17 @@ export interface Coach {
   created_at: string;
   updated_at: string;
 }
+
+export const COACH_ROLES: { value: CoachRole; label: string }[] = [
+  { value: "coach", label: "Coach" },
+  { value: "directeur-general", label: "Directeur Général" },
+  { value: "directeur-hockey", label: "Directeur Hockey" },
+];
+
+export const COACHING_LEVELS: { value: CoachingLevel; label: string }[] = [
+  { value: "initiation", label: "Initiation" },
+  { value: "regional", label: "Régional" },
+  { value: "provincial", label: "Provincial" },
+  { value: "national", label: "National" },
+  { value: "haute-performance", label: "Haute Performance" },
+];

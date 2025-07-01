@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { supabase, CoachRole, CoachingLevel } from "@/lib/supabase/client";
+import {
+  supabase,
+  CoachRole,
+  CoachingLevel,
+  COACH_ROLES,
+  COACHING_LEVELS,
+} from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -150,11 +156,11 @@ export function RegisterForm() {
               <SelectValue placeholder="Sélectionnez votre rôle" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="coach">Coach</SelectItem>
-              <SelectItem value="directeur-general">
-                Directeur Général
-              </SelectItem>
-              <SelectItem value="directeur-hockey">Directeur Hockey</SelectItem>
+              {COACH_ROLES.map((role) => (
+                <SelectItem key={role.value} value={role.value}>
+                  {role.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -170,13 +176,11 @@ export function RegisterForm() {
               <SelectValue placeholder="Sélectionnez votre niveau" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="initiation">Initiation</SelectItem>
-              <SelectItem value="regional">Régional</SelectItem>
-              <SelectItem value="provincial">Provincial</SelectItem>
-              <SelectItem value="national">National</SelectItem>
-              <SelectItem value="haute-performance">
-                Haute Performance
-              </SelectItem>
+              {COACHING_LEVELS.map((level) => (
+                <SelectItem key={level.value} value={level.value}>
+                  {level.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

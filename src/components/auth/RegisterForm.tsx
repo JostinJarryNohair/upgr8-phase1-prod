@@ -138,7 +138,11 @@ export default function RegisterForm() {
       {/* Left Side - Form */}
       <div className="w-full lg:w-[55%] xl:w-[40%] flex items-center flex-col justify-center p-6 lg:p-8 bg-white">
         {/* Logo */}
+<<<<<<< HEAD
         <div className="text-center mb-4">
+=======
+        <div className="text-center">
+>>>>>>> b1c0e9be6edfe3dc9bf88d402181665dfb57b5d0
           <Image
             src="/logo.png"
             alt="UpGr8 Logo"

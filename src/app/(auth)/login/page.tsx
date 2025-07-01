@@ -193,9 +193,6 @@ export default function LoginScreen() {
                 className="h-10 text-sm"
                 {...register("password")}
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Minimum 6 caractères avec majuscule, minuscule et chiffre
-              </p>
             </div>
 
             {/* Forgot Password Link */}

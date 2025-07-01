@@ -142,8 +142,8 @@ export default function RegisterForm() {
           <Image
             src="/logo.png"
             alt="UpGr8 Logo"
-            width={200}
-            height={200}
+            width={180}
+            height={180}
             priority
             className="inline-flex items-center justify-center"
           />
@@ -242,9 +242,6 @@ export default function RegisterForm() {
                   error={errors.password}
                   className="h-10 text-sm"
                 />
-                <p className="mt-1 text-xs text-gray-500">
-                  Doit contenir au moins 6 caractères
-                </p>
               </div>
               <div>
                 <Label

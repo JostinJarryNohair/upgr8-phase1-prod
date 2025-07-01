@@ -109,7 +109,7 @@ export default function DynamicInput({
       </div>
 
       {error && (
-        <p className="mt-1 text-sm text-red-600" id={`${inputId}-error`}>
+        <p className="mt-1 text-xs text-red-600" id={`${inputId}-error`}>
           {error}
         </p>
       )}

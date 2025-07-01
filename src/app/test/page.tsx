@@ -5,7 +5,6 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
-  supabase,
   COACH_ROLES,
   COACHING_LEVELS,
   CoachingLevel,
@@ -20,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import DynamicInput from "@/components/common/DynamicInput";
 
-export default function RegisterForm() {
+export default function TestRegisterForm() {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -49,101 +48,28 @@ export default function RegisterForm() {
       role: "",
       coachingLevel: "",
     };
-
     if (!formData.firstName) newErrors.firstName = "Le prénom est requis";
     if (!formData.lastName) newErrors.lastName = "Le nom de famille est requis";
-    if (!formData.email) {
-      newErrors.email = "Le courriel est requis";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Veuillez entrer une adresse courriel valide";
-    }
-    if (!formData.password) {
-      newErrors.password = "Le mot de passe est requis";
-    } else if (formData.password.length < 6) {
-      newErrors.password =
-        "Le mot de passe doit contenir au moins 6 caractères";
-    }
+    if (!formData.email) newErrors.email = "Le courriel est requis";
+    if (!formData.password) newErrors.password = "Le mot de passe est requis";
     if (!formData.role) newErrors.role = "Le rôle est requis";
     if (!formData.coachingLevel)
       newErrors.coachingLevel = "Le niveau est requis";
-
     setErrors(newErrors);
     return !Object.values(newErrors).some(Boolean);
   };
 
-  const clearError = (field: string) => {
-    if (errors[field as keyof typeof errors]) {
-      setErrors({ ...errors, [field]: "" });
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validate()) return;
-
     setLoading(true);
     setMessage("");
-
-    try {
-      // Step 1: Create user account with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      if (authError) throw authError;
-
-      if (authData.user) {
-        // Step 2: Create coach profile in coaches table
-        // Wait a moment for user to be fully created
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        const { data: coachData, error: profileError } = await supabase
-          .from("coaches")
-          .insert({
-            id: authData.user.id,
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            email: formData.email,
-            role: formData.role,
-            coaching_level: formData.coachingLevel,
-          })
-          .select();
-
-        if (profileError) {
-          console.error("Profile creation error:", profileError);
-          throw new Error(
-            `Erreur lors de la création du profil: ${profileError.message}`
-          );
-        }
-
-        console.log("Coach profile created successfully:", coachData);
-      }
-
+    setTimeout(() => {
+      setLoading(false);
       setMessage(
         "Inscription réussie! Vérifiez votre email pour confirmer votre compte."
       );
-
-      // Clear form on success
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        password: "",
-        role: "" as CoachRole,
-        coachingLevel: "" as CoachingLevel,
-      });
-    } catch (error: unknown) {
-      console.error("Registration error:", error);
-      if (error instanceof Error) {
-        setMessage("Erreur: " + error.message);
-      } else {
-        setMessage("Erreur inconnue lors de l'inscription");
-      }
-    } finally {
-      setLoading(false);
-    }
+    }, 1200);
   };
 
   return (
@@ -162,7 +88,6 @@ export default function RegisterForm() {
               className="mb-2"
             />
           </div>
-
           {/* Header */}
           <h1 className="text-2xl font-bold text-gray-900 mb-1">
             Créer un compte
@@ -185,10 +110,9 @@ export default function RegisterForm() {
                   type="text"
                   placeholder="Jean"
                   value={formData.firstName}
-                  onChange={(e) => {
-                    setFormData({ ...formData, firstName: e.target.value });
-                    clearError("firstName");
-                  }}
+                  onChange={(e) =>
+                    setFormData({ ...formData, firstName: e.target.value })
+                  }
                   className={
                     errors.firstName
                       ? "border-red-300 focus:border-red-500 focus:ring-red-500"
@@ -213,10 +137,9 @@ export default function RegisterForm() {
                   type="text"
                   placeholder="Dupont"
                   value={formData.lastName}
-                  onChange={(e) => {
-                    setFormData({ ...formData, lastName: e.target.value });
-                    clearError("lastName");
-                  }}
+                  onChange={(e) =>
+                    setFormData({ ...formData, lastName: e.target.value })
+                  }
                   className={
                     errors.lastName
                       ? "border-red-300 focus:border-red-500 focus:ring-red-500"
@@ -228,7 +151,6 @@ export default function RegisterForm() {
                 )}
               </div>
             </div>
-
             <div>
               <Label
                 htmlFor="email"
@@ -241,10 +163,9 @@ export default function RegisterForm() {
                 type="email"
                 placeholder="jean@exemple.com"
                 value={formData.email}
-                onChange={(e) => {
-                  setFormData({ ...formData, email: e.target.value });
-                  clearError("email");
-                }}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 className={
                   errors.email
                     ? "border-red-300 focus:border-red-500 focus:ring-red-500"
@@ -255,7 +176,6 @@ export default function RegisterForm() {
                 <p className="text-sm text-red-600 mt-1">{errors.email}</p>
               )}
             </div>
-
             <div>
               <Label
                 htmlFor="password"
@@ -268,10 +188,9 @@ export default function RegisterForm() {
                 type="password"
                 placeholder="Créez un mot de passe robuste"
                 value={formData.password}
-                onChange={(e) => {
-                  setFormData({ ...formData, password: e.target.value });
-                  clearError("password");
-                }}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
                 className={
                   errors.password
                     ? "border-red-300 focus:border-red-500 focus:ring-red-500"
@@ -282,26 +201,18 @@ export default function RegisterForm() {
                 <p className="text-sm text-red-600 mt-1">{errors.password}</p>
               )}
               <p className="mt-1 text-xs text-gray-500">
-                Doit contenir au moins 6 caractères
+                Doit contenir au moins 8 caractères
               </p>
             </div>
-
             <div>
               <Label htmlFor="role">Rôle</Label>
               <Select
                 value={formData.role}
-                onValueChange={(value: CoachRole) => {
-                  setFormData({ ...formData, role: value });
-                  clearError("role");
-                }}
+                onValueChange={(value: CoachRole) =>
+                  setFormData({ ...formData, role: value })
+                }
               >
-                <SelectTrigger
-                  className={
-                    errors.role
-                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                      : ""
-                  }
-                >
+                <SelectTrigger>
                   <SelectValue placeholder="Sélectionnez votre rôle" />
                 </SelectTrigger>
                 <SelectContent>
@@ -316,23 +227,15 @@ export default function RegisterForm() {
                 <p className="text-sm text-red-600 mt-1">{errors.role}</p>
               )}
             </div>
-
             <div>
               <Label htmlFor="coachingLevel">Niveau de coaching</Label>
               <Select
                 value={formData.coachingLevel}
-                onValueChange={(value: CoachingLevel) => {
-                  setFormData({ ...formData, coachingLevel: value });
-                  clearError("coachingLevel");
-                }}
+                onValueChange={(value: CoachingLevel) =>
+                  setFormData({ ...formData, coachingLevel: value })
+                }
               >
-                <SelectTrigger
-                  className={
-                    errors.coachingLevel
-                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                      : ""
-                  }
-                >
+                <SelectTrigger>
                   <SelectValue placeholder="Sélectionnez votre niveau" />
                 </SelectTrigger>
                 <SelectContent>
@@ -349,7 +252,6 @@ export default function RegisterForm() {
                 </p>
               )}
             </div>
-
             <Button
               type="submit"
               className="w-full bg-red-600 text-white hover:bg-red-700 rounded-md py-2 text-base font-semibold mt-2"
@@ -357,18 +259,12 @@ export default function RegisterForm() {
             >
               {loading ? "Création..." : "Créer le compte"}
             </Button>
-
             {message && (
-              <p
-                className={`text-sm text-center mt-2 ${
-                  message.includes("Erreur") ? "text-red-600" : "text-green-600"
-                }`}
-              >
+              <p className="text-sm text-center text-green-600 mt-2">
                 {message}
               </p>
             )}
           </form>
-
           <div className="text-center text-base mt-6">
             <span className="text-gray-600">
               Vous avez déjà un compte ?{" "}
@@ -382,7 +278,6 @@ export default function RegisterForm() {
           </div>
         </div>
       </div>
-
       {/* Right Side - Image */}
       <div className="hidden lg:block lg:w-[60%] relative overflow-hidden bg-gray-100">
         <Image

@@ -222,7 +222,7 @@ export default function LoginScreen() {
               <span className="text-sm text-gray-600">
                 Vous n&apos;avez pas de compte ?{" "}
                 <Link
-                  href="/signup"
+                  href="/register"
                   className="font-medium text-red-600 hover:text-red-700 transition-colors"
                 >
                   S&apos;inscrire

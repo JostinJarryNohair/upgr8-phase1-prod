@@ -136,236 +136,206 @@ export default function RegisterForm() {
   return (
     <div className="h-screen flex bg-white">
       {/* Left Side - Form */}
-      <div className="w-full lg:w-[55%] xl:w-[40%] flex items-center flex-col justify-center p-6 lg:p-8 bg-white">
-        {/* Logo */}
-        <div className="text-center mb-4">
-          <Image
-            src="/logo.png"
-            alt="UpGr8 Logo"
-            width={200}
-            height={200}
-            priority
-            className="inline-flex items-center justify-center"
-          />
-        </div>
-        <div>
-          {/* Register Card */}
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 -mt-20">
-            {/* Header */}
-            <div className="text-center mb-6">
-              <h1 className="text-xl font-semibold text-gray-900 mb-1">
-                Créer un compte
-              </h1>
-              <p className="text-gray-600 text-sm">
-                Commencez votre parcours hockey avec UpGr8
+      <div className="w-full lg:w-[55%] xl:w-[40%] flex items-center justify-center p-6 lg:p-8 bg-white">
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 -mt-20 w-full max-w-md">
+          {/* Header */}
+          <div className="text-center mb-6">
+            <h1 className="text-xl font-semibold text-gray-900 mb-1">
+              Créer un compte
+            </h1>
+            <p className="text-gray-600 text-sm">
+              Commencez votre parcours hockey avec UpGr8
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label
+                  htmlFor="firstName"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Prénom
+                </Label>
+                <DynamicInput
+                  id="firstName"
+                  type="text"
+                  placeholder="Jean"
+                  value={formData.firstName}
+                  onChange={(e) => {
+                    setFormData({ ...formData, firstName: e.target.value });
+                    clearError("firstName");
+                  }}
+                  error={errors.firstName}
+                  className="h-10 text-sm"
+                />
+              </div>
+              <div>
+                <Label
+                  htmlFor="lastName"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Nom de famille
+                </Label>
+                <DynamicInput
+                  id="lastName"
+                  type="text"
+                  placeholder="Dupont"
+                  value={formData.lastName}
+                  onChange={(e) => {
+                    setFormData({ ...formData, lastName: e.target.value });
+                    clearError("lastName");
+                  }}
+                  error={errors.lastName}
+                  className="h-10 text-sm"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Adresse courriel
+              </Label>
+              <DynamicInput
+                id="email"
+                type="email"
+                placeholder="jean@exemple.com"
+                value={formData.email}
+                onChange={(e) => {
+                  setFormData({ ...formData, email: e.target.value });
+                  clearError("email");
+                }}
+                error={errors.email}
+                className="h-10 text-sm"
+              />
+            </div>
+
+            <div>
+              <Label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Mot de passe
+              </Label>
+              <DynamicInput
+                id="password"
+                type="password"
+                placeholder="Créez un mot de passe robuste"
+                value={formData.password}
+                onChange={(e) => {
+                  setFormData({ ...formData, password: e.target.value });
+                  clearError("password");
+                }}
+                error={errors.password}
+                className="h-10 text-sm"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Doit contenir au moins 6 caractères
               </p>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label
-                    htmlFor="firstName"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Prénom
-                  </Label>
-                  <DynamicInput
-                    id="firstName"
-                    type="text"
-                    placeholder="Jean"
-                    value={formData.firstName}
-                    onChange={(e) => {
-                      setFormData({ ...formData, firstName: e.target.value });
-                      clearError("firstName");
-                    }}
-                    error={errors.firstName}
-                    className="h-10 text-sm"
-                  />
-                </div>
-                <div>
-                  <Label
-                    htmlFor="lastName"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Nom de famille
-                  </Label>
-                  <DynamicInput
-                    id="lastName"
-                    type="text"
-                    placeholder="Dupont"
-                    value={formData.lastName}
-                    onChange={(e) => {
-                      setFormData({ ...formData, lastName: e.target.value });
-                      clearError("lastName");
-                    }}
-                    error={errors.lastName}
-                    className="h-10 text-sm"
-                  />
-                </div>
-              </div>
-              <div>
-                <Label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+
+            <div>
+              <Label
+                htmlFor="role"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Rôle
+              </Label>
+              <Select
+                value={formData.role}
+                onValueChange={(value: CoachRole) => {
+                  setFormData({ ...formData, role: value });
+                  clearError("role");
+                }}
+              >
+                <SelectTrigger
+                  className={
+                    errors.role
+                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                      : ""
+                  }
                 >
-                  Adresse courriel
-                </Label>
-                <DynamicInput
-                  id="email"
-                  type="email"
-                  placeholder="jean@exemple.com"
-                  value={formData.email}
-                  onChange={(e) => {
-                    setFormData({ ...formData, email: e.target.value });
-                    clearError("email");
-                  }}
-                  error={errors.email}
-                  className="h-10 text-sm"
-                />
-              </div>
-              <div>
-                <Label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Mot de passe
-                </Label>
-                <DynamicInput
-                  id="password"
-                  type="password"
-                  placeholder="Créez un mot de passe robuste"
-                  value={formData.password}
-                  onChange={(e) => {
-                    setFormData({ ...formData, password: e.target.value });
-                    clearError("password");
-                  }}
-                  error={errors.password}
-                  className="h-10 text-sm"
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  Doit contenir au moins 6 caractères
-                </p>
-              </div>
-              <div>
-                <Label
-                  htmlFor="role"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Rôle
-                </Label>
-                <Select
-                  value={formData.role}
-                  onValueChange={(value: CoachRole) => {
-                    setFormData({ ...formData, role: value });
-                    clearError("role");
-                  }}
-                >
-                  <SelectTrigger
-                    className={
-                      errors.role
-                        ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                        : ""
-                    }
-                  >
-                    <SelectValue placeholder="Sélectionnez votre rôle" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {COACH_ROLES.map((role) => (
-                      <SelectItem key={role.value} value={role.value}>
-                        {role.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label
-                  htmlFor="coachingLevel"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Niveau de coaching
-                </Label>
-                <Select
-                  value={formData.coachingLevel}
-                  onValueChange={(value: CoachingLevel) => {
-                    setFormData({ ...formData, coachingLevel: value });
-                    clearError("coachingLevel");
-                  }}
-                >
-                  <SelectTrigger
-                    className={
-                      errors.coachingLevel
-                        ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                        : ""
-                    }
-                  >
-                    <SelectValue placeholder="Sélectionnez votre niveau" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {COACHING_LEVELS.map((level) => (
-                      <SelectItem key={level.value} value={level.value}>
-                        {level.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <DynamicButton
-                label={loading ? "Création..." : "Créer le compte"}
-                type="submit"
-                variant="default"
-                className="w-full h-10 text-sm font-medium"
-                disabled={loading}
-              />
-              {message && (
-                <p
-                  className={`text-sm text-center mt-2 ${
-                    message.includes("Erreur")
-                      ? "text-red-600"
-                      : "text-green-600"
-                  }`}
-                >
-                  {message}
-                </p>
-              )}
-            </form>
-            <div className="text-center mt-4">
-              <span className="text-sm text-gray-600">
-                Vous avez déjà un compte ?{" "}
-                <Link
-                  href="/login"
-                  className="font-medium text-red-600 hover:text-red-700 transition-colors"
-                >
-                  Se connecter
-                </Link>
-              </span>
+                  <SelectValue placeholder="Sélectionnez votre rôle" />
+                </SelectTrigger>
+                <SelectContent>
+                  {COACH_ROLES.map((role) => (
+                    <SelectItem key={role.value} value={role.value}>
+                      {role.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          </div>
-          {/* Footer */}
-          <div className="mt-4 flex items-center justify-center space-x-4 text-sm">
-            <Link
-              href="/"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              © 2025 UpGr8
-            </Link>
-            <span className="text-gray-300">•</span>
-            <Link
-              href="/privacy"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Politique de confidentialité
-            </Link>
-            <span className="text-gray-300">•</span>
-            <Link
-              href="/terms"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              Conditions d&apos;utilisation
-            </Link>
+
+            <div>
+              <Label
+                htmlFor="coachingLevel"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Niveau de coaching
+              </Label>
+              <Select
+                value={formData.coachingLevel}
+                onValueChange={(value: CoachingLevel) => {
+                  setFormData({ ...formData, coachingLevel: value });
+                  clearError("coachingLevel");
+                }}
+              >
+                <SelectTrigger
+                  className={
+                    errors.coachingLevel
+                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                      : ""
+                  }
+                >
+                  <SelectValue placeholder="Sélectionnez votre niveau" />
+                </SelectTrigger>
+                <SelectContent>
+                  {COACHING_LEVELS.map((level) => (
+                    <SelectItem key={level.value} value={level.value}>
+                      {level.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <DynamicButton
+              label={loading ? "Création..." : "Créer le compte"}
+              type="submit"
+              variant="default"
+              className="w-full h-10 text-sm font-medium"
+              disabled={loading}
+            />
+
+            {message && (
+              <p
+                className={`text-sm text-center mt-2 ${
+                  message.includes("Erreur") ? "text-red-600" : "text-green-600"
+                }`}
+              >
+                {message}
+              </p>
+            )}
+          </form>
+
+          <div className="text-center mt-4">
+            <span className="text-sm text-gray-600">
+              Vous avez déjà un compte ?{" "}
+              <Link
+                href="/login"
+                className="font-medium text-red-600 hover:text-red-700 transition-colors"
+              >
+                Se connecter
+              </Link>
+            </span>
           </div>
         </div>
       </div>
+
       {/* Right Side - Image */}
       <div className="hidden lg:block lg:w-[45%] xl:w-[60%] relative overflow-hidden bg-gray-100">
         <Image

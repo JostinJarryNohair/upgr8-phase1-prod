@@ -1,110 +1,118 @@
 "use client";
 
 import * as React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useState } from "react";
+import { supabase } from "@/lib/supabase/client";
 import DynamicInput from "@/components/common/DynamicInput";
 import Image from "next/image";
 import Link from "next/link";
 import DynamicButton from "@/components/common/DynamicButton";
 import { useRouter } from "next/navigation";
 
-// Enhanced schema validation
-const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Le courriel est requis")
-    .email("Format d'email invalide")
-    .max(255, "L'email est trop long"),
-  password: z
-    .string()
-    .min(1, "Le mot de passe est requis")
-    .min(6, "Le mot de passe doit contenir au moins 6 caractères")
-    .max(100, "Le mot de passe est trop long")
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      "Le mot de passe doit contenir au moins une minuscule, une majuscule et un chiffre"
-    ),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
-
-// Constants
-const MOCK_ACCOUNTS = [
-  {
-    email: "coach@upgr8.com",
-    password: "coach123A111",
-    type: "coach",
-    name: "Coach Martin",
-    redirectPath: "/dashboard/coach",
-  },
-  {
-    email: "player@upgr8.com",
-    password: "player123",
-    type: "player",
-    name: "Alexandre Dubois",
-    redirectPath: "/player",
-  },
-] as const;
-
-export default function LoginScreen() {
+export default function LoginForm() {
   const router = useRouter();
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    setError,
-    clearErrors,
-  } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
   });
 
-  const validateCredentials = (email: string, password: string) => {
-    return MOCK_ACCOUNTS.find(
-      (account) => account.email === email && account.password === password
-    );
+  const validate = () => {
+    const newErrors = {
+      email: "",
+      password: "",
+    };
+
+    if (!formData.email) {
+      newErrors.email = "Le courriel est requis";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Format d'email invalide";
+    }
+
+    if (!formData.password) {
+      newErrors.password = "Le mot de passe est requis";
+    }
+
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(Boolean);
   };
 
-  const onSubmit = async (data: LoginFormValues) => {
+  const clearError = (field: string) => {
+    if (errors[field as keyof typeof errors]) {
+      setErrors({ ...errors, [field]: "" });
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validate()) return;
+
+    setLoading(true);
+    setMessage("");
+
     try {
-      // Clear any previous errors
-      clearErrors();
-
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Validate credentials
-      const account = validateCredentials(data.email, data.password);
-
-      if (!account) {
-        setError("root", {
-          message: "Identifiants invalides. Veuillez réessayer.",
-        });
-        return;
-      }
-
-      // Store user session (in a real app, this would be handled by your auth system)
-      sessionStorage.setItem("isAuthenticated", "true");
-      sessionStorage.setItem("userType", account.type);
-      sessionStorage.setItem("userName", account.name);
-      sessionStorage.setItem("userEmail", account.email);
-
-      // Success message could be shown here
-      console.log("Connexion réussie pour:", account.name);
-
-      // Redirect to appropriate dashboard
-      router.push(account.redirectPath);
-    } catch (error) {
-      console.error("Erreur de connexion:", error);
-      setError("root", {
-        message: "Une erreur est survenue. Veuillez réessayer.",
+      // Supabase login
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
       });
+
+      if (error) throw error;
+
+      if (data.user) {
+        // Get coach profile to confirm everything is set up
+        const { data: coachData, error: profileError } = await supabase
+          .from("coaches")
+          .select("*")
+          .eq("id", data.user.id)
+          .single();
+
+        if (profileError) {
+          console.error("Profile fetch error:", profileError);
+          // User exists in auth but no coach profile - redirect to complete setup
+          setMessage("Profil incomplet. Redirection...");
+          setTimeout(() => router.push("/complete-profile"), 1500);
+          return;
+        }
+
+        console.log("Login successful:", {
+          user: data.user.email,
+          coach: coachData,
+        });
+
+        // Success! Redirect to dashboard
+        router.push("/dashboard");
+      }
+    } catch (error: unknown) {
+      console.error("Login error:", error);
+
+      // Handle specific Supabase errors
+      if (
+        error instanceof Error &&
+        error.message.includes("Invalid login credentials")
+      ) {
+        setMessage("Email ou mot de passe incorrect");
+      } else if (
+        error instanceof Error &&
+        error.message.includes("Email not confirmed")
+      ) {
+        setMessage("Veuillez confirmer votre email avant de vous connecter");
+      } else if (
+        error instanceof Error &&
+        error.message.includes("Too many requests")
+      ) {
+        setMessage("Trop de tentatives. Réessayez dans quelques minutes");
+      } else {
+        setMessage("Erreur de connexion: " + (error as Error).message);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -133,29 +141,24 @@ export default function LoginScreen() {
             <p className="text-gray-600 text-sm">
               Bon retour ! Veuillez entrer vos informations.
             </p>
-
-            {/* Demo Accounts */}
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg text-left">
-              <p className="text-xs font-medium text-blue-900 mb-2">
-                Comptes de démonstration :
-              </p>
-              <div className="text-xs text-blue-800 space-y-1">
-                <div>
-                  <strong>Entraîneur :</strong> coach@upgr8.com / Coach123
-                </div>
-                <div>
-                  <strong>Joueur :</strong> player@upgr8.com / Player123
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Global Error Display */}
-            {errors.root && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-800">{errors.root.message}</p>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Global Message Display */}
+            {message && (
+              <div
+                className={`p-3 rounded-lg ${
+                  message.includes("Erreur") ||
+                  message.includes("incorrect") ||
+                  message.includes("tentatives")
+                    ? "bg-red-50 border border-red-200 text-red-800"
+                    : message.includes("Redirection")
+                    ? "bg-blue-50 border border-blue-200 text-blue-800"
+                    : "bg-green-50 border border-green-200 text-green-800"
+                }`}
+              >
+                <p className="text-sm">{message}</p>
               </div>
             )}
 
@@ -165,15 +168,19 @@ export default function LoginScreen() {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Email *
+                Email
               </label>
               <DynamicInput
                 type="email"
                 id="email"
                 placeholder="Entrez votre courriel"
-                error={errors.email?.message}
+                value={formData.email}
+                onChange={(e) => {
+                  setFormData({ ...formData, email: e.target.value });
+                  clearError("email");
+                }}
+                error={errors.email}
                 className="h-10 text-sm"
-                {...register("email")}
               />
             </div>
 
@@ -183,15 +190,19 @@ export default function LoginScreen() {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Mot de passe *
+                Mot de passe
               </label>
               <DynamicInput
                 type="password"
                 id="password"
                 placeholder="Entrez votre mot de passe"
-                error={errors.password?.message}
+                value={formData.password}
+                onChange={(e) => {
+                  setFormData({ ...formData, password: e.target.value });
+                  clearError("password");
+                }}
+                error={errors.password}
                 className="h-10 text-sm"
-                {...register("password")}
               />
             </div>
 
@@ -207,11 +218,11 @@ export default function LoginScreen() {
 
             {/* Submit Button */}
             <DynamicButton
-              label={isSubmitting ? "Connexion..." : "Se connecter"}
+              label={loading ? "Connexion..." : "Se connecter"}
               type="submit"
               variant="default"
               className="w-full h-10 text-sm font-medium"
-              disabled={isSubmitting}
+              disabled={loading}
             />
 
             {/* Sign Up Link */}

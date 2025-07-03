@@ -81,38 +81,34 @@ export default function RegisterForm() {
     if (!validate()) return;
     setLoading(true);
     setMessage("");
+
     try {
-      // Step 1: Create user account with Supabase Auth
+      // Single auth.signUp() call with metadata - trigger handles coach profile creation
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
-      });
-      if (authError) throw authError;
-      if (authData.user) {
-        // Step 2: Create coach profile in coaches table
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        const { data: coachData, error: profileError } = await supabase
-          .from("coaches")
-          .insert({
-            id: authData.user.id,
+        options: {
+          data: {
             first_name: formData.firstName,
             last_name: formData.lastName,
-            email: formData.email,
             role: formData.role,
             coaching_level: formData.coachingLevel,
-          })
-          .select();
-        if (profileError) {
-          console.error("Profile creation error:", profileError);
-          throw new Error(
-            `Erreur lors de la création du profil: ${profileError.message}`
-          );
-        }
-        console.log("Coach profile created successfully:", coachData);
-      }
+          },
+        },
+      });
+
+      if (authError) throw authError;
+
+      console.log(
+        "User created successfully! Trigger should create coach profile automatically:",
+        authData.user?.id
+      );
+
       setMessage(
         "Inscription réussie! Vérifiez votre email pour confirmer votre compte."
       );
+
+      // Clear form on success
       setFormData({
         firstName: "",
         lastName: "",

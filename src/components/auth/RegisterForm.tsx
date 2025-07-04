@@ -83,6 +83,17 @@ export default function RegisterForm() {
     setMessage("");
 
     try {
+      // Add this before the signUp call
+      const { data: existingUser } = await supabase
+        .from("coaches")
+        .select("email")
+        .eq("email", formData.email)
+        .single();
+
+      if (existingUser) {
+        setMessage("Erreur: Un compte existe déjà avec cette adresse email.");
+        return;
+      }
       // Single auth.signUp() call with metadata - trigger handles coach profile creation
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,

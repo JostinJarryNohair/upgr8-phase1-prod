@@ -87,7 +87,7 @@ export default function LoginForm() {
         });
 
         // Success! Redirect to dashboard
-        router.push("/dashboard");
+        router.push("/coach-dashboard");
       }
     } catch (error: unknown) {
       console.error("Login error:", error);

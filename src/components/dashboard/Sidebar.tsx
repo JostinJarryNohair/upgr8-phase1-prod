@@ -1,11 +1,21 @@
 "use client";
 
-import * as React from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { LayoutDashboard, Settings, HelpCircle } from "lucide-react";
+import { supabase } from "@/lib/supabase/client";
+
+interface Coach {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
+  coaching_level: string;
+}
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -15,16 +25,52 @@ interface SidebarProps {
 
 export function Sidebar({ isCollapsed, className }: SidebarProps) {
   const pathname = usePathname();
+  const [coach, setCoach] = useState<Coach | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch authenticated coach data
+  useEffect(() => {
+    const fetchCoach = async () => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+          return;
+        }
+
+        const { data: coachData, error } = await supabase
+          .from("coaches")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+
+        if (error) {
+          console.error("Error fetching coach:", error);
+          return;
+        }
+
+        setCoach(coachData);
+      } catch (err) {
+        console.error("Error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCoach();
+  }, []);
 
   const navItems = [
     {
       name: "Tableau de bord",
-      href: "/dashboard/coach",
+      href: "/coach-dashboard",
       icon: LayoutDashboard,
     },
     {
       name: "Paramètres",
-      href: "/dashboard/settings",
+      href: "/coach-dashboard/settings",
       icon: Settings,
     },
     {
@@ -33,6 +79,25 @@ export function Sidebar({ isCollapsed, className }: SidebarProps) {
       icon: HelpCircle,
     },
   ];
+
+  // Generate initials for avatar
+  const getInitials = (firstName: string, lastName: string) => {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
+
+  // Get role display name
+  const getRoleDisplay = (role: string) => {
+    switch (role) {
+      case "coach":
+        return "Coach";
+      case "directeur-general":
+        return "Directeur Général";
+      case "directeur-hockey":
+        return "Directeur Hockey";
+      default:
+        return "Coach";
+    }
+  };
 
   return (
     <div
@@ -96,11 +161,25 @@ export function Sidebar({ isCollapsed, className }: SidebarProps) {
         <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-gray-700 bg-gray-800">
           <div className="flex items-center px-3 py-2">
             <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center shadow-md">
-              <span className="text-xs font-bold text-white">CM</span>
+              <span className="text-xs font-bold text-white">
+                {loading
+                  ? "..."
+                  : coach
+                  ? getInitials(coach.first_name, coach.last_name)
+                  : "??"}
+              </span>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-white">Coach Martin</p>
-              <p className="text-xs text-gray-400">Les Titans</p>
+              <p className="text-sm font-medium text-white">
+                {loading
+                  ? "Chargement..."
+                  : coach
+                  ? `${coach.first_name} ${coach.last_name}`
+                  : "Coach"}
+              </p>
+              <p className="text-xs text-gray-400">
+                {loading ? "..." : coach ? getRoleDisplay(coach.role) : "Coach"}
+              </p>
             </div>
           </div>
         </div>

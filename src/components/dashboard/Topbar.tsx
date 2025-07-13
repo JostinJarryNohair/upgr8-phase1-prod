@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase/client";
 import {
   Bell,
   Menu,
@@ -25,6 +26,15 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
+interface Coach {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
+  coaching_level: string;
+}
+
 interface TopbarProps {
   isCollapsed: boolean;
   setIsCollapsed: (isCollapsed: boolean) => void;
@@ -38,15 +48,69 @@ export function Topbar({
 }: TopbarProps) {
   const router = useRouter();
   const [showNotifications, setShowNotifications] = React.useState(false);
+  const [isLoggingOut, setIsLoggingOut] = React.useState(false);
+  const [coach, setCoach] = React.useState<Coach | null>(null);
+  const [loading, setLoading] = React.useState(true);
   const notificationRef = React.useRef<HTMLDivElement>(null);
 
-  const handleLogout = () => {
-    // Clear any stored authentication data
-    localStorage.removeItem("userType");
-    localStorage.removeItem("userData");
+  // Fetch authenticated coach data
+  React.useEffect(() => {
+    const fetchCoach = async () => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-    // Navigate to login page
-    router.push("/");
+        if (!user) {
+          router.push("/login");
+          return;
+        }
+
+        const { data: coachData, error } = await supabase
+          .from("coaches")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+
+        if (error) {
+          console.error("Error fetching coach:", error);
+          return;
+        }
+
+        setCoach(coachData);
+      } catch (err) {
+        console.error("Error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCoach();
+  }, [router]);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        console.error("Error signing out:", error);
+        return;
+      }
+
+      // Clear any local storage
+      localStorage.removeItem("userType");
+      localStorage.removeItem("userData");
+
+      // Navigate to login page
+      router.push("/login");
+    } catch (err) {
+      console.error("Unexpected error during logout:", err);
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   React.useEffect(() => {
@@ -114,6 +178,29 @@ export function Topbar({
   ];
 
   const unreadCount = mockNotifications.filter((n) => !n.read).length;
+
+  // Generate initials for avatar
+  const getInitials = (firstName: string, lastName: string) => {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  };
+
+  if (loading) {
+    return (
+      <header
+        className={cn(
+          "fixed top-0 right-0 z-30 h-16 bg-white border-b border-gray-200 shadow-sm transition-all duration-300",
+          isCollapsed ? "left-16" : "left-64",
+          className
+        )}
+      >
+        <div className="flex items-center justify-end h-full px-6">
+          <div className="animate-pulse">
+            <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header
@@ -214,9 +301,16 @@ export function Topbar({
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8 cursor-pointer">
-                  <AvatarImage src="/avatar.jpg" alt="Coach Martin" />
+                  <AvatarImage
+                    src="/avatar.jpg"
+                    alt={
+                      coach ? `${coach.first_name} ${coach.last_name}` : "Coach"
+                    }
+                  />
                   <AvatarFallback className="bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold text-sm">
-                    CM
+                    {coach
+                      ? getInitials(coach.first_name, coach.last_name)
+                      : "??"}
                   </AvatarFallback>
                 </Avatar>
               </Button>
@@ -225,11 +319,9 @@ export function Topbar({
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium text-gray-900">
-                    Entraîneur Martin
+                    {coach ? `${coach.first_name} ${coach.last_name}` : "Coach"}
                   </p>
-                  <p className="text-xs text-gray-500">
-                    entraineur.martin@upgr8.com
-                  </p>
+                  <p className="text-xs text-gray-500">{coach?.email || ""}</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -249,9 +341,12 @@ export function Topbar({
               <DropdownMenuItem
                 className="cursor-pointer text-red-600 focus:text-red-600"
                 onClick={handleLogout}
+                disabled={isLoggingOut}
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Se déconnecter</span>
+                <span>
+                  {isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
+                </span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

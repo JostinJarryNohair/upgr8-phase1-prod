@@ -323,7 +323,10 @@ export function CampManagement({
       <AddCampModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onSubmit={onAddCamp}
+        onSubmit={(campData) => {
+          onAddCamp(campData);
+          setIsAddModalOpen(false); // Close modal after successful submission
+        }}
       />
     </div>
   );

@@ -30,7 +30,7 @@ export function CampManagement({
   const [campToDelete, setCampToDelete] = useState<Camp | null>(null);
 
   const handleCampClick = (camp: Camp) => {
-    router.push(`/dashboard/coach/camp/${camp.id}`);
+    router.push(`/coach-dashboard/camps/${camp.id}`);
   };
 
   const handleDeleteClick = (e: React.MouseEvent, camp: Camp) => {

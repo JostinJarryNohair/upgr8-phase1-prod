@@ -12,13 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Camp, CampLevel } from "@/types/camp";
+import { CampFormData, CampLevel } from "@/types/camp";
 
 interface AddCampModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: Omit<Camp, "id" | "createdAt" | "updatedAt">) => void;
-  initialData?: Camp | null;
+  onSubmit: (data: CampFormData) => void;
+  initialData?: CampFormData | null;
 }
 
 const campLevels: CampLevel[] = [

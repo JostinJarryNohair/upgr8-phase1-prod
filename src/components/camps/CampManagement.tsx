@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
-import { Camp } from "@/types/camp";
+import { Camp, CampFormData } from "@/types/camp";
 import { AddCampModal } from "@/components/camps/AddCampModal";
 
 interface CampManagementProps {
-  camps: Camp[];
-  onAddCamp: (camp: Omit<Camp, "id" | "createdAt" | "updatedAt">) => void;
-  onUpdateCamp: (id: string, updates: Partial<Camp>) => void;
+  camps: Camp[]; // Display uses full records
+  onAddCamp: (camp: CampFormData) => void; // Form submits user input only
+  onUpdateCamp: (id: string, updates: Partial<CampFormData>) => void;
   onDeleteCamp: (id: string) => void;
 }
 
@@ -23,6 +23,7 @@ export function CampManagement({ camps, onAddCamp }: CampManagementProps) {
     "all" | "active" | "archived"
   >("all");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
   const handleCampClick = (camp: Camp) => {
     router.push(`/dashboard/coach/camp/${camp.id}`);
   };
@@ -44,6 +45,7 @@ export function CampManagement({ camps, onAddCamp }: CampManagementProps) {
   const activeCamps = camps.filter((camp) => camp.isActive);
   const archivedCamps = camps.filter((camp) => !camp.isActive);
 
+  // ✅ FIXED - Now expects Camp (what it actually receives)
   const getStatusBadge = (camp: Camp) => {
     if (!camp.isActive) {
       return <Badge className="bg-gray-100 text-gray-800">Archivé</Badge>;
@@ -69,7 +71,6 @@ export function CampManagement({ camps, onAddCamp }: CampManagementProps) {
       Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
     return `${days} jour${days > 1 ? "s" : ""}`;
   };
-
   return (
     <div className="space-y-6">
       {/* Header */}

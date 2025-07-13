@@ -1,18 +1,9 @@
-export type CampLevel =
-  | "M13"
-  | "M15"
-  | "M18"
-  | "U7"
-  | "U9"
-  | "U11"
-  | "U13"
-  | "U15"
-  | "U18"
-  | "Junior"
-  | "Senior";
+import { Database } from "./database";
 
-export interface Camp {
-  id: string;
+export type CampLevel = Database["public"]["Enums"]["camp_level"];
+
+// What is displayed to the user
+export interface CampFormData {
   name: string;
   level: CampLevel;
   location: string;
@@ -20,5 +11,10 @@ export interface Camp {
   isActive: boolean;
   startDate: string;
   endDate: string;
+}
+// What gets stored in database
+export interface Camp extends CampFormData {
+  id: string;
+  coachId: string;
   createdAt: string;
 }

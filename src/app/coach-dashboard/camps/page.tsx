@@ -69,7 +69,11 @@ export default function CampsPage() {
       return;
     }
 
-    if (data) setCamps([data, ...camps]); // ✅ Add to beginning (newest first)
+    if (data) {
+      // ✅ CONVERT raw DB data to frontend format!
+      const formattedCamp = fromDatabaseFormat(data);
+      setCamps([formattedCamp, ...camps]); // ✅ Now properly formatted
+    }
   };
 
   const handleUpdateCamp = async (
@@ -89,7 +93,9 @@ export default function CampsPage() {
     }
 
     if (data) {
-      setCamps(camps.map((camp) => (camp.id === id ? data : camp)));
+      // ✅ Convert DB format to frontend format
+      const formattedCamp = fromDatabaseFormat(data);
+      setCamps(camps.map((camp) => (camp.id === id ? formattedCamp : camp)));
     }
   };
 

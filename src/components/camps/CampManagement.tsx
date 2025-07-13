@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -16,16 +16,37 @@ interface CampManagementProps {
   onDeleteCamp: (id: string) => void;
 }
 
-export function CampManagement({ camps, onAddCamp }: CampManagementProps) {
+export function CampManagement({
+  camps,
+  onAddCamp,
+  onDeleteCamp,
+}: CampManagementProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<
     "all" | "active" | "archived"
   >("all");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [campToDelete, setCampToDelete] = useState<Camp | null>(null);
 
   const handleCampClick = (camp: Camp) => {
     router.push(`/dashboard/coach/camp/${camp.id}`);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, camp: Camp) => {
+    e.stopPropagation(); // Prevent triggering camp click
+    setCampToDelete(camp);
+  };
+
+  const handleConfirmDelete = () => {
+    if (campToDelete) {
+      onDeleteCamp(campToDelete.id);
+      setCampToDelete(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setCampToDelete(null);
   };
 
   const filteredCamps = camps.filter((camp) => {
@@ -71,6 +92,7 @@ export function CampManagement({ camps, onAddCamp }: CampManagementProps) {
       Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
     return `${days} jour${days > 1 ? "s" : ""}`;
   };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -152,8 +174,18 @@ export function CampManagement({ camps, onAddCamp }: CampManagementProps) {
           <div
             key={camp.id}
             onClick={() => handleCampClick(camp)}
-            className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all cursor-pointer"
+            className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all cursor-pointer relative group"
           >
+            {/* Delete Button - positioned absolutely */}
+            <Button
+              onClick={(e) => handleDeleteClick(e, camp)}
+              variant="destructive"
+              size="sm"
+              className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+
             <div className="p-6">
               {/* Header */}
               <div className="flex items-start justify-between mb-4">
@@ -229,6 +261,65 @@ export function CampManagement({ camps, onAddCamp }: CampManagementProps) {
           )}
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      {campToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={handleCancelDelete}
+          />
+          <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
+            <div className="p-6">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                  <Trash2 className="w-6 h-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Supprimer le camp
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Cette action est irréversible
+                  </p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-gray-700">
+                  Êtes-vous sûr de vouloir supprimer le camp{" "}
+                  <span className="font-semibold text-gray-900">
+                    &ldquo;{campToDelete.name}&rdquo;
+                  </span>
+                  ?
+                </p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Toutes les données associées à ce camp seront définitivement
+                  supprimées.
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  onClick={handleCancelDelete}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  onClick={handleConfirmDelete}
+                  variant="destructive"
+                  className="flex-1"
+                >
+                  Supprimer
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <AddCampModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}

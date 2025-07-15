@@ -1,260 +1,193 @@
-# Current Project Status
+# Current Status - UpGr8 Hockey Camp Management Platform
 
-## ✅ What's Working
+## 🎯 **Project Overview**
 
-### Database (Supabase)
+UpGr8 is a comprehensive hockey camp management platform built with Next.js, TypeScript, and Supabase. The platform serves coaches, players, and scouts with camp management, player registration, and evaluation features.
 
-- **Coaches Table**: ✅ Created and functional
+## ✅ **Completed Features**
 
-  - Fields: `id`, `first_name`, `last_name`, `email`, `coaching_level`, `role`, `created_at`, `updated_at`
-  - Enums: `coaching_level` (initiation, regional, provincial, national, haute-performance)
-  - Enums: `role` (coach, directeur-general, directeur-hockey)
+### **Authentication & User Management**
 
-- **Camps Table**: ✅ Created and functional
-  - Fields: `id`, `coach_id`, `name`, `description`, `start_date`, `end_date`, `location`, `level`, `is_active`, `created_at`
-  - Enums: `level` (M13, M15, M18, U7, U9, U11, U13, U15, U18, Junior, Senior)
-  - Foreign key relationship to coaches table
+- ✅ Complete authentication system with Supabase Auth
+- ✅ Coach registration and login functionality
+- ✅ Protected routes and session management
+- ✅ User role management (coaches)
 
-### Authentication
+### **Database Foundation**
 
-- ✅ Supabase Auth integration
-- ✅ Login/Register forms implemented
-- ✅ Protected routes working
-- ✅ Session management functional
+- ✅ Supabase project setup with proper configuration
+- ✅ Database schema with proper relationships
+- ✅ TypeScript types generated from Supabase schema
+- ✅ RLS (Row Level Security) policies implemented
 
-### Coach Dashboard
+### **Coach Dashboard**
 
-- ✅ Dashboard layout with sidebar navigation
-- ✅ Camp listing page (`/coach-dashboard/camps`)
-- ✅ Camp creation modal with form
-- ✅ Individual camp pages (`/coach-dashboard/camps/[id]`)
-- ✅ Delete functionality with confirmation modal
-- ✅ Edit camp functionality
-- ✅ Responsive design
+- ✅ Complete coach dashboard with sidebar navigation
+- ✅ Camp management interface
+- ✅ Add/Edit/Delete camp functionality
+- ✅ Camp status management (active/inactive)
+- ✅ Responsive design with modern UI
 
-### UI Components
+### **Camp Management**
 
-- ✅ DynamicInput and DynamicButton components
-- ✅ Modal system for confirmations and forms
-- ✅ DashboardLayout with sidebar
-- ✅ Red brand color scheme implemented
-- ✅ Responsive design patterns
+- ✅ Full CRUD operations for camps
+- ✅ Camp detail pages with overview and players tabs
+- ✅ Camp status tracking and management
+- ✅ Location, dates, level, and description management
+- ✅ Real-time data synchronization
 
-### Landing Page
+### **Player & Registration System**
 
-- ✅ Professional landing page with interactive tabs
-- ✅ User type selection (coaches, players, scouts)
-- ✅ Logo integration and brand consistency
-- ✅ Clear call-to-action flows
+- ✅ Players table created with comprehensive player data
+- ✅ Camp registrations table for player-camp relationships
+- ✅ PlayerWithRegistration interface for combined data
+- ✅ Real database integration with JOIN queries
+- ✅ CampPlayers component with search and filtering
+- ✅ Add Player button ready for modal integration
 
-### Deployment
+### **UI/UX Components**
 
-- ✅ Vercel deployment configured and ready
-- ✅ Environment variables set up
+- ✅ shadcn/ui components integrated
+- ✅ Responsive design across all pages
+- ✅ French language support throughout
+- ✅ Loading states and error handling
+- ✅ Modern, professional design system
 
-## 🔄 What's Partially Working
+## 🚧 **In Progress**
 
-### Type Safety
+### **Add Player to Camp Feature**
 
-- ✅ Database types generated from Supabase
-- ✅ TypeScript strict mode enabled
-- ⚠️ Some components need type updates to match actual database schema
+- ✅ Database foundation complete
+- ✅ CampPlayers component with real data
+- ✅ Add Player button implemented
+- 🔄 **Next**: AddPlayerModal component
+- 🔄 **Next**: Player search and selection
+- 🔄 **Next**: New player creation flow
 
-### Error Handling
+## 📋 **Planned Features**
 
-- ✅ Basic error handling in place
-- ⚠️ Need more comprehensive error states and user feedback
+### **Player Management**
 
-## 🚧 IN PROGRESS TODAY
+- [ ] AddPlayerModal component
+- [ ] Player search functionality
+- [ ] New player creation form
+- [ ] Player registration to camps
+- [ ] Player evaluation system
+- [ ] Player cut/uncut functionality
 
-### Player and Camp Registration System
+### **Player Dashboard**
 
-- ✅ **Tabs UI Working**: Camp detail page now uses shadcn tabs for navigation
-- ✅ **Camp Detail Page**: Fully integrated with database, showing Overview and Players tabs
-- ✅ **Database Types**: Regenerated and in sync with Supabase
-- ✅ **PlayerForm Component**: Ready for integration
-- 🔄 **Player Management Components**: Next step is to implement player listing and add player modal
-- 🔄 **Camp Registration Workflow**: Next step is to implement registration logic
+- [ ] Player registration interface
+- [ ] Player profile management
+- [ ] Camp registration workflow
+- [ ] Player evaluation viewing
 
-## 📝 Recent Progress
+### **Scout Dashboard**
 
-- Implemented shadcn/ui Tabs component for camp detail navigation
-- Refactored camp detail page to use only Overview and Players tabs
-- Removed unused and placeholder components
-- Ensured all UI is type-safe and database-driven
+- [ ] Scout registration and authentication
+- [ ] Player evaluation interface
+- [ ] Evaluation submission system
+- [ ] Player performance tracking
 
-## Next Steps
+### **Advanced Features**
 
-- Implement player listing and add player modal in Players tab
-- Integrate PlayerForm for adding new players
-- Build out camp registration workflow
+- [ ] Real-time notifications
+- [ ] Email notifications
+- [ ] Payment integration
+- [ ] File uploads (player photos, documents)
+- [ ] Advanced reporting and analytics
 
-## ❌ What's Missing
+## 🏗️ **Technical Architecture**
 
-### Database Tables (Creating Today)
-
-- **Players Table**: ✅ Created in Supabase
-- **Camp Registrations Table**: ✅ Created in Supabase
-- **User Authentication Links**: Need to link coaches to auth.users
-
-### Player Management System
-
-- ⏳ Player profile creation (ready to implement)
-- ⏳ Player listing and management (ready to implement)
-- ❌ Player invitation system
-- ⏳ Camp registration workflow (ready to implement)
-- ❌ Email invitation system
-
-### Player Dashboard
-
-- ❌ Player authentication flow
-- ❌ Player dashboard layout
-- ❌ Camp discovery for players
-- ❌ Player registration flow
-
-### Advanced Features
-
-- ❌ File upload system
-- ❌ Payment integration
-- ❌ Real-time notifications
-- ❌ Analytics and reporting
-- ❌ Email templates
-
-## 🚨 Critical Issues to Fix
-
-### 1. Database Schema Alignment
-
-- **Issue**: Some components expect different field names than actual database
-- **Impact**: Type errors and potential runtime issues
-- **Solution**: Update components to match actual database schema
-
-### 2. Coach Authentication Link
-
-- **Issue**: Coaches table not linked to auth.users
-- **Impact**: Authentication system not fully integrated
-- **Solution**: Add user_id field to coaches table or create separate auth flow
-
-### 3. Missing Required Fields
-
-- **Issue**: Some components expect fields that don't exist in database
-- **Impact**: Form submissions may fail
-- **Solution**: Update forms to match actual database schema
-
-## 📋 TODAY'S IMPLEMENTATION PLAN
-
-### ✅ 1. Create Database Tables (COMPLETED)
-
-- [x] Create `create-players-table.sql` script
-- [x] Create `create-camp-registrations-table.sql` script
-- [x] Execute players table SQL script in Supabase ✅
-- [x] Execute camp_registrations table SQL script in Supabase ✅
-- [ ] Update database types (`src/types/database.ts`) - will auto-generate
-- [ ] Test database schema with sample data
-
-### ✅ 2. Update TypeScript Types (COMPLETED)
-
-- [x] Create `src/types/player.ts`
-- [x] Create `src/types/campRegistration.ts`
-- [x] Create `src/lib/mappers/playerMapper.ts`
-- [x] Regenerate database types to include new tables
-- [x] Update temporary types to use generated ones
-- [x] Create `src/lib/mappers/campRegistrationMapper.ts`
-
-### 🔄 3. Build Player Management Components (IN PROGRESS)
-
-- [x] Create `src/components/players/PlayerForm.tsx` ✅
-- [ ] Create `src/components/players/PlayerList.tsx`
-- [ ] Create `src/components/players/AddPlayerModal.tsx`
-- [ ] Create `src/components/registrations/CampRegistration.tsx`
-- [ ] Add "Add Player" button to camp management (user implementing)
-
-### ⏳ 4. Integrate with Coach Dashboard (READY TO START)
-
-- [ ] Add "Players" tab to camp detail pages
-- [ ] Implement player addition to camps
-- [ ] Create registration status management
-- [ ] Test complete workflow
-
-## 🎯 Success Metrics
-
-### Current Status
-
-- **Database**: 2/4 tables created (50%)
-- **Authentication**: Fully functional (100%)
-- **Coach Dashboard**: Fully functional (100%)
-- **Player Management**: 🔄 Preparation complete, implementation ready
-- **Deployment**: Ready (100%)
-
-### Target for Today
-
-- **Database**: 4/4 tables created (100%) - after user creates tables
-- **Player Management**: Basic functionality (80%) - after tables created
-- **Camp Registration**: Working workflow (90%) - after tables created
-- **Type Safety**: 100% aligned - after database types regenerate
-
-## 🔧 Technical Debt
-
-### High Priority
-
-1. **Schema Mismatches**: Components expecting different field names
-2. **Type Safety**: Some components using `any` types
-3. **Error Handling**: Inconsistent error handling across components
-
-### Medium Priority
-
-1. **Performance**: No caching strategy implemented
-2. **Security**: Need to implement Row Level Security (RLS)
-3. **Testing**: No automated tests
-
-### Low Priority
-
-1. **Documentation**: Need more inline code documentation
-2. **Accessibility**: Need to add ARIA labels
-3. **Mobile**: Need to optimize for mobile devices
-
-## 📊 Development Velocity
-
-### Completed Features
-
-- Coach dashboard: 100% complete
-- Camp management: 100% complete
-- Authentication: 100% complete
-- Basic UI: 100% complete
-- Landing page: 100% complete
-
-### In Progress Today
-
-- Database schema completion: 🔄 SQL scripts ready, waiting for user action
-- Player management preparation: ✅ Complete
-- Camp registration preparation: ✅ Complete
-
-### Planned Features
-
-- Player dashboard: 0% complete
-- Email system: 0% complete
-- Payment integration: 0% complete
-- File uploads: 0% complete
-
-## 🚀 Deployment Status
-
-### Vercel Configuration
-
-- ✅ Project connected to Vercel
-- ✅ Environment variables configured
-- ✅ Automatic deployments enabled
-- ✅ Domain configured (if applicable)
-
-### Production Readiness
-
-- ⚠️ Database schema needs completion (user action needed)
-- 🔄 Player management preparation complete
-- ✅ Basic functionality working
-- ✅ Authentication system ready
-
-## 📝 Next Steps After Database Tables Created
-
-1. **Regenerate Database Types**: Run Supabase CLI to update `src/types/database.ts`
-2. **Update TypeScript Types**: Replace temporary types with generated ones
-3. **Build Player Components**: Create forms and lists for player management
-4. **Integrate with Coach Dashboard**: Add player management to camp pages
-5. **Test Complete Workflow**: End-to-end testing of player registration
+### **Frontend**
+
+- **Framework**: Next.js 14 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **UI Components**: shadcn/ui
+- **State Management**: React hooks and context
+- **Icons**: Lucide React
+
+### **Backend**
+
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
+- **Real-time**: Supabase Realtime
+- **Storage**: Supabase Storage (planned)
+
+### **Database Schema**
+
+- **Tables**: coaches, camps, players, camp_registrations
+- **Relationships**: Proper foreign key constraints
+- **Security**: RLS policies for data protection
+- **Types**: Auto-generated TypeScript types
+
+## 📊 **Current Data Structure**
+
+### **Player Data**
+
+```typescript
+interface Player {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email?: string;
+  position?: "forward" | "defense" | "goalie";
+  jersey_number?: number;
+  // ... other fields
+}
+```
+
+### **Registration Data**
+
+```typescript
+interface CampRegistration {
+  id: string;
+  camp_id: string;
+  player_id: string;
+  status: "pending" | "confirmed" | "cancelled" | "attended";
+  payment_status: "pending" | "paid" | "refunded";
+  // ... other fields
+}
+```
+
+### **Combined Data**
+
+```typescript
+interface PlayerWithRegistration extends Player {
+  registration_id?: string;
+  registration_status?: string;
+  payment_status?: string;
+  // ... registration fields
+}
+```
+
+## 🎯 **Immediate Next Steps**
+
+1. **Create AddPlayerModal component**
+2. **Implement player search functionality**
+3. **Add new player creation form**
+4. **Test database integration**
+5. **Implement cut functionality**
+
+## 📈 **Progress Metrics**
+
+- **Database**: 100% complete
+- **Authentication**: 100% complete
+- **Coach Dashboard**: 100% complete
+- **Camp Management**: 100% complete
+- **Player System**: 70% complete
+- **Player Dashboard**: 0% complete
+- **Scout Dashboard**: 0% complete
+
+## 🔧 **Development Environment**
+
+- **Node.js**: Latest LTS
+- **Package Manager**: npm
+- **Database**: Supabase (cloud)
+- **Version Control**: Git
+- **Deployment**: Vercel (planned)
+
+---
+
+**Last Updated**: Current session - Database integration and player system foundation complete

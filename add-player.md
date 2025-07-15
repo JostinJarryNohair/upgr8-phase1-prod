@@ -36,6 +36,7 @@
    - French label "Ajouter un joueur"
 
 5. ✅ **Database Integration Preparation**
+
    - Removed all mock data from CampPlayers component
    - Implemented proper TypeScript types using PlayerWithRegistration
    - Added loading and error states
@@ -44,14 +45,28 @@
    - Updated status badges to use registration_status
    - Prepared for real data integration
 
+6. ✅ **Real Database Integration**
+   - Implemented Supabase JOIN query: camp_registrations + players
+   - Proper data transformation from database format to PlayerWithRegistration
+   - Understanding of data structure: Player data + Registration data
+   - Type-safe queries with proper error handling
+
 ### Current Implementation:
 
 - **Location**: `src/components/camps/camp/CampPlayer.tsx`
 - **Integration**: Imported in `src/app/coach-dashboard/camps/[id]/page.tsx`
 - **Features**: Search, filter, player cards, cut functionality, real DB queries
-- **Data**: Now loads real data from camp_registrations table
+- **Data**: Now loads real data from camp_registrations table with JOIN to players
 - **Types**: Uses PlayerWithRegistration interface
 - **States**: Loading, error, and empty states implemented
+- **Database**: Real Supabase queries with automatic JOIN relationships
+
+### Data Structure Understanding:
+
+- **Player Data**: Personal info, contact details, position, jersey number
+- **Registration Data**: Camp-specific status, payment, dates, notes
+- **Combined**: PlayerWithRegistration gives us everything for camp context
+- **JOIN Logic**: Automatic relationship handling via foreign keys
 
 ## Next Steps 🎯
 
@@ -113,6 +128,7 @@
 - ✅ Replace mock data with actual database queries
 - ✅ Implement loading states for player list
 - ✅ Add error handling for database operations
+- ✅ Understand data structure and JOIN relationships
 
 ### Phase 3: Add New Player Flow
 
@@ -145,3 +161,5 @@
 - Modal approach for add player functionality
 - Real database integration implemented
 - Proper TypeScript types used throughout
+- Understanding of Player + Registration data structure
+- Automatic JOIN relationships via foreign keys

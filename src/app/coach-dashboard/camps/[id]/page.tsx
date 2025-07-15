@@ -1,499 +1,288 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Edit, Trash2, Archive, Copy } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Calendar, MapPin, Users, ArrowLeft, Eye, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Camp } from "@/types/camp";
 import { supabase } from "@/lib/supabase/client";
 import { fromDatabaseFormat } from "@/lib/mappers/campMapper";
-import { Camp, CampFormData } from "@/types/camp";
-import { AddCampModal } from "@/components/camps/AddCampModal";
+// import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
-export default function CampDetailPage() {
-  const params = useParams();
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default function CampDetailPage({ params }: PageProps) {
   const router = useRouter();
-  const campId = params.id as string;
-
   const [camp, setCamp] = useState<Camp | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
 
-  // Fetch camp data
   useEffect(() => {
-    const fetchCamp = async () => {
+    const loadCamp = async () => {
       try {
-        setLoading(true);
-        setError(null);
+        const { id } = await params;
 
-        // Get current user
+        // Get authenticated user
         const {
           data: { user },
         } = await supabase.auth.getUser();
-
         if (!user) {
-          setError("Utilisateur non authentifié");
+          console.error("No authenticated user");
           return;
         }
 
-        // Fetch camp and verify ownership
-        const { data, error: fetchError } = await supabase
+        // Load camp data from database
+        const { data, error } = await supabase
           .from("camps")
           .select("*")
-          .eq("id", campId)
+          .eq("id", id)
           .eq("coach_id", user.id)
           .single();
 
-        if (fetchError) {
-          if (fetchError.code === "PGRST116") {
-            setError("Camp non trouvé ou accès non autorisé");
-          } else {
-            setError("Erreur lors du chargement du camp");
-          }
+        if (error) {
+          console.error("Error loading camp:", error);
           return;
         }
 
-        if (!data) {
-          setError("Camp non trouvé");
-          return;
+        if (data) {
+          const formattedCamp = fromDatabaseFormat(data);
+          setCamp(formattedCamp);
         }
-
-        // Convert to frontend format
-        const formattedCamp = fromDatabaseFormat(data);
-        setCamp(formattedCamp);
-      } catch (err) {
-        setError("Erreur inattendue");
-        console.error("Error fetching camp:", err);
+      } catch (error) {
+        console.error("Error loading camp:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    if (campId) {
-      // Only runs if we have an ID
-      fetchCamp();
-    }
-  }, [campId]); // Triggers when campId changes
+    loadCamp();
+  }, [params]);
 
-  // Handle camp update
-  const handleUpdateCamp = async (updatedData: CampFormData) => {
-    if (!camp) return;
-
-    try {
-      const { data, error } = await supabase
-        .from("camps")
-        .update({
-          name: updatedData.name,
-          level: updatedData.level,
-          location: updatedData.location,
-          description: updatedData.description,
-          start_date: updatedData.startDate,
-          end_date: updatedData.endDate,
-          is_active: updatedData.isActive,
-        })
-        .eq("id", camp.id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Error updating camp:", error);
-        return;
-      }
-
-      if (data) {
-        const updatedCamp = fromDatabaseFormat(data);
-        setCamp(updatedCamp);
-        setIsEditModalOpen(false);
-      }
-    } catch (err) {
-      console.error("Error updating camp:", err);
-    }
-  };
-
-  // Handle camp deletion
-  const handleDeleteCamp = async () => {
-    if (!camp) return;
-
-    try {
-      const { error } = await supabase.from("camps").delete().eq("id", camp.id);
-
-      if (error) {
-        console.error("Error deleting camp:", error);
-        return;
-      }
-
-      // Redirect back to camps list
-      router.push("/coach-dashboard/camps");
-    } catch (err) {
-      console.error("Error deleting camp:", err);
-    }
-  };
-
-  // Handle camp archive/activate
-  const handleToggleArchive = async () => {
-    if (!camp) return;
-
-    try {
-      const { data, error } = await supabase
-        .from("camps")
-        .update({ is_active: !camp.isActive })
-        .eq("id", camp.id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Error updating camp status:", error);
-        return;
-      }
-
-      if (data) {
-        const updatedCamp = fromDatabaseFormat(data);
-        setCamp(updatedCamp);
-      }
-    } catch (err) {
-      console.error("Error updating camp status:", err);
-    }
-  };
-
-  // Calculate camp status
-  const getCampStatus = (camp: Camp) => {
-    if (!camp.isActive) {
-      return {
-        status: "archived",
-        label: "Archivé",
-        color: "bg-gray-100 text-gray-800",
-      };
-    }
-
+  const getStatusColor = () => {
+    if (!camp?.isActive) return "bg-gray-100 text-gray-800";
     const now = new Date();
     const start = new Date(camp.startDate);
     const end = new Date(camp.endDate);
 
-    if (now < start) {
-      return {
-        status: "upcoming",
-        label: "À venir",
-        color: "bg-blue-100 text-blue-800",
-      };
-    } else if (now > end) {
-      return {
-        status: "completed",
-        label: "Complété",
-        color: "bg-green-100 text-green-800",
-      };
-    } else {
-      return {
-        status: "active",
-        label: "Actif",
-        color: "bg-red-100 text-red-800",
-      };
-    }
+    if (now < start) return "bg-blue-100 text-blue-800";
+    if (now > end) return "bg-green-100 text-green-800";
+    return "bg-red-100 text-red-800";
   };
 
-  // Calculate duration
-  const getDuration = (startDate: string, endDate: string) => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const days =
-      Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-    return `${days} jour${days > 1 ? "s" : ""}`;
+  const getStatusText = () => {
+    if (!camp?.isActive) return "Archived";
+    const now = new Date();
+    const start = new Date(camp.startDate);
+    const end = new Date(camp.endDate);
+
+    if (now < start) return "Upcoming";
+    if (now > end) return "Completed";
+    return "Active";
   };
 
-  // Loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-64">
-        <div className="text-gray-600">Chargement du camp...</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-600">Loading camp...</div>
       </div>
     );
   }
 
-  // Error state
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-64">
-        <div className="text-center">
-          <div className="text-red-600 mb-4">{error}</div>
-          <Button onClick={() => router.push("/coach-dashboard/camps")}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Retour aux camps
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // No camp found
   if (!camp) {
     return (
-      <div className="flex items-center justify-center min-h-64">
-        <div className="text-center">
-          <div className="text-gray-600 mb-4">Camp non trouvé</div>
-          <Button onClick={() => router.push("/coach-dashboard/camps")}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Retour aux camps
-          </Button>
-        </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-600">Camp not found</div>
       </div>
     );
   }
 
-  const campStatus = getCampStatus(camp);
-
   return (
-    <div className="space-y-6">
-      {/* Header with navigation */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="outline"
-            onClick={() => router.push("/coach-dashboard/camps")}
-            className="flex items-center"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Retour aux camps
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">{camp.name}</h1>
-            <p className="text-gray-600">Détails du camp</p>
-          </div>
-        </div>
-
-        {/* Action buttons */}
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            onClick={() => setIsEditModalOpen(true)}
-            className="flex items-center"
-          >
-            <Edit className="w-4 h-4 mr-2" />
-            Modifier
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleToggleArchive}
-            className="flex items-center"
-          >
-            <Archive className="w-4 h-4 mr-2" />
-            {camp.isActive ? "Archiver" : "Activer"}
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={() => setIsDeleteModalOpen(true)}
-            className="flex items-center"
-          >
-            <Trash2 className="w-4 h-4 mr-2" />
-            Supprimer
-          </Button>
-        </div>
-      </div>
-
-      {/* Camp details */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main information */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Status and basic info */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Informations générales
-              </h2>
-              <Badge className={campStatus.color}>{campStatus.label}</Badge>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-gray-600">
-                  Niveau
-                </label>
-                <p className="text-gray-900">{camp.level}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600">
-                  Emplacement
-                </label>
-                <p className="text-gray-900">{camp.location}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600">
-                  Date de début
-                </label>
-                <p className="text-gray-900">
-                  {new Date(camp.startDate).toLocaleDateString("fr-FR")}
-                </p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600">
-                  Date de fin
-                </label>
-                <p className="text-gray-900">
-                  {new Date(camp.endDate).toLocaleDateString("fr-FR")}
-                </p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600">
-                  Durée
-                </label>
-                <p className="text-gray-900">
-                  {getDuration(camp.startDate, camp.endDate)}
-                </p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600">
-                  Statut
-                </label>
-                <p className="text-gray-900">
-                  {camp.isActive ? "Actif" : "Archivé"}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Description */}
-          {camp.description && (
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                Description
-              </h2>
-              <p className="text-gray-700 whitespace-pre-wrap">
-                {camp.description}
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Sidebar with stats and actions */}
-        <div className="space-y-6">
-          {/* Quick stats */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Statistiques
-            </h3>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Jours restants</span>
-                <span className="font-medium">
-                  {Math.max(
-                    0,
-                    Math.ceil(
-                      (new Date(camp.endDate).getTime() -
-                        new Date().getTime()) /
-                        (1000 * 60 * 60 * 24)
-                    )
-                  )}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Progression</span>
-                <span className="font-medium">
-                  {campStatus.status === "completed"
-                    ? "100%"
-                    : campStatus.status === "upcoming"
-                    ? "0%"
-                    : "En cours"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick actions */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Actions rapides
-            </h3>
-            <div className="space-y-2">
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() => setIsEditModalOpen(true)}
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => router.back()}
+                className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg p-3 transition-colors"
               >
-                <Edit className="w-4 h-4 mr-2" />
-                Modifier le camp
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={handleToggleArchive}
-              >
-                <Archive className="w-4 h-4 mr-2" />
-                {camp.isActive ? "Archiver" : "Activer"}
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <Copy className="w-4 h-4 mr-2" />
-                Dupliquer le camp
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Edit Modal */}
-      <AddCampModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        onSubmit={handleUpdateCamp}
-        initialData={camp}
-      />
-
-      {/* Delete Confirmation Modal */}
-      {isDeleteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setIsDeleteModalOpen(false)}
-          />
-          <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
-            <div className="p-6">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
-                  <Trash2 className="w-6 h-6 text-red-600" />
-                </div>
+                <ArrowLeft className="w-6 h-6" />
+              </button>
+              <div className="flex items-center space-x-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Supprimer le camp
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Cette action est irréversible
-                  </p>
+                  <h1 className="text-3xl font-bold text-gray-900">
+                    {camp.name}
+                  </h1>
+                  <div className="flex items-center space-x-4 mt-1">
+                    <div className="flex items-center text-gray-600">
+                      <MapPin className="w-4 h-4 mr-1" />
+                      <span className="text-sm">{camp.location}</span>
+                    </div>
+                    <div className="flex items-center text-gray-600">
+                      <Calendar className="w-4 h-4 mr-1" />
+                      <span className="text-sm">
+                        {new Date(camp.startDate).toLocaleDateString()} -{" "}
+                        {new Date(camp.endDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <Badge className={getStatusColor()}>
+                      {getStatusText()}
+                    </Badge>
+                    <Badge variant="outline">{camp.level}</Badge>
+                  </div>
                 </div>
-              </div>
-
-              <div className="mb-6">
-                <p className="text-gray-700">
-                  Êtes-vous sûr de vouloir supprimer le camp{" "}
-                  <span className="font-semibold text-gray-900">
-                    &ldquo;{camp.name}&rdquo;
-                  </span>
-                  ?
-                </p>
-                <p className="text-sm text-gray-500 mt-2">
-                  Toutes les données associées à ce camp seront définitivement
-                  supprimées.
-                </p>
-              </div>
-
-              <div className="flex gap-3">
-                <Button
-                  onClick={() => setIsDeleteModalOpen(false)}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  Annuler
-                </Button>
-                <Button
-                  onClick={handleDeleteCamp}
-                  variant="destructive"
-                  className="flex-1"
-                >
-                  Supprimer
-                </Button>
               </div>
             </div>
           </div>
         </div>
-      )}
+      </div>
+
+      {/* Quick Stats */}
+      <div className="px-8 py-6 bg-white border-b border-gray-200">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-gray-900">0</div>
+            <div className="text-sm text-gray-600">Total Players</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-green-600">0</div>
+            <div className="text-sm text-gray-600">Active Players</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-blue-600">0</div>
+            <div className="text-sm text-gray-600">Registrations</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs Navigation */}
+      <div className="px-8 py-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-6"
+        >
+          <TabsList className="grid w-full grid-cols-2 bg-gray-100">
+            <TabsTrigger
+              value="overview"
+              className="flex items-center space-x-2"
+            >
+              <Eye className="w-4 h-4" />
+              <span>Overview</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="players"
+              className="flex items-center space-x-2"
+            >
+              <Users className="w-4 h-4" />
+              <span>Players</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview">
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                Camp Overview
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Camp Details
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Name:</span>
+                      <span className="font-medium">{camp.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Level:</span>
+                      <span className="font-medium">{camp.level}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Location:</span>
+                      <span className="font-medium">{camp.location}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Start Date:</span>
+                      <span className="font-medium">
+                        {new Date(camp.startDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">End Date:</span>
+                      <span className="font-medium">
+                        {new Date(camp.endDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Status:</span>
+                      <Badge className={getStatusColor()}>
+                        {getStatusText()}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    Description
+                  </h3>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-gray-700">
+                      {camp.description ||
+                        "No description available for this camp."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="players">
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900">Players</h2>
+                <Button
+                  onClick={() => {
+                    // TODO: Add player functionality
+                    console.log("Add player clicked");
+                  }}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Player
+                </Button>
+              </div>
+
+              <div className="text-center py-12">
+                <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No Players Yet
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Start by adding players to this camp to manage registrations
+                  and track progress.
+                </p>
+                <Button
+                  onClick={() => {
+                    // TODO: Add player functionality
+                    console.log("Add first player clicked");
+                  }}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add First Player
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

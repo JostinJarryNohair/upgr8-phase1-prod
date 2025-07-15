@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, MapPin, Users, ArrowLeft, Eye, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Calendar, MapPin, Users, ArrowLeft, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Camp } from "@/types/camp";
 import { supabase } from "@/lib/supabase/client";
 import { fromDatabaseFormat } from "@/lib/mappers/campMapper";
+import { CampPlayers } from "@/components/camps/camp/CampPlayer";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -244,42 +244,7 @@ export default function CampDetailPage({ params }: PageProps) {
           </TabsContent>
 
           <TabsContent value="players">
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-gray-900">Players</h2>
-                <Button
-                  onClick={() => {
-                    // TODO: Add player functionality
-                    console.log("Add player clicked");
-                  }}
-                  className="bg-red-600 hover:bg-red-700 text-white"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Player
-                </Button>
-              </div>
-
-              <div className="text-center py-12">
-                <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No Players Yet
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Start by adding players to this camp to manage registrations
-                  and track progress.
-                </p>
-                <Button
-                  onClick={() => {
-                    // TODO: Add player functionality
-                    console.log("Add first player clicked");
-                  }}
-                  className="bg-red-600 hover:bg-red-700 text-white"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add First Player
-                </Button>
-              </div>
-            </div>
+            <CampPlayers campId={camp.id} />
           </TabsContent>
         </Tabs>
       </div>

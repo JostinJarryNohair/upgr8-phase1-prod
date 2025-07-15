@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { Calendar, MapPin, Users, ArrowLeft, Eye, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Camp } from "@/types/camp";
 import { supabase } from "@/lib/supabase/client";
 import { fromDatabaseFormat } from "@/lib/mappers/campMapper";
-// import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 interface PageProps {
   params: Promise<{ id: string }>;

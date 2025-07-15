@@ -69,16 +69,25 @@
 
 ### Player and Camp Registration System
 
-- ✅ **SQL Scripts Prepared**: `create-players-table.sql` and `create-camp-registrations-table.sql` ready
-- ✅ **TypeScript Types Created**: Player and camp registration types defined
-- ✅ **Player Mapper Created**: Database conversion functions ready
-- ✅ **Players Table**: Created in Supabase
-- ✅ **Camp Registrations Table**: Created in Supabase
-- ✅ **Database Types**: Regenerated to include new tables
-- ✅ **TypeScript Types Updated**: Now using generated database types
-- ✅ **PlayerForm Component**: Created and ready to use
-- 🔄 **Player Management Components**: Building remaining components
-- 🔄 **Camp Registration Workflow**: Ready to implement
+- ✅ **Tabs UI Working**: Camp detail page now uses shadcn tabs for navigation
+- ✅ **Camp Detail Page**: Fully integrated with database, showing Overview and Players tabs
+- ✅ **Database Types**: Regenerated and in sync with Supabase
+- ✅ **PlayerForm Component**: Ready for integration
+- 🔄 **Player Management Components**: Next step is to implement player listing and add player modal
+- 🔄 **Camp Registration Workflow**: Next step is to implement registration logic
+
+## 📝 Recent Progress
+
+- Implemented shadcn/ui Tabs component for camp detail navigation
+- Refactored camp detail page to use only Overview and Players tabs
+- Removed unused and placeholder components
+- Ensured all UI is type-safe and database-driven
+
+## Next Steps
+
+- Implement player listing and add player modal in Players tab
+- Integrate PlayerForm for adding new players
+- Build out camp registration workflow
 
 ## ❌ What's Missing
 

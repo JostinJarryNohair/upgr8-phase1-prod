@@ -146,6 +146,9 @@ This roadmap outlines the development phases for UpGr8, a comprehensive hockey c
 - [ ] Document uploads (medical forms, etc.)
 - [ ] File storage and management
 - [ ] Image optimization
+- [ ] Bulk player import (CSV/Excel)
+- [ ] Smart field mapping for import templates
+- [ ] Coach-specific player lists with duplicate detection
 
 ### **Payment Integration**
 

@@ -96,6 +96,9 @@ UpGr8 is a comprehensive hockey camp management platform built with Next.js, Typ
 - [ ] Payment integration
 - [ ] File uploads (player photos, documents)
 - [ ] Advanced reporting and analytics
+- [ ] Bulk player import (CSV/Excel with auto-mapping)
+- [ ] Coach-specific player lists with duplicate detection
+- [ ] Smart field mapping for import templates
 
 ## 🏗️ **Technical Architecture**
 

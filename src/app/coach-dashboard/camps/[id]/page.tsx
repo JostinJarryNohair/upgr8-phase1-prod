@@ -14,14 +14,27 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+interface CampStats {
+  totalPlayers: number;
+  activePlayers: number;
+  pendingPlayers: number;
+  totalRegistrations: number;
+}
+
 export default function CampDetailPage({ params }: PageProps) {
   const router = useRouter();
   const [camp, setCamp] = useState<Camp | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
+  const [stats, setStats] = useState<CampStats>({
+    totalPlayers: 0,
+    activePlayers: 0,
+    pendingPlayers: 0,
+    totalRegistrations: 0,
+  });
 
   useEffect(() => {
-    const loadCamp = async () => {
+    const loadCampAndStats = async () => {
       try {
         const { id } = await params;
 
@@ -35,21 +48,65 @@ export default function CampDetailPage({ params }: PageProps) {
         }
 
         // Load camp data from database
-        const { data, error } = await supabase
+        const { data: campData, error: campError } = await supabase
           .from("camps")
           .select("*")
           .eq("id", id)
           .eq("coach_id", user.id)
           .single();
 
-        if (error) {
-          console.error("Error loading camp:", error);
+        if (campError) {
+          console.error("Error loading camp:", campError);
           return;
         }
 
-        if (data) {
-          const formattedCamp = fromDatabaseFormat(data);
+        if (campData) {
+          const formattedCamp = fromDatabaseFormat(campData);
           setCamp(formattedCamp);
+        }
+
+        // Load player stats for this camp
+        const { data: registrationsData, error: registrationsError } =
+          await supabase
+            .from("camp_registrations")
+            .select(
+              `
+            *,
+            players (
+              id,
+              first_name,
+              last_name,
+              email,
+              is_active
+            )
+          `
+            )
+            .eq("camp_id", id);
+
+        if (registrationsError) {
+          console.error("Error loading registrations:", registrationsError);
+          return;
+        }
+
+        // Calculate stats
+        if (registrationsData) {
+          const totalRegistrations = registrationsData.length;
+          const activePlayers = registrationsData.filter(
+            (reg) => reg.status === "confirmed"
+          ).length;
+          const pendingPlayers = registrationsData.filter(
+            (reg) => reg.status === "pending"
+          ).length;
+          const totalPlayers = registrationsData.filter(
+            (reg) => reg.status !== "cancelled"
+          ).length;
+
+          setStats({
+            totalPlayers,
+            activePlayers,
+            pendingPlayers,
+            totalRegistrations,
+          });
         }
       } catch (error) {
         console.error("Error loading camp:", error);
@@ -58,7 +115,7 @@ export default function CampDetailPage({ params }: PageProps) {
       }
     };
 
-    loadCamp();
+    loadCampAndStats();
   }, [params]);
 
   const getStatusColor = () => {
@@ -141,20 +198,32 @@ export default function CampDetailPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Quick Stats */}
+      {/* Quick Stats - Now with Real Data */}
       <div className="px-8 py-6 bg-white border-b border-gray-200">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">0</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {stats.totalPlayers}
+            </div>
             <div className="text-sm text-gray-600">Total Players</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">0</div>
-            <div className="text-sm text-gray-600">Active Players</div>
+            <div className="text-2xl font-bold text-green-600">
+              {stats.activePlayers}
+            </div>
+            <div className="text-sm text-gray-600">Confirmed</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">0</div>
-            <div className="text-sm text-gray-600">Registrations</div>
+            <div className="text-2xl font-bold text-orange-600">
+              {stats.pendingPlayers}
+            </div>
+            <div className="text-sm text-gray-600">Pending</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-blue-600">
+              {stats.totalRegistrations}
+            </div>
+            <div className="text-sm text-gray-600">Total Registrations</div>
           </div>
         </div>
       </div>
@@ -179,7 +248,7 @@ export default function CampDetailPage({ params }: PageProps) {
               className="flex items-center space-x-2"
             >
               <Users className="w-4 h-4" />
-              <span>Players</span>
+              <span>Players ({stats.totalPlayers})</span>
             </TabsTrigger>
           </TabsList>
 
@@ -230,13 +299,45 @@ export default function CampDetailPage({ params }: PageProps) {
 
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium text-gray-900">
-                    Description
+                    Registration Statistics
                   </h3>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-gray-700">
-                      {camp.description ||
-                        "No description available for this camp."}
-                    </p>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Total Players:</span>
+                      <span className="font-medium">{stats.totalPlayers}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Confirmed:</span>
+                      <span className="font-medium text-green-600">
+                        {stats.activePlayers}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Pending:</span>
+                      <span className="font-medium text-orange-600">
+                        {stats.pendingPlayers}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">
+                        Total Registrations:
+                      </span>
+                      <span className="font-medium text-blue-600">
+                        {stats.totalRegistrations}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-6">
+                    <h4 className="text-sm font-medium text-gray-900 mb-2">
+                      Description
+                    </h4>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <p className="text-gray-700">
+                        {camp.description ||
+                          "No description available for this camp."}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

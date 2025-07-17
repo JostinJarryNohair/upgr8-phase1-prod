@@ -149,6 +149,25 @@
 - Edge case handling
 - Testing all flows
 
+## Future Enhancements (After AddPlayerModal):
+
+### Bulk Player Import Feature:
+
+- **CSV/Excel Import**: Allow coaches to upload player lists
+- **Smart Field Mapping**: Auto-detect column headers (first_name, firstName, Prénom, etc.)
+- **Duplicate Detection**: Identify existing players by email/name
+- **Coach-Specific Lists**: Each coach maintains their own player database
+- **Import Preview**: Show what will be created/updated before import
+- **Template Download**: Provide CSV template for consistent formatting
+
+### Technical Implementation:
+
+- **File Upload**: Drag & drop or file picker for CSV/Excel files
+- **Field Detection**: Intelligent mapping of common column variations
+- **Validation**: Data validation before import
+- **Batch Processing**: Handle large imports efficiently
+- **Error Handling**: Clear feedback for import issues
+
 ## Current Blockers:
 
 - None - ready to proceed with AddPlayerModal component
@@ -163,3 +182,4 @@
 - Proper TypeScript types used throughout
 - Understanding of Player + Registration data structure
 - Automatic JOIN relationships via foreign keys
+- Bulk import will be implemented after individual player addition is complete

@@ -9,8 +9,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
+/**
+ * Main confirmation component that handles the email verification logic
+ * This component needs to be separate from the page component because
+ * useSearchParams() requires a Suspense boundary in Next.js 14
+ */
 function ConfirmContent() {
   const router = useRouter();
+  // useSearchParams() reads URL parameters like ?token=abc&type=signup
+  // In Next.js 14, this MUST be wrapped in <Suspense> because it's dynamic
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading"
@@ -18,50 +25,111 @@ function ConfirmContent() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
+    /**
+     * This function handles the email confirmation process:
+     * 1. Supabase automatically processes the token when the page loads
+     * 2. We need to listen for auth state changes to detect confirmation
+     * 3. Then verify the user has a coach profile in our database
+     * 4. Show success/error and redirect accordingly
+     */
     const handleEmailConfirmation = async () => {
       try {
-        // Get the token and type from URL parameters
+        // Get URL parameters for debugging
         const token = searchParams.get("token");
         const type = searchParams.get("type");
+        const error = searchParams.get("error");
+        const error_description = searchParams.get("error_description");
 
         console.log("Confirmation attempt:", {
           token: token?.substring(0, 10) + "...",
           type,
+          error,
+          error_description,
         });
 
-        // Supabase automatically processes the confirmation when the page loads
-        // We just need to check the session
-        const {
-          data: { session },
-          error,
-        } = await supabase.auth.getSession();
-
+        // Check if there's an error in the URL
         if (error) {
-          console.error("Confirmation error:", error);
           setStatus("error");
-
-          if (error.message.includes("expired")) {
+          if (error === "expired_token") {
             setMessage(
               "Le lien de confirmation a expiré. Veuillez vous inscrire à nouveau."
             );
-          } else if (error.message.includes("invalid")) {
+          } else if (error === "invalid_token") {
             setMessage(
               "Lien de confirmation invalide. Veuillez vérifier votre email."
             );
           } else {
-            setMessage("Erreur lors de la confirmation: " + error.message);
+            setMessage(`Erreur de confirmation: ${error_description || error}`);
           }
           return;
         }
 
-        if (session && session.user) {
-          console.log("User confirmed successfully:", session.user.email);
+        // Set up auth state listener to detect when user gets confirmed
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange(async (event, session) => {
+          console.log("Auth state change:", event, session?.user?.email);
 
-          // Check if user has a coach profile
+          if (event === "SIGNED_IN" && session?.user) {
+            // User was just confirmed and signed in
+            try {
+              // Verify that the user has a complete coach profile
+              const { data: coachData, error: profileError } = await supabase
+                .from("coaches")
+                .select("*")
+                .eq("id", session.user.id)
+                .single();
+
+              if (profileError) {
+                console.error("Profile check error:", profileError);
+                setStatus("error");
+                setMessage(
+                  "Compte confirmé mais profil incomplet. Veuillez contacter le support."
+                );
+                return;
+              }
+
+              if (coachData) {
+                setStatus("success");
+                setMessage(
+                  `Bienvenue ${coachData.first_name}! Votre compte a été confirmé avec succès.`
+                );
+
+                // Automatically redirect to dashboard after 3 seconds
+                setTimeout(() => {
+                  router.push("/coach-dashboard");
+                }, 3000);
+              } else {
+                setStatus("error");
+                setMessage(
+                  "Profil coach non trouvé. Veuillez contacter le support."
+                );
+              }
+            } catch (err) {
+              console.error("Error verifying coach profile:", err);
+              setStatus("error");
+              setMessage("Erreur lors de la vérification du profil.");
+            }
+          } else if (event === "TOKEN_REFRESHED") {
+            // Token was refreshed, check if user is now confirmed
+            if (session?.user?.email_confirmed_at) {
+              // Trigger the same logic as SIGNED_IN
+              handleEmailConfirmation();
+            }
+          }
+        });
+
+        // Also check current session in case user is already signed in
+        const {
+          data: { session: currentSession },
+        } = await supabase.auth.getSession();
+
+        if (currentSession?.user?.email_confirmed_at) {
+          // User is already confirmed, check their profile
           const { data: coachData, error: profileError } = await supabase
             .from("coaches")
             .select("*")
-            .eq("id", session.user.id)
+            .eq("id", currentSession.user.id)
             .single();
 
           if (profileError) {
@@ -70,16 +138,11 @@ function ConfirmContent() {
             setMessage(
               "Compte confirmé mais profil incomplet. Veuillez contacter le support."
             );
-            return;
-          }
-
-          if (coachData) {
+          } else if (coachData) {
             setStatus("success");
             setMessage(
               `Bienvenue ${coachData.first_name}! Votre compte a été confirmé avec succès.`
             );
-
-            // Redirect to dashboard after a short delay
             setTimeout(() => {
               router.push("/coach-dashboard");
             }, 3000);
@@ -89,13 +152,32 @@ function ConfirmContent() {
               "Profil coach non trouvé. Veuillez contacter le support."
             );
           }
+        } else if (
+          currentSession?.user &&
+          !currentSession.user.email_confirmed_at
+        ) {
+          // User exists but not confirmed yet, wait for confirmation
+          console.log("User exists but not confirmed yet, waiting...");
         } else {
-          // No session means confirmation failed
-          setStatus("error");
-          setMessage(
-            "La confirmation a échoué. Veuillez réessayer ou contacter le support."
-          );
+          // No session, wait for auth state change
+          console.log("No session, waiting for confirmation...");
         }
+
+        // Set timeout to show error if nothing happens after 10 seconds
+        const timeoutId = setTimeout(() => {
+          if (status === "loading") {
+            setStatus("error");
+            setMessage(
+              "La confirmation a pris trop de temps. Veuillez réessayer ou contacter le support."
+            );
+          }
+        }, 10000);
+
+        // Cleanup
+        return () => {
+          subscription.unsubscribe();
+          clearTimeout(timeoutId);
+        };
       } catch (error) {
         console.error("Unexpected error during confirmation:", error);
         setStatus("error");
@@ -103,10 +185,8 @@ function ConfirmContent() {
       }
     };
 
-    // Small delay to ensure URL parameters are available
-    const timer = setTimeout(handleEmailConfirmation, 100);
-    return () => clearTimeout(timer);
-  }, [searchParams, router]);
+    handleEmailConfirmation();
+  }, [searchParams, router, status]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -123,7 +203,7 @@ function ConfirmContent() {
           />
         </div>
 
-        {/* Status Content */}
+        {/* Loading State: Shown while processing the confirmation */}
         {status === "loading" && (
           <div className="space-y-4">
             <div className="w-16 h-16 bg-blue-100 rounded-full mx-auto flex items-center justify-center">
@@ -138,6 +218,7 @@ function ConfirmContent() {
           </div>
         )}
 
+        {/* Success State: Email confirmed and user verified */}
         {status === "success" && (
           <div className="space-y-4">
             <div className="w-16 h-16 bg-green-100 rounded-full mx-auto flex items-center justify-center">
@@ -153,6 +234,7 @@ function ConfirmContent() {
           </div>
         )}
 
+        {/* Error State: Something went wrong with confirmation */}
         {status === "error" && (
           <div className="space-y-4">
             <div className="w-16 h-16 bg-red-100 rounded-full mx-auto flex items-center justify-center">
@@ -163,7 +245,7 @@ function ConfirmContent() {
             </h1>
             <p className="text-gray-600">{message}</p>
 
-            {/* Action buttons for error cases */}
+            {/* Recovery options for users when confirmation fails */}
             <div className="space-y-3 pt-4">
               <Link href="/register">
                 <Button className="w-full bg-red-600 hover:bg-red-700">
@@ -206,7 +288,11 @@ function ConfirmContent() {
   );
 }
 
-// Loading fallback component
+/**
+ * Loading fallback component shown while useSearchParams() is resolving
+ * This is required by Next.js 14 when using dynamic functions like useSearchParams()
+ * during server-side rendering
+ */
 function ConfirmLoading() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -235,7 +321,21 @@ function ConfirmLoading() {
   );
 }
 
-// Main page component with Suspense wrapper
+/**
+ * Main page component with Suspense wrapper
+ *
+ * WHY SUSPENSE IS NEEDED:
+ * - useSearchParams() is a dynamic function that reads URL parameters
+ * - During server-side rendering, URL parameters aren't available yet
+ * - Next.js 14 requires wrapping it in <Suspense> to handle this gracefully
+ * - The fallback component shows while the parameters are being resolved
+ *
+ * THE FLOW:
+ * 1. User clicks email confirmation link: /confirm?token=abc&type=signup
+ * 2. Next.js renders ConfirmLoading first (fallback)
+ * 3. Once search params are ready, ConfirmContent renders
+ * 4. ConfirmContent processes the token and shows result
+ */
 export default function ConfirmPage() {
   return (
     <Suspense fallback={<ConfirmLoading />}>

@@ -1,7 +1,7 @@
-// src/app/confirm/page.tsx
+// src/app/(auth)/confirm/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { CheckCircle, AlertCircle, Loader2 } from "lucide-react";
@@ -9,7 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default function ConfirmPage() {
+function ConfirmContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<"loading" | "success" | "error">(
@@ -203,5 +203,43 @@ export default function ConfirmPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Loading fallback component
+function ConfirmLoading() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md text-center">
+        <div className="mb-8">
+          <Image
+            src="/logo.png"
+            alt="UpGr8 Logo"
+            width={120}
+            height={60}
+            className="mx-auto"
+            priority
+          />
+        </div>
+        <div className="space-y-4">
+          <div className="w-16 h-16 bg-blue-100 rounded-full mx-auto flex items-center justify-center">
+            <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+          </div>
+          <h1 className="text-xl font-semibold text-gray-900">Chargement...</h1>
+          <p className="text-gray-600">
+            Préparation de la confirmation de votre compte.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Main page component with Suspense wrapper
+export default function ConfirmPage() {
+  return (
+    <Suspense fallback={<ConfirmLoading />}>
+      <ConfirmContent />
+    </Suspense>
   );
 }

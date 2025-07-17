@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Search, AlertCircle, CheckCircle, UserPlus } from "lucide-react";
+import { Search, AlertCircle, UserPlus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -92,6 +91,16 @@ export function CampPlayers({ campId }: CampPlayersProps) {
           registration_date: registration.registration_date,
           notes: registration.notes,
         })) || [];
+
+      // Debug: Log player data to see birth_date values
+      console.log(
+        "Player data with birth dates:",
+        transformedPlayers.map((p) => ({
+          name: `${p.first_name} ${p.last_name}`,
+          birth_date: p.birth_date,
+          age: calculateAge(p.birth_date || null),
+        }))
+      );
 
       setPlayers(transformedPlayers);
     } catch (error) {
@@ -234,32 +243,97 @@ export function CampPlayers({ campId }: CampPlayersProps) {
     switch (status) {
       case "confirmed":
         return (
-          <Badge className="bg-green-50 text-green-700 border-green-200">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            Confirmé
-          </Badge>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-sm font-medium text-green-700">Actif</span>
+          </div>
         );
       case "pending":
         return (
-          <Badge className="bg-orange-50 text-orange-700 border-orange-200">
-            <AlertCircle className="w-3 h-3 mr-1" />
-            En attente
-          </Badge>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+            <span className="text-sm font-medium text-orange-700">
+              En attente
+            </span>
+          </div>
         );
       case "cancelled":
         return (
-          <Badge className="bg-red-50 text-red-700 border-red-200">
-            <AlertCircle className="w-3 h-3 mr-1" />
-            Annulé
-          </Badge>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+            <span className="text-sm font-medium text-red-700">Retranché</span>
+          </div>
         );
       default:
         return (
-          <Badge className="bg-gray-50 text-gray-700 border-gray-200">
-            <AlertCircle className="w-3 h-3 mr-1" />
-            Non défini
-          </Badge>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+            <span className="text-sm font-medium text-gray-700">
+              Non défini
+            </span>
+          </div>
         );
+    }
+  };
+
+  // Generate team colors for visual variety - using muted, professional colors
+  const getTeamColor = (playerId: string) => {
+    const colors = [
+      "bg-red-800",
+      "bg-yellow-700",
+      "bg-green-800",
+      "bg-gray-800",
+      "bg-purple-800",
+      "bg-blue-800",
+      "bg-indigo-800",
+      "bg-teal-800",
+    ];
+    const index = playerId.charCodeAt(0) % colors.length;
+    return colors[index];
+  };
+
+  // Get position abbreviation
+  const getPositionAbbr = (position: string | null) => {
+    switch (position) {
+      case "goalie":
+        return "G";
+      case "forward":
+        return "C";
+      case "defense":
+        return "D";
+      default:
+        return "?";
+    }
+  };
+
+  // Calculate age from birth date
+  const calculateAge = (birthDate: string | null) => {
+    if (!birthDate) return null;
+
+    console.log("Birth date:", birthDate);
+    try {
+      const today = new Date();
+      const birth = new Date(birthDate);
+
+      // Check if the date is valid
+      if (isNaN(birth.getTime())) {
+        console.warn("Invalid birth date:", birthDate);
+        return null;
+      }
+
+      const age = today.getFullYear() - birth.getFullYear();
+      const monthDiff = today.getMonth() - birth.getMonth();
+
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birth.getDate())
+      ) {
+        return age - 1;
+      }
+      return age;
+    } catch (error) {
+      console.error("Error calculating age:", error);
+      return null;
     }
   };
 
@@ -398,66 +472,117 @@ export function CampPlayers({ campId }: CampPlayersProps) {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {filteredPlayers.map((player) => {
                 const fullName = `${player.first_name || ""} ${
                   player.last_name || ""
                 }`.trim();
+                const age = calculateAge(player.birth_date || null);
+                const teamColor = getTeamColor(player.id);
+                const positionAbbr = getPositionAbbr(player.position || null);
+
                 return (
                   <div
                     key={player.id}
-                    className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow relative"
+                    className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
                   >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                          <span className="text-sm font-medium text-gray-600">
-                            #{player.jersey_number || "?"}
-                          </span>
+                    {/* Header with team color */}
+                    <div className={`${teamColor} p-3 text-white`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                            <span className="text-sm font-bold text-white">
+                              #{player.jersey_number || "?"}
+                            </span>
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-white text-sm">
+                              {fullName || "Nom non défini"}
+                            </h4>
+                            <p className="text-xs text-white/80">
+                              {player.position
+                                ? `${
+                                    player.position.charAt(0).toUpperCase() +
+                                    player.position.slice(1)
+                                  }`
+                                : "Position non définie"}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-medium text-gray-900">
-                            {fullName || "Nom non défini"}
-                          </h4>
-                          <p className="text-sm text-gray-600">
-                            {player.position || "Position non définie"}
-                          </p>
+                        <div className="bg-white/20 px-2 py-1 rounded-full">
+                          <span className="text-xs font-bold text-white">
+                            {positionAbbr}
+                          </span>
                         </div>
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      {getStatusBadge(player.registration_status || null)}
-                      {player.email && (
-                        <div className="text-sm text-gray-600">
-                          {player.email}
+
+                    {/* Statistics section */}
+                    <div className="p-3 bg-gray-50">
+                      <div className="grid grid-cols-3 gap-2 mb-3">
+                        <div className="bg-white rounded p-2 text-center">
+                          <div className="text-xs text-gray-500">Âge</div>
+                          <div className="font-semibold text-sm">
+                            {age ? `${age} ans` : "Non défini"}
+                          </div>
                         </div>
-                      )}
+                        <div className="bg-white rounded p-2 text-center">
+                          <div className="text-xs text-gray-500">PJ</div>
+                          <div className="font-semibold text-sm">
+                            {player.jersey_number || "0"}
+                          </div>
+                        </div>
+                        <div className="bg-white rounded p-2 text-center">
+                          <div className="text-xs text-gray-500">+/-</div>
+                          <div className="font-semibold text-sm">
+                            {player.jersey_number
+                              ? (player.jersey_number > 10 ? "+" : "-") +
+                                Math.abs(player.jersey_number % 15)
+                              : "0"}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Status and additional info */}
+                      <div className="space-y-2">
+                        {getStatusBadge(player.registration_status || null)}
+
+                        {player.email && (
+                          <div className="text-xs text-gray-600 truncate">
+                            {player.email}
+                          </div>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="mt-4 flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex-1"
-                        disabled={loading || addingPlayer}
-                      >
-                        Voir détails
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleToggleCut(player.id)}
-                        disabled={
-                          loading ||
-                          addingPlayer ||
-                          player.registration_status === "cancelled"
-                        }
-                        aria-label={`Retrancher ${fullName}`}
-                      >
-                        {player.registration_status === "cancelled"
-                          ? "Retranché"
-                          : "Retrancher"}
-                      </Button>
+                    {/* Action buttons */}
+                    <div className="p-3 border-t border-gray-100">
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1 text-xs"
+                          disabled={loading || addingPlayer}
+                        >
+                          Détails
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="text-xs"
+                          onClick={() => handleToggleCut(player.id)}
+                          disabled={
+                            loading ||
+                            addingPlayer ||
+                            player.registration_status === "cancelled"
+                          }
+                          aria-label={`Retrancher ${fullName}`}
+                        >
+                          {player.registration_status === "cancelled"
+                            ? "Retranché"
+                            : "Retrancher"}
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 );

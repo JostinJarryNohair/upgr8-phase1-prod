@@ -167,6 +167,7 @@
 - **Validation**: Data validation before import
 - **Batch Processing**: Handle large imports efficiently
 - **Error Handling**: Clear feedback for import issues
+- **Security**: XSS protection and input sanitization for all user inputs
 
 ## Current Blockers:
 

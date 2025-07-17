@@ -104,6 +104,7 @@ This roadmap outlines the development phases for UpGr8, a comprehensive hockey c
 - [ ] Payment integration
 - [ ] File uploads (player photos, documents)
 - [ ] Advanced reporting and analytics
+- [ ] XSS protection and input sanitization
 
 ## 📊 **Progress Tracking**
 

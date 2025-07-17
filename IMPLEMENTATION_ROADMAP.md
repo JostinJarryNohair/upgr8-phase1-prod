@@ -70,175 +70,40 @@ This roadmap outlines the development phases for UpGr8, a comprehensive hockey c
 - ✅ Add Player button ready for modal
 - ✅ Loading, error, and empty states
 
-## 🚧 **Phase 4: Add Player to Camp (IN PROGRESS)**
+## ✅ **Phase 4: Add Player to Camp (COMPLETED)**
 
-### **Current Status**
+### **Completed Features**
 
-- ✅ Database foundation complete
-- ✅ CampPlayers component with real data
-- ✅ Add Player button implemented
-- 🔄 **Next**: AddPlayerModal component
-- 🔄 **Next**: Player search functionality
-- 🔄 **Next**: New player creation flow
+- ✅ AddPlayerModal component for new player creation
+- ✅ Modal with form validation, error handling, and direct camp registration
+- ✅ Player status defaults to 'confirmed' and payment to 'paid' for new additions
+- ✅ Cut/uncut functionality for players
+- ✅ Real-time updates to player list
+- ✅ Error handling and validation
 
-### **Planned Features**
-
-- [ ] AddPlayerModal component with two options
-- [ ] Search existing players functionality
-- [ ] Create new player form
-- [ ] Player registration to camps
-- [ ] Real-time player list updates
-- [ ] Error handling and validation
-
-## 📋 **Phase 5: Player Management (PLANNED)**
-
-### **Player Dashboard**
-
-- [ ] Player registration interface
-- [ ] Player profile management
-- [ ] Camp discovery and registration
-- [ ] Player evaluation viewing
-- [ ] Personal camp history
-
-### **Player Authentication**
-
-- [ ] Player registration flow
-- [ ] Player login system
-- [ ] Player profile management
-- [ ] Email verification
-
-## 📋 **Phase 6: Scout System (PLANNED)**
-
-### **Scout Dashboard**
-
-- [ ] Scout registration and authentication
-- [ ] Player evaluation interface
-- [ ] Evaluation submission system
-- [ ] Player performance tracking
-- [ ] Evaluation history and reports
-
-### **Evaluation System**
-
-- [ ] Evaluation forms and criteria
-- [ ] Scoring and rating system
-- [ ] Evaluation submission workflow
-- [ ] Performance analytics
-
-## 📋 **Phase 7: Advanced Features (PLANNED)**
-
-### **Real-time Features**
-
-- [ ] Real-time notifications
-- [ ] Live updates for camp changes
-- [ ] Real-time player status updates
-- [ ] WebSocket integration
-
-### **Communication**
-
-- [ ] Email notification system
-- [ ] Email templates for invitations
-- [ ] Automated reminders
-- [ ] Communication logs
-
-### **File Management**
-
-- [ ] Player photo uploads
-- [ ] Document uploads (medical forms, etc.)
-- [ ] File storage and management
-- [ ] Image optimization
-- [ ] Bulk player import (CSV/Excel)
-- [ ] Smart field mapping for import templates
-- [ ] Coach-specific player lists with duplicate detection
-
-### **Payment Integration**
-
-- [ ] Payment processing for camp registrations
-- [ ] Payment status tracking
-- [ ] Refund handling
-- [ ] Financial reporting
-
-## 📋 **Phase 8: Analytics & Reporting (PLANNED)**
-
-### **Data Analytics**
-
-- [ ] Camp performance metrics
-- [ ] Player attendance tracking
-- [ ] Evaluation analytics
-- [ ] Financial reporting
-
-### **Reporting System**
-
-- [ ] Camp reports and summaries
-- [ ] Player evaluation reports
-- [ ] Financial reports
-- [ ] Export functionality
-
-## 📋 **Phase 9: Mobile & Optimization (PLANNED)**
-
-### **Mobile Optimization**
-
-- [ ] Mobile-responsive design improvements
-- [ ] Touch-friendly interfaces
-- [ ] Mobile-specific features
-- [ ] PWA capabilities
-
-### **Performance Optimization**
-
-- [ ] Code splitting and lazy loading
-- [ ] Image optimization
-- [ ] Database query optimization
-- [ ] Caching strategies
-
-## 📋 **Phase 10: Production & Deployment (PLANNED)**
-
-### **Production Readiness**
-
-- [ ] Comprehensive testing
-- [ ] Security audit
-- [ ] Performance optimization
-- [ ] Documentation completion
-
-### **Deployment**
-
-- [ ] Vercel production deployment
-- [ ] Domain configuration
-- [ ] SSL certificate setup
-- [ ] Monitoring and logging
-
-## 🎯 **Current Focus: Phase 4 - Add Player to Camp**
+## 🚧 **Current Focus: Bulk Import & Advanced Features**
 
 ### **Immediate Next Steps**
 
-1. **Create AddPlayerModal component**
+1. **Implement bulk player import (CSV/Excel with auto-mapping)**
+2. **Add player search and selection for existing players**
+3. **Enhance player evaluation and dashboard features**
+4. **Continue advanced features and polish**
 
-   - Modal structure with two options
-   - "Add New Player" and "Add Existing Player" tabs
-   - Form validation and error handling
+### **Planned Features**
 
-2. **Implement player search functionality**
-
-   - Debounced search input
-   - Search existing players by name/email
-   - Results dropdown with player selection
-
-3. **Add new player creation flow**
-
-   - PlayerForm integration
-   - Auto-registration to camp
-   - Success/error feedback
-
-4. **Test and polish**
-   - Database integration testing
-   - Error handling validation
-   - User experience optimization
-
-### **Success Criteria**
-
-- ✅ Players can be added to camps
-- ✅ Both new and existing player flows work
-- ✅ Real-time updates to player list
-- ✅ Proper error handling and validation
-- ✅ Smooth user experience
+- [ ] Bulk player import (CSV/Excel)
+- [ ] Smart field mapping for import templates
+- [ ] Coach-specific player lists with duplicate detection
+- [ ] Player search functionality (existing player selection)
+- [ ] Player evaluation system
+- [ ] Player dashboard and self-registration
+- [ ] Player cut/uncut enhancements
+- [ ] Real-time notifications
+- [ ] Email notifications
+- [ ] Payment integration
+- [ ] File uploads (player photos, documents)
+- [ ] Advanced reporting and analytics
 
 ## 📊 **Progress Tracking**
 
@@ -247,16 +112,11 @@ This roadmap outlines the development phases for UpGr8, a comprehensive hockey c
 - **Phase 1**: Foundation - 100% ✅
 - **Phase 2**: Camp Management - 100% ✅
 - **Phase 3**: Player System Foundation - 100% ✅
+- **Phase 4**: Add Player to Camp - 100% ✅
 
 ### **Current Phase**
 
-- **Phase 4**: Add Player to Camp - 70% 🔄
-
-### **Upcoming Phases**
-
-- **Phase 5**: Player Management - 0% 📋
-- **Phase 6**: Scout System - 0% 📋
-- **Phase 7**: Advanced Features - 0% 📋
+- **Bulk Import & Advanced Features** - In Progress
 
 ## 🔧 **Technical Considerations**
 
@@ -280,4 +140,4 @@ This roadmap outlines the development phases for UpGr8, a comprehensive hockey c
 
 ---
 
-**Last Updated**: Current session - Phase 4 in progress, database integration complete
+**Last Updated**: Current session - AddPlayerModal and individual player addition complete, preparing for bulk import and advanced features

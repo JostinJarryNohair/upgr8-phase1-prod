@@ -43,7 +43,10 @@ UpGr8 is a comprehensive hockey camp management platform built with Next.js, Typ
 - ✅ PlayerWithRegistration interface for combined data
 - ✅ Real database integration with JOIN queries
 - ✅ CampPlayers component with search and filtering
-- ✅ Add Player button ready for modal integration
+- ✅ Add Player button and AddPlayerModal component for new player creation
+- ✅ AddPlayerModal with form validation, error handling, and direct camp registration
+- ✅ Player status defaults to 'confirmed' and payment to 'paid' for new additions
+- ✅ Cut/uncut functionality for players
 
 ### **UI/UX Components**
 
@@ -55,25 +58,20 @@ UpGr8 is a comprehensive hockey camp management platform built with Next.js, Typ
 
 ## 🚧 **In Progress**
 
-### **Add Player to Camp Feature**
+### **Bulk Player Import & Advanced Features**
 
-- ✅ Database foundation complete
-- ✅ CampPlayers component with real data
-- ✅ Add Player button implemented
-- 🔄 **Next**: AddPlayerModal component
-- 🔄 **Next**: Player search and selection
-- 🔄 **Next**: New player creation flow
+- 🔄 Bulk player import (CSV/Excel with auto-mapping)
+- 🔄 Coach-specific player lists with duplicate detection
+- 🔄 Smart field mapping for import templates
 
 ## 📋 **Planned Features**
 
 ### **Player Management**
 
-- [ ] AddPlayerModal component
-- [ ] Player search functionality
-- [ ] New player creation form
-- [ ] Player registration to camps
+- [ ] Player search functionality (existing player selection)
 - [ ] Player evaluation system
-- [ ] Player cut/uncut functionality
+- [ ] Player dashboard and self-registration
+- [ ] Player cut/uncut enhancements
 
 ### **Player Dashboard**
 
@@ -167,11 +165,10 @@ interface PlayerWithRegistration extends Player {
 
 ## 🎯 **Immediate Next Steps**
 
-1. **Create AddPlayerModal component**
-2. **Implement player search functionality**
-3. **Add new player creation form**
-4. **Test database integration**
-5. **Implement cut functionality**
+1. **Implement bulk player import (CSV/Excel)**
+2. **Add player search and selection for existing players**
+3. **Enhance player evaluation and dashboard features**
+4. **Continue advanced features and polish**
 
 ## 📈 **Progress Metrics**
 
@@ -179,7 +176,7 @@ interface PlayerWithRegistration extends Player {
 - **Authentication**: 100% complete
 - **Coach Dashboard**: 100% complete
 - **Camp Management**: 100% complete
-- **Player System**: 70% complete
+- **Player System**: 90% complete
 - **Player Dashboard**: 0% complete
 - **Scout Dashboard**: 0% complete
 
@@ -193,4 +190,4 @@ interface PlayerWithRegistration extends Player {
 
 ---
 
-**Last Updated**: Current session - Database integration and player system foundation complete
+**Last Updated**: Current session - AddPlayerModal and individual player addition complete, preparing for bulk import and advanced features

@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase/client";
+import { AuthApiError } from "@supabase/supabase-js";
 import DynamicInput from "@/components/common/DynamicInput";
 import Image from "next/image";
 import Link from "next/link";
@@ -92,24 +93,34 @@ export default function LoginForm() {
     } catch (error: unknown) {
       console.error("Login error:", error);
 
-      // Handle specific Supabase errors
-      if (
-        error instanceof Error &&
-        error.message.includes("Invalid login credentials")
-      ) {
-        setMessage("Email ou mot de passe incorrect");
-      } else if (
-        error instanceof Error &&
-        error.message.includes("Email not confirmed")
-      ) {
-        setMessage("Veuillez confirmer votre email avant de vous connecter");
-      } else if (
-        error instanceof Error &&
-        error.message.includes("Too many requests")
-      ) {
-        setMessage("Trop de tentatives. Réessayez dans quelques minutes");
+      // Handle specific Supabase AuthApiError
+      if (error instanceof AuthApiError) {
+        switch (error.message) {
+          case "Invalid login credentials":
+            setMessage("Email ou mot de passe incorrect");
+            break;
+          case "Email not confirmed":
+            setMessage("Veuillez confirmer votre email avant de vous connecter");
+            break;
+          case "Too many requests":
+            setMessage("Trop de tentatives. Réessayez dans quelques minutes");
+            break;
+          default:
+            setMessage("Erreur de connexion: " + error.message);
+        }
+      } else if (error instanceof Error) {
+        // Handle other Error types
+        if (error.message.includes("Invalid login credentials")) {
+          setMessage("Email ou mot de passe incorrect");
+        } else if (error.message.includes("Email not confirmed")) {
+          setMessage("Veuillez confirmer votre email avant de vous connecter");
+        } else if (error.message.includes("Too many requests")) {
+          setMessage("Trop de tentatives. Réessayez dans quelques minutes");
+        } else {
+          setMessage("Erreur de connexion: " + error.message);
+        }
       } else {
-        setMessage("Erreur de connexion: " + (error as Error).message);
+        setMessage("Erreur de connexion inconnue");
       }
     } finally {
       setLoading(false);

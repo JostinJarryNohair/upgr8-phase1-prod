@@ -10,6 +10,7 @@ import {
   CoachingLevel,
   CoachRole,
 } from "@/lib/supabase/client";
+import { AuthApiError } from "@supabase/supabase-js";
 import {
   Select,
   SelectContent,
@@ -130,8 +131,36 @@ export default function RegisterForm() {
       });
     } catch (error: unknown) {
       console.error("Registration error:", error);
-      if (error instanceof Error) {
-        setMessage("Erreur: " + error.message);
+      
+      // Handle specific Supabase AuthApiError
+      if (error instanceof AuthApiError) {
+        switch (error.message) {
+          case "User already registered":
+            setMessage("Un compte existe déjà avec cette adresse email");
+            break;
+          case "Password should be at least 6 characters":
+            setMessage("Le mot de passe doit contenir au moins 6 caractères");
+            break;
+          case "Invalid email":
+            setMessage("Adresse email invalide");
+            break;
+          case "Too many requests":
+            setMessage("Trop de tentatives. Réessayez dans quelques minutes");
+            break;
+          default:
+            setMessage("Erreur d'inscription: " + error.message);
+        }
+      } else if (error instanceof Error) {
+        // Handle other Error types
+        if (error.message.includes("already exists")) {
+          setMessage("Un compte existe déjà avec cette adresse email");
+        } else if (error.message.includes("password")) {
+          setMessage("Erreur avec le mot de passe");
+        } else if (error.message.includes("email")) {
+          setMessage("Erreur avec l'adresse email");
+        } else {
+          setMessage("Erreur d'inscription: " + error.message);
+        }
       } else {
         setMessage("Erreur inconnue lors de l'inscription");
       }

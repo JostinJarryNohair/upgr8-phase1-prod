@@ -7,7 +7,7 @@ export default function TrainingPage() {
         {/* Header Section */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold">Gestion de l'entraînement</h1>
+            <h1 className="text-3xl font-bold">Gestion de l&apos;entraînement</h1>
             <div className="flex items-center space-x-4">
               <p className="text-gray-600">Page en développement</p>
             </div>
@@ -18,7 +18,7 @@ export default function TrainingPage() {
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="text-center py-12">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Gestion de l'entraînement
+              Gestion de l&apos;entraînement
             </h2>
             <p className="text-gray-600 mb-4">
               Cette fonctionnalité sera bientôt disponible.

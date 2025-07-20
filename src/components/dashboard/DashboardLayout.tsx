@@ -10,14 +10,19 @@ interface DashboardLayoutProps {
   className?: string;
 }
 
-export function DashboardLayout({ children, className }: DashboardLayoutProps) {
+export function DashboardLayout({ 
+  children, 
+  className
+}: DashboardLayoutProps) {
   const [isCollapsed, setIsCollapsed] = React.useState(false);
-  // Determine if this is a coach dashboard
 
   return (
     <div className={cn("min-h-screen bg-gray-50 flex", className)}>
       {/* Fixed Sidebar */}
-      <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+      <Sidebar 
+        isCollapsed={isCollapsed} 
+        setIsCollapsed={setIsCollapsed}
+      />
 
       {/* Main Content Area */}
       <div

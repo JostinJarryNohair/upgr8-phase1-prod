@@ -5,7 +5,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { LayoutDashboard, Settings, HelpCircle } from "lucide-react";
+import { 
+  Settings, 
+  HelpCircle,
+  Dumbbell,
+  Users,
+  User,
+  ClipboardCheck,
+  Users2,
+  Calendar,
+  LucideIcon
+} from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 
 interface Coach {
@@ -15,6 +25,22 @@ interface Coach {
   email: string;
   role: string;
   coaching_level: string;
+}
+
+export type ViewType =
+  | "teams"
+  | "players"
+  | "training"
+  | "evaluations"
+  | "staff"
+  | "camps"
+  | "regular-season";
+
+interface NavItem {
+  id: ViewType;
+  label: string;
+  icon: LucideIcon;
+  href: string;
 }
 
 interface SidebarProps {
@@ -62,12 +88,17 @@ export function Sidebar({ isCollapsed, className }: SidebarProps) {
     fetchCoach();
   }, []);
 
-  const navItems = [
-    {
-      name: "Tableau de bord",
-      href: "/coach-dashboard",
-      icon: LayoutDashboard,
-    },
+  const navItems: NavItem[] = [
+    { id: "camps", label: "Camps", icon: Dumbbell, href: "/coach-dashboard/camps" },
+    { id: "regular-season", label: "Saison régulière", icon: Calendar, href: "/coach-dashboard/regular-season" },
+    { id: "teams", label: "Équipes", icon: Users, href: "/coach-dashboard/teams" },
+    { id: "players", label: "Joueurs", icon: User, href: "/coach-dashboard/players" },
+    { id: "training", label: "Entrainement", icon: Dumbbell, href: "/coach-dashboard/training" },
+    { id: "evaluations", label: "Évaluations", icon: ClipboardCheck, href: "/coach-dashboard/evaluations" },
+    { id: "staff", label: "Personnel", icon: Users2, href: "/coach-dashboard/staff" },
+  ];
+
+  const settingsItems = [
     {
       name: "Paramètres",
       href: "/coach-dashboard/settings",
@@ -122,10 +153,44 @@ export function Sidebar({ isCollapsed, className }: SidebarProps) {
         )}
       </div>
 
-      {/* Navigation */}
+      {/* Main Navigation */}
       <nav className="flex-1 px-3 py-6">
         <ul className="space-y-2">
           {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            const Icon = item.icon;
+
+            return (
+              <li key={item.id}>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "group flex items-center w-full px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-700/50 relative",
+                    isActive
+                      ? "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg"
+                      : "text-gray-300 hover:text-white"
+                  )}
+                >
+                  <Icon
+                    className={cn("w-5 h-5", isCollapsed ? "mx-auto" : "mr-3")}
+                  />
+                  {!isCollapsed && <span>{item.label}</span>}
+                  {isCollapsed && (
+                    <span className="absolute left-full ml-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 bg-gray-900 text-white text-xs px-2 py-1 rounded transition-opacity z-50">
+                      {item.label}
+                    </span>
+                  )}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      {/* Settings Navigation */}
+      <nav className="px-3 py-4 border-t border-gray-700">
+        <ul className="space-y-2">
+          {settingsItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
 

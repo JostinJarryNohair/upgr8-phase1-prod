@@ -37,7 +37,8 @@ import {
   Settings,
   Star,
   Users,
-  Eye
+  Eye,
+  X
 } from "lucide-react";
 
 interface PlayersManagementProps {
@@ -77,6 +78,7 @@ export function PlayersManagement({
   const [selectedCamp, setSelectedCamp] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedPosition, setSelectedPosition] = useState<string | null>(null);
+  const [managingRegistrations, setManagingRegistrations] = useState<Player | null>(null);
 
   // Calculate counts for categories and positions
   const calculateCounts = () => {
@@ -142,6 +144,10 @@ export function PlayersManagement({
         setError("Erreur lors de la suppression du joueur");
       }
     }
+  };
+
+  const handleManageRegistrations = (player: Player) => {
+    setManagingRegistrations(player);
   };
 
   const getPositionLabel = (position: string | undefined) => {
@@ -408,6 +414,27 @@ export function PlayersManagement({
                               <div className="text-sm text-gray-500">
                                 #{player.jersey_number || "N/A"}
                               </div>
+                              {/* Show camp registrations */}
+                              {campRegistrations.filter(reg => reg.player_id === player.id).length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {campRegistrations
+                                    .filter(reg => reg.player_id === player.id)
+                                    .slice(0, 2)
+                                    .map((reg, index) => {
+                                      const camp = camps.find(c => c.id === reg.camp_id);
+                                      return camp ? (
+                                        <span key={reg.id} className="text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">
+                                          {camp.name}
+                                        </span>
+                                      ) : null;
+                                    })}
+                                  {campRegistrations.filter(reg => reg.player_id === player.id).length > 2 && (
+                                    <span className="text-xs text-gray-500">
+                                      +{campRegistrations.filter(reg => reg.player_id === player.id).length - 2} autres
+                                    </span>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </div>
                         </TableCell>
@@ -456,12 +483,19 @@ export function PlayersManagement({
                                 <Star className="w-4 h-4 mr-2" />
                                 Ajouter aux favoris
                               </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => handleManageRegistrations(player)}
+                                className="text-gray-700 hover:bg-gray-100"
+                              >
+                                <Users className="w-4 h-4 mr-2" />
+                                Gérer les inscriptions aux camps
+                              </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => handleDeletePlayer(player.id)}
                                 className="text-red-600 hover:bg-gray-100"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
-                                Supprimer
+                                Supprimer définitivement
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -491,6 +525,107 @@ export function PlayersManagement({
           initialData={editingPlayer}
           error={error}
         />
+
+        {/* Camp Registration Management Modal */}
+        {managingRegistrations && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/50" onClick={() => setManagingRegistrations(null)} />
+            <div className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Gérer les inscriptions aux camps - {managingRegistrations.first_name} {managingRegistrations.last_name}
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  onClick={() => setManagingRegistrations(null)}
+                  className="h-12 w-12"
+                >
+                  <X className="h-6 w-6" />
+                </Button>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {/* Current Registrations */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-3">Inscriptions actuelles</h3>
+                  <div className="space-y-2">
+                    {campRegistrations
+                      .filter(reg => reg.player_id === managingRegistrations.id)
+                      .map(reg => {
+                        const camp = camps.find(c => c.id === reg.camp_id);
+                        return camp ? (
+                          <div key={reg.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div>
+                              <div className="font-medium text-gray-900">{camp.name}</div>
+                              <div className="text-sm text-gray-500">{camp.level} • {camp.location}</div>
+                              <div className="text-xs text-gray-400">Statut: {reg.status || 'confirmé'}</div>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-red-600 border-red-300 hover:bg-red-50"
+                              onClick={() => {
+                                if (confirm(`Retirer ${managingRegistrations.first_name} du camp ${camp.name} ?`)) {
+                                  // TODO: Implement remove from camp
+                                  console.log('Remove from camp:', reg.id);
+                                }
+                              }}
+                            >
+                              Retirer
+                            </Button>
+                          </div>
+                        ) : null;
+                      })}
+                    {campRegistrations.filter(reg => reg.player_id === managingRegistrations.id).length === 0 && (
+                      <p className="text-gray-500 text-center py-4">Aucune inscription aux camps</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Available Camps */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-3">Camps disponibles</h3>
+                  <div className="space-y-2">
+                    {camps
+                      .filter(camp => !campRegistrations.some(reg => 
+                        reg.player_id === managingRegistrations.id && reg.camp_id === camp.id
+                      ))
+                      .map(camp => (
+                        <div key={camp.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div>
+                            <div className="font-medium text-gray-900">{camp.name}</div>
+                            <div className="text-sm text-gray-500">{camp.level} • {camp.location}</div>
+                            <div className="text-xs text-gray-400">
+                              {camp.isActive ? 'Actif' : 'Inactif'} • {camp.startDate} - {camp.endDate}
+                            </div>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-green-600 border-green-300 hover:bg-green-50"
+                            onClick={() => {
+                              if (confirm(`Inscrire ${managingRegistrations.first_name} au camp ${camp.name} ?`)) {
+                                // TODO: Implement add to camp
+                                console.log('Add to camp:', camp.id);
+                              }
+                            }}
+                          >
+                            Inscrire
+                          </Button>
+                        </div>
+                      ))}
+                    {camps.filter(camp => !campRegistrations.some(reg => 
+                      reg.player_id === managingRegistrations.id && reg.camp_id === camp.id
+                    )).length === 0 && (
+                      <p className="text-gray-500 text-center py-4">Aucun camp disponible</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

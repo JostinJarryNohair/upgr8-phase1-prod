@@ -37,6 +37,8 @@
     "help": "Help"
   },
   "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
     "email": "Email",
     "password": "Password",
     "confirmPassword": "Confirm Password",

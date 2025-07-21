@@ -37,6 +37,8 @@
     "help": "Aide"
   },
   "auth": {
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
     "email": "Courriel",
     "password": "Mot de passe",
     "confirmPassword": "Confirmer le mot de passe",

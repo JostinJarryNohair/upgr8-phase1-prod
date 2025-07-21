@@ -231,7 +231,7 @@ export default function LoginForm() {
 
             {/* Submit Button */}
             <DynamicButton
-              label={loading ? t('common.loading') : t('auth.login')}
+              label={loading ? t('common.loading') : t('auth.signIn')}
               type="submit"
               variant="default"
               className="w-full h-10 text-sm font-medium"

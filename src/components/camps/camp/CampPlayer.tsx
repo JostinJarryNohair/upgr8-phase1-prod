@@ -15,12 +15,14 @@ import {
 import { PlayerWithRegistration, PlayerFormData } from "@/types/player";
 import { supabase } from "@/lib/supabase/client";
 import { AddPlayerModal } from "@/components/players/AddPlayerModal";
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface CampPlayersProps {
   campId: string;
 }
 
 export function CampPlayers({ campId }: CampPlayersProps) {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGroup, setSelectedGroup] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -44,7 +46,7 @@ export function CampPlayers({ campId }: CampPlayersProps) {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        setError("Non authentifié");
+        setError(t('players.notAuthenticated'));
         return;
       }
 
@@ -78,7 +80,7 @@ export function CampPlayers({ campId }: CampPlayersProps) {
 
       if (error) {
         console.error("Error loading camp players:", error);
-        setError("Erreur lors du chargement des joueurs");
+        setError(t('players.errorLoadingPlayers'));
         return;
       }
 
@@ -96,11 +98,11 @@ export function CampPlayers({ campId }: CampPlayersProps) {
       setPlayers(transformedPlayers);
     } catch (error) {
       console.error("Error loading camp players:", error);
-      setError("Erreur lors du chargement des joueurs");
+      setError(t('players.errorLoadingPlayers'));
     } finally {
       setLoading(false);
     }
-  }, [campId]);
+  }, [campId, t]);
 
   // Load players for this camp
   useEffect(() => {
@@ -118,7 +120,7 @@ export function CampPlayers({ campId }: CampPlayersProps) {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        throw new Error("Non authentifié");
+        throw new Error(t('players.notAuthenticated'));
       }
 
       let playerId: string;
@@ -144,7 +146,7 @@ export function CampPlayers({ campId }: CampPlayersProps) {
             .single();
 
           if (existingRegistration) {
-            throw new Error("Ce joueur est déjà inscrit à ce camp");
+            throw new Error(t('players.playerAlreadyRegistered'));
           }
         } else {
           // Create new player
@@ -155,7 +157,7 @@ export function CampPlayers({ campId }: CampPlayersProps) {
             .single();
 
           if (playerError) {
-            throw new Error("Erreur lors de la création du joueur");
+            throw new Error(t('players.errorCreatingPlayer'));
           }
           playerId = newPlayer.id;
         }
@@ -168,7 +170,7 @@ export function CampPlayers({ campId }: CampPlayersProps) {
           .single();
 
         if (playerError) {
-          throw new Error("Erreur lors de la création du joueur");
+          throw new Error(t('players.errorCreatingPlayer'));
         }
         playerId = newPlayer.id;
       }
@@ -186,7 +188,7 @@ export function CampPlayers({ campId }: CampPlayersProps) {
         ]);
 
       if (registrationError) {
-        throw new Error("Erreur lors de l'inscription au camp");
+        throw new Error(t('players.errorRegisteringCamp'));
       }
 
       // Close modal and reload players
@@ -197,7 +199,7 @@ export function CampPlayers({ campId }: CampPlayersProps) {
       setAddPlayerError(
         error instanceof Error
           ? error.message
-          : "Erreur lors de l'ajout du joueur"
+          : t('players.errorCreatingPlayer')
       );
     } finally {
       setAddingPlayer(false);
@@ -215,7 +217,7 @@ export function CampPlayers({ campId }: CampPlayersProps) {
 
       if (error) {
         console.error("Error updating registration status:", error);
-        throw new Error("Erreur lors de la modification du statut");
+        throw new Error(t('players.errorUpdatingStatus'));
       }
 
       // Reload players to reflect the change
@@ -225,7 +227,7 @@ export function CampPlayers({ campId }: CampPlayersProps) {
       setError(
         error instanceof Error
           ? error.message
-          : "Erreur lors de la modification"
+          : t('players.errorModifying')
       );
     }
   };
@@ -236,28 +238,28 @@ export function CampPlayers({ campId }: CampPlayersProps) {
         return (
           <Badge className="bg-green-50 text-green-700 border-green-200">
             <CheckCircle className="w-3 h-3 mr-1" />
-            Confirmé
+            {t('players.confirmed')}
           </Badge>
         );
       case "pending":
         return (
           <Badge className="bg-orange-50 text-orange-700 border-orange-200">
             <AlertCircle className="w-3 h-3 mr-1" />
-            En attente
+            {t('players.pending')}
           </Badge>
         );
       case "cancelled":
         return (
           <Badge className="bg-red-50 text-red-700 border-red-200">
             <AlertCircle className="w-3 h-3 mr-1" />
-            Annulé
+            {t('players.cancelled')}
           </Badge>
         );
       default:
         return (
           <Badge className="bg-gray-50 text-gray-700 border-gray-200">
             <AlertCircle className="w-3 h-3 mr-1" />
-            Non défini
+            {t('players.undefinedStatus')}
           </Badge>
         );
     }
@@ -286,7 +288,7 @@ export function CampPlayers({ campId }: CampPlayersProps) {
     return (
       <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="text-center text-gray-600">
-          Chargement des joueurs...
+          {t('players.loadingPlayers')}
         </div>
       </div>
     );
@@ -298,7 +300,7 @@ export function CampPlayers({ campId }: CampPlayersProps) {
         <div className="text-center text-red-600 mb-4">{error}</div>
         <div className="text-center">
           <Button onClick={loadCampPlayers} variant="outline" size="sm">
-            Réessayer
+            {t('players.retry')}
           </Button>
         </div>
       </div>
@@ -314,53 +316,51 @@ export function CampPlayers({ campId }: CampPlayersProps) {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <Input
-                placeholder="Rechercher un joueur..."
+                placeholder={t('players.searchPlayer')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
-                aria-label="Rechercher un joueur"
+                aria-label={t('players.searchPlayer')}
               />
             </div>
             <Select value={selectedGroup} onValueChange={setSelectedGroup}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Tous les groupes" />
+                <SelectValue placeholder={t('players.allGroups')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tous les groupes</SelectItem>
+                <SelectItem value="all">{t('players.allGroups')}</SelectItem>
                 {/* TODO: Add dynamic groups */}
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Tous les statuts" />
+                <SelectValue placeholder={t('players.allStatuses')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tous les statuts</SelectItem>
-                <SelectItem value="confirmed">Confirmé</SelectItem>
-                <SelectItem value="pending">En attente</SelectItem>
-                <SelectItem value="cancelled">Annulé</SelectItem>
+                <SelectItem value="all">{t('players.allStatuses')}</SelectItem>
+                <SelectItem value="confirmed">{t('players.confirmed')}</SelectItem>
+                <SelectItem value="pending">{t('players.pending')}</SelectItem>
+                <SelectItem value="cancelled">{t('players.cancelled')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="flex items-center justify-between mt-4">
             <p className="text-sm text-gray-600">
-              {filteredPlayers.length} joueur
-              {filteredPlayers.length !== 1 ? "s" : ""} trouvé
-              {filteredPlayers.length !== 1 ? "s" : ""}
+              {filteredPlayers.length} {filteredPlayers.length === 1 ? t('players.playerFound') : t('players.playersFound')}
             </p>
             <div className="flex gap-2">
               <Button variant="outline" size="sm">
-                Plus de filtres
+                {t('players.moreFilters')}
               </Button>
               <Button
                 size="sm"
                 className="bg-red-600 hover:bg-red-700"
                 onClick={() => setIsAddPlayerModalOpen(true)}
                 disabled={addingPlayer}
-                aria-label="Ajouter un nouveau joueur"
+                aria-label={t('players.addPlayer')}
               >
-                {addingPlayer ? "Ajout en cours..." : "+ Ajouter un joueur"}
+                {addingPlayer ? t('players.addingPlayer') : `+ ${t('players.addPlayer')}`}
               </Button>
             </div>
           </div>
@@ -382,19 +382,19 @@ export function CampPlayers({ campId }: CampPlayersProps) {
             <div className="text-center py-8">
               <UserPlus className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Aucun joueur inscrit
+                {t('players.noPlayersRegistered')}
               </h3>
               <p className="text-gray-600 mb-4">
-                Commencez par ajouter des joueurs à ce camp.
+                {t('players.startByAddingPlayers')}
               </p>
               <Button
                 size="sm"
                 className="bg-red-600 hover:bg-red-700"
                 onClick={() => setIsAddPlayerModalOpen(true)}
                 disabled={addingPlayer}
-                aria-label="Ajouter un nouveau joueur"
+                aria-label={t('players.addPlayer')}
               >
-                {addingPlayer ? "Ajout en cours..." : "+ Ajouter un joueur"}
+                {addingPlayer ? t('players.addingPlayer') : `+ ${t('players.addPlayer')}`}
               </Button>
             </div>
           ) : (
@@ -417,10 +417,10 @@ export function CampPlayers({ campId }: CampPlayersProps) {
                         </div>
                         <div>
                           <h4 className="font-medium text-gray-900">
-                            {fullName || "Nom non défini"}
+                            {fullName || t('players.undefinedName')}
                           </h4>
                           <p className="text-sm text-gray-600">
-                            {player.position || "Position non définie"}
+                            {player.position || t('players.undefinedPosition')}
                           </p>
                         </div>
                       </div>
@@ -441,7 +441,7 @@ export function CampPlayers({ campId }: CampPlayersProps) {
                         className="flex-1"
                         disabled={loading || addingPlayer}
                       >
-                        Voir détails
+                        {t('players.viewDetails')}
                       </Button>
                       <Button
                         size="sm"
@@ -452,11 +452,11 @@ export function CampPlayers({ campId }: CampPlayersProps) {
                           addingPlayer ||
                           player.registration_status === "cancelled"
                         }
-                        aria-label={`Retrancher ${fullName}`}
+                        aria-label={`${t('players.cut')} ${fullName}`}
                       >
                         {player.registration_status === "cancelled"
-                          ? "Retranché"
-                          : "Retrancher"}
+                          ? t('players.cutPlayer')
+                          : t('players.cut')}
                       </Button>
                     </div>
                   </div>

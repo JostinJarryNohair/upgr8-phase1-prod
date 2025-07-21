@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
 import { Camp, CampFormData } from "@/types/camp";
 import { AddCampModal } from "@/components/camps/AddCampModal";
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface CampManagementProps {
   camps: Camp[]; // Display uses full records
@@ -22,6 +23,7 @@ export function CampManagement({
   onDeleteCamp,
 }: CampManagementProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<
     "all" | "active" | "archived"
@@ -69,7 +71,7 @@ export function CampManagement({
   // ✅ FIXED - Now expects Camp (what it actually receives)
   const getStatusBadge = (camp: Camp) => {
     if (!camp.isActive) {
-      return <Badge className="bg-gray-100 text-gray-800">Archivé</Badge>;
+      return <Badge className="bg-gray-100 text-gray-800">{t('camps.inactive')}</Badge>;
     }
 
     const now = new Date();
@@ -77,11 +79,11 @@ export function CampManagement({
     const end = new Date(camp.endDate);
 
     if (now < start) {
-      return <Badge className="bg-blue-100 text-blue-800">À venir</Badge>;
+      return <Badge className="bg-blue-100 text-blue-800">{t('camps.upcoming')}</Badge>;
     } else if (now > end) {
-      return <Badge className="bg-green-100 text-green-800">Complété</Badge>;
+      return <Badge className="bg-green-100 text-green-800">{t('camps.completed')}</Badge>;
     } else {
-      return <Badge className="bg-red-100 text-red-800">Actif</Badge>;
+      return <Badge className="bg-red-100 text-red-800">{t('camps.active')}</Badge>;
     }
   };
 
@@ -90,7 +92,7 @@ export function CampManagement({
     const end = new Date(endDate);
     const days =
       Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-    return `${days} jour${days > 1 ? "s" : ""}`;
+    return `${days} ${t('camps.days')}`;
   };
 
   return (
@@ -99,9 +101,9 @@ export function CampManagement({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">
-            Gestion des camps
+            {t('camps.title')}
           </h1>
-          <p className="text-gray-600 mt-2">Organisez vos camps de hockey</p>
+          <p className="text-gray-600 mt-2">{t('camps.subtitle')}</p>
         </div>
 
         <Button
@@ -109,26 +111,26 @@ export function CampManagement({
           className="bg-red-600 hover:bg-red-700"
         >
           <Plus className="w-5 h-5 mr-2" />
-          Nouveau camp
+          {t('camps.newCamp')}
         </Button>
       </div>
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="text-2xl font-bold text-gray-900">{camps.length}</div>
-          <div className="text-sm text-gray-600">Total des camps</div>
+          <div className="text-sm text-gray-600">{t('camps.totalCamps')}</div>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="text-2xl font-bold text-green-600">
             {activeCamps.length}
           </div>
-          <div className="text-sm text-gray-600">Camps actifs</div>
+          <div className="text-sm text-gray-600">{t('camps.activeCamps')}</div>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="text-2xl font-bold text-gray-600">
             {archivedCamps.length}
           </div>
-          <div className="text-sm text-gray-600">Camps archivés</div>
+          <div className="text-sm text-gray-600">{t('camps.archivedCamps')}</div>
         </div>
       </div>
       {/* Filters */}
@@ -137,7 +139,7 @@ export function CampManagement({
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <Input
-              placeholder="Rechercher des camps..."
+              placeholder={t('camps.searchCamps')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -149,21 +151,21 @@ export function CampManagement({
               onClick={() => setSelectedStatus("all")}
               size="sm"
             >
-              Tous les camps
+              {t('common.all')}
             </Button>
             <Button
               variant={selectedStatus === "active" ? "default" : "outline"}
               onClick={() => setSelectedStatus("active")}
               size="sm"
             >
-              Actifs
+              {t('camps.active')}
             </Button>
             <Button
               variant={selectedStatus === "archived" ? "default" : "outline"}
               onClick={() => setSelectedStatus("archived")}
               size="sm"
             >
-              Archivés
+              {t('camps.inactive')}
             </Button>
           </div>
         </div>
@@ -203,20 +205,20 @@ export function CampManagement({
               {/* Details */}
               <div className="space-y-3 mb-6">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Emplacement :</span>
+                  <span className="text-gray-600">{t('camps.location')} :</span>
                   <span className="text-gray-900 font-medium">
                     {camp.location}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Durée :</span>
+                  <span className="text-gray-600">{t('camps.duration')} :</span>
                   <span className="text-gray-900 font-medium">
                     {getDuration(camp.startDate, camp.endDate)}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Dates :</span>
+                  <span className="text-gray-600">{t('camps.dates')} :</span>
                   <span className="text-gray-900 font-medium">
                     {new Date(camp.startDate).toLocaleDateString("fr-FR")} -{" "}
                     {new Date(camp.endDate).toLocaleDateString("fr-FR")}
@@ -229,7 +231,7 @@ export function CampManagement({
             <div className="px-6 py-4 bg-gray-50 rounded-b-lg border-t border-gray-100">
               <div className="text-center">
                 <span className="text-sm text-gray-600">
-                  Cliquez pour gérer le camp
+                  {t('camps.clickToManage')}
                 </span>
               </div>
             </div>
@@ -243,12 +245,12 @@ export function CampManagement({
             <Search className="w-8 h-8 text-gray-400" />
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Aucun camp trouvé
+            {t('camps.noCampsFound')}
           </h3>
           <p className="text-gray-600 mb-4">
             {searchQuery || selectedStatus !== "all"
-              ? "Ajustez vos critères de recherche"
-              : "Créez votre premier camp pour commencer"}
+              ? t('camps.adjustSearchCriteria')
+              : t('camps.createFirstCamp')}
           </p>
           {!searchQuery && selectedStatus === "all" && (
             <Button
@@ -256,7 +258,7 @@ export function CampManagement({
               className="bg-red-600 hover:bg-red-700"
             >
               <Plus className="w-5 h-5 mr-2" />
-              Créer votre premier camp
+              {t('camps.createFirstCamp')}
             </Button>
           )}
         </div>
@@ -277,25 +279,24 @@ export function CampManagement({
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
-                    Supprimer le camp
+                    {t('camps.deleteCamp')}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    Cette action est irréversible
+                    {t('camps.deleteWarning')}
                   </p>
                 </div>
               </div>
 
               <div className="mb-6">
                 <p className="text-gray-700">
-                  Êtes-vous sûr de vouloir supprimer le camp{" "}
+                  {t('camps.deleteConfirmation')}{" "}
                   <span className="font-semibold text-gray-900">
                     &ldquo;{campToDelete.name}&rdquo;
                   </span>
                   ?
                 </p>
                 <p className="text-sm text-gray-500 mt-2">
-                  Toutes les données associées à ce camp seront définitivement
-                  supprimées.
+                  {t('camps.deleteDescription')}
                 </p>
               </div>
 
@@ -305,14 +306,14 @@ export function CampManagement({
                   variant="outline"
                   className="flex-1"
                 >
-                  Annuler
+                  {t('common.cancel')}
                 </Button>
                 <Button
                   onClick={handleConfirmDelete}
                   variant="destructive"
                   className="flex-1"
                 >
-                  Supprimer
+                  {t('common.delete')}
                 </Button>
               </div>
             </div>

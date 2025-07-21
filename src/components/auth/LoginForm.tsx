@@ -9,9 +9,11 @@ import Image from "next/image";
 import Link from "next/link";
 import DynamicButton from "@/components/common/DynamicButton";
 import { useRouter } from "next/navigation";
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function LoginForm() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -30,13 +32,13 @@ export default function LoginForm() {
     };
 
     if (!formData.email) {
-      newErrors.email = "Le courriel est requis";
+      newErrors.email = t('validation.required');
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Format d'email invalide";
+      newErrors.email = t('validation.invalidEmail');
     }
 
     if (!formData.password) {
-      newErrors.password = "Le mot de passe est requis";
+      newErrors.password = t('validation.required');
     }
 
     setErrors(newErrors);
@@ -97,30 +99,30 @@ export default function LoginForm() {
       if (error instanceof AuthApiError) {
         switch (error.message) {
           case "Invalid login credentials":
-            setMessage("Email ou mot de passe incorrect");
+            setMessage(t('auth.invalidCredentials'));
             break;
           case "Email not confirmed":
-            setMessage("Veuillez confirmer votre email avant de vous connecter");
+            setMessage(t('auth.emailNotConfirmed'));
             break;
           case "Too many requests":
-            setMessage("Trop de tentatives. Réessayez dans quelques minutes");
+            setMessage(t('auth.tooManyRequests'));
             break;
           default:
-            setMessage("Erreur de connexion: " + error.message);
+            setMessage(t('auth.loginError') + ": " + error.message);
         }
       } else if (error instanceof Error) {
         // Handle other Error types
         if (error.message.includes("Invalid login credentials")) {
-          setMessage("Email ou mot de passe incorrect");
+          setMessage(t('auth.invalidCredentials'));
         } else if (error.message.includes("Email not confirmed")) {
-          setMessage("Veuillez confirmer votre email avant de vous connecter");
+          setMessage(t('auth.emailNotConfirmed'));
         } else if (error.message.includes("Too many requests")) {
-          setMessage("Trop de tentatives. Réessayez dans quelques minutes");
+          setMessage(t('auth.tooManyRequests'));
         } else {
-          setMessage("Erreur de connexion: " + error.message);
+          setMessage(t('auth.loginError') + ": " + error.message);
         }
       } else {
-        setMessage("Erreur de connexion inconnue");
+        setMessage(t('auth.loginError'));
       }
     } finally {
       setLoading(false);
@@ -147,10 +149,10 @@ export default function LoginForm() {
           {/* Header */}
           <div className="text-center mb-6">
             <h1 className="text-xl font-semibold text-gray-900 mb-1">
-              Connectez-vous à votre compte
+              {t('auth.loginTitle')}
             </h1>
             <p className="text-gray-600 text-sm">
-              Bon retour ! Veuillez entrer vos informations.
+              {t('auth.loginSubtitle')}
             </p>
           </div>
 
@@ -179,12 +181,12 @@ export default function LoginForm() {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Email
+                {t('auth.email')}
               </label>
               <DynamicInput
                 type="email"
                 id="email"
-                placeholder="Entrez votre courriel"
+                placeholder={t('auth.email')}
                 value={formData.email}
                 onChange={(e) => {
                   setFormData({ ...formData, email: e.target.value });
@@ -201,12 +203,12 @@ export default function LoginForm() {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Mot de passe
+                {t('auth.password')}
               </label>
               <DynamicInput
                 type="password"
                 id="password"
-                placeholder="Entrez votre mot de passe"
+                placeholder={t('auth.password')}
                 value={formData.password}
                 onChange={(e) => {
                   setFormData({ ...formData, password: e.target.value });
@@ -223,13 +225,13 @@ export default function LoginForm() {
                 href="/forgot-password"
                 className="text-sm font-medium text-red-600 hover:text-red-700 transition-colors"
               >
-                Mot de passe oublié ?
+                {t('auth.forgotPassword')}
               </Link>
             </div>
 
             {/* Submit Button */}
             <DynamicButton
-              label={loading ? "Connexion..." : "Se connecter"}
+              label={loading ? t('common.loading') : t('auth.login')}
               type="submit"
               variant="default"
               className="w-full h-10 text-sm font-medium"

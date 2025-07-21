@@ -17,6 +17,7 @@ import {
   LucideIcon
 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface Coach {
   id: string;
@@ -53,6 +54,7 @@ export function Sidebar({ isCollapsed, className }: SidebarProps) {
   const pathname = usePathname();
   const [coach, setCoach] = useState<Coach | null>(null);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   // Fetch authenticated coach data
   useEffect(() => {
@@ -89,23 +91,23 @@ export function Sidebar({ isCollapsed, className }: SidebarProps) {
   }, []);
 
   const navItems: NavItem[] = [
-    { id: "camps", label: "Camps", icon: Dumbbell, href: "/coach-dashboard/camps" },
-    { id: "regular-season", label: "Saison régulière", icon: Calendar, href: "/coach-dashboard/regular-season" },
-    { id: "teams", label: "Équipes", icon: Users, href: "/coach-dashboard/teams" },
-    { id: "players", label: "Joueurs", icon: User, href: "/coach-dashboard/players" },
-    { id: "training", label: "Entrainement", icon: Dumbbell, href: "/coach-dashboard/training" },
-    { id: "evaluations", label: "Évaluations", icon: ClipboardCheck, href: "/coach-dashboard/evaluations" },
-    { id: "staff", label: "Personnel", icon: Users2, href: "/coach-dashboard/staff" },
+    { id: "camps", label: t('navigation.camps'), icon: Dumbbell, href: "/coach-dashboard/camps" },
+    { id: "regular-season", label: t('navigation.regularSeason'), icon: Calendar, href: "/coach-dashboard/regular-season" },
+    { id: "teams", label: t('navigation.teams'), icon: Users, href: "/coach-dashboard/teams" },
+    { id: "players", label: t('navigation.players'), icon: User, href: "/coach-dashboard/players" },
+    { id: "training", label: t('navigation.training'), icon: Dumbbell, href: "/coach-dashboard/training" },
+    { id: "evaluations", label: t('navigation.evaluations'), icon: ClipboardCheck, href: "/coach-dashboard/evaluations" },
+    { id: "staff", label: t('navigation.staff'), icon: Users2, href: "/coach-dashboard/staff" },
   ];
 
   const settingsItems = [
     {
-      name: "Paramètres",
+      name: t('navigation.settings'),
       href: "/coach-dashboard/settings",
       icon: Settings,
     },
     {
-      name: "Aide",
+      name: t('navigation.help'),
       href: "/help",
       icon: HelpCircle,
     },

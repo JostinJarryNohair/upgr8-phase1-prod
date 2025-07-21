@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 
 interface Coach {
   id: string;
@@ -234,6 +235,9 @@ export function Topbar({
 
         {/* Right section */}
         <div className="flex items-center space-x-4">
+          {/* Language Switcher */}
+          <LanguageSwitcher />
+          
           {/* Notifications */}
           <div className="relative" ref={notificationRef}>
             <Button

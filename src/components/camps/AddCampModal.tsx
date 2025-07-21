@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CampFormData, CampLevel } from "@/types/camp";
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface AddCampModalProps {
   isOpen: boolean;
@@ -40,6 +41,7 @@ export function AddCampModal({
   onSubmit,
   initialData,
 }: AddCampModalProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: "",
     level: "" as CampLevel,
@@ -77,19 +79,19 @@ export function AddCampModal({
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.name.trim()) newErrors.name = "Le nom du camp est requis";
-    if (!formData.level) newErrors.level = "Le niveau est requis";
+    if (!formData.name.trim()) newErrors.name = t('validation.required');
+    if (!formData.level) newErrors.level = t('validation.required');
     if (!formData.location.trim())
-      newErrors.location = "L'emplacement est requis";
+      newErrors.location = t('validation.required');
     if (!formData.startDate)
-      newErrors.startDate = "La date de début est requise";
-    if (!formData.endDate) newErrors.endDate = "La date de fin est requise";
+      newErrors.startDate = t('validation.required');
+    if (!formData.endDate) newErrors.endDate = t('validation.required');
     if (
       formData.startDate &&
       formData.endDate &&
       new Date(formData.startDate) >= new Date(formData.endDate)
     ) {
-      newErrors.endDate = "La date de fin doit être après la date de début";
+      newErrors.endDate = t('validation.invalidDate');
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -118,10 +120,10 @@ export function AddCampModal({
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-gray-900">
-              {initialData ? "Modifier le camp" : "Création d&apos;un camp"}
+              {initialData ? t('camps.editCamp') : t('camps.createCamp')}
             </h2>
             <p className="text-sm text-gray-600 mt-1">
-              Configurez votre nouveau camp d&apos;évaluation hockey
+              {t('camps.configureCamp')}
             </p>
           </div>
           <button
@@ -134,19 +136,19 @@ export function AddCampModal({
         <form onSubmit={handleSubmit} className="p-6 space-y-8">
           <div className="space-y-6">
             <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-3">
-              Informations du camp
+              {t('camps.campInformation')}
             </h3>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="name">Nom du camp *</Label>
+                  <Label htmlFor="name">{t('camps.campName')} *</Label>
                   <Input
                     id="name"
                     value={formData.name}
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
-                    placeholder="Ex: Camp Excellence M15 Printemps 2025"
+                    placeholder={t('camps.campNamePlaceholder')}
                     className={errors.name ? "border-red-500" : ""}
                     required
                   />
@@ -155,7 +157,7 @@ export function AddCampModal({
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="level">Niveau *</Label>
+                  <Label htmlFor="level">{t('camps.level')} *</Label>
                   <Select
                     value={formData.level}
                     onValueChange={(value) =>
@@ -167,7 +169,7 @@ export function AddCampModal({
                       id="level"
                       className={errors.level ? "border-red-500" : ""}
                     >
-                      <SelectValue placeholder="Sélectionner le niveau" />
+                      <SelectValue placeholder={t('camps.selectLevel')} />
                     </SelectTrigger>
                     <SelectContent>
                       {campLevels.map((level) => (
@@ -182,14 +184,14 @@ export function AddCampModal({
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="location">Lieu *</Label>
+                  <Label htmlFor="location">{t('camps.location')} *</Label>
                   <Input
                     id="location"
                     value={formData.location}
                     onChange={(e) =>
                       setFormData({ ...formData, location: e.target.value })
                     }
-                    placeholder="Centre Sportif Montréal"
+                    placeholder={t('camps.locationPlaceholder')}
                     className={errors.location ? "border-red-500" : ""}
                     required
                   />
@@ -201,7 +203,7 @@ export function AddCampModal({
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="startDate">Date de début *</Label>
+                    <Label htmlFor="startDate">{t('camps.startDate')} *</Label>
                     <Input
                       id="startDate"
                       type="date"
@@ -219,7 +221,7 @@ export function AddCampModal({
                     )}
                   </div>
                   <div>
-                    <Label htmlFor="endDate">Date de fin *</Label>
+                    <Label htmlFor="endDate">{t('camps.endDate')} *</Label>
                     <Input
                       id="endDate"
                       type="date"
@@ -239,14 +241,14 @@ export function AddCampModal({
                   </div>
                 </div>
                 <div className="space-y-4">
-                  <Label htmlFor="description">Description *</Label>
+                  <Label htmlFor="description">{t('camps.description')} *</Label>
                   <textarea
                     id="description"
                     value={formData.description}
                     onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
                     }
-                    placeholder="Décrivez le camp (optionnel)"
+                    placeholder={t('camps.descriptionPlaceholder')}
                     className="w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 text-gray-900 sm:text-sm px-3 py-2 border min-h-[80px]"
                   />
                 </div>
@@ -255,13 +257,13 @@ export function AddCampModal({
           </div>
           <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
             <Button type="button" variant="outline" onClick={onClose}>
-              Annuler
+              {t('common.cancel')}
             </Button>
             <Button
               type="submit"
               className="bg-red-600 hover:bg-red-700 text-white"
             >
-              {initialData ? "Mettre à jour le camp" : "Créer le camp"}
+              {initialData ? t('camps.updateCamp') : t('camps.createCamp')}
             </Button>
           </div>
         </form>

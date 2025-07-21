@@ -5,8 +5,10 @@ import { Camp, CampFormData } from "@/types/camp";
 import { CampManagement } from "@/components/camps/CampManagement";
 import { supabase } from "@/lib/supabase/client";
 import { fromDatabaseFormat, toDatabaseFormat } from "@/lib/mappers/campMapper";
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function CampsPage() {
+  const { t } = useTranslation();
   const [camps, setCamps] = useState<Camp[]>([]);
   const [loading, setLoading] = useState(true);
 

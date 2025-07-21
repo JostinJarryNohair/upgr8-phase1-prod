@@ -20,7 +20,7 @@ export default function CampsPage() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        console.error("No authenticated user");
+        console.error(t('common.notAuthenticated'));
         setLoading(false);
         return;
       }
@@ -32,7 +32,7 @@ export default function CampsPage() {
         .order("created_at", { ascending: false }); // ✅ Newest first
 
       if (error) {
-        console.error("Error loading camps:", error);
+        console.error(t('camps.errorLoadingCamps'), error);
       } else {
         // ✅ Convert all camps from database format
         const formattedCamps = (data || []).map(fromDatabaseFormat);
@@ -43,7 +43,7 @@ export default function CampsPage() {
     };
 
     loadCamps();
-  }, []);
+  }, [t]);
 
   const handleAddCamp = async (newCamp: CampFormData) => {
     const {
@@ -51,7 +51,7 @@ export default function CampsPage() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      console.error("No authenticated user");
+      console.error(t('common.notAuthenticated'));
       return;
     }
 
@@ -67,7 +67,7 @@ export default function CampsPage() {
       .single();
 
     if (error) {
-      console.error("Error adding camp:", error);
+      console.error(t('camps.errorAddingCamp'), error);
       return;
     }
 
@@ -90,7 +90,7 @@ export default function CampsPage() {
       .single();
 
     if (error) {
-      console.error("Error updating camp:", error);
+      console.error(t('camps.errorUpdatingCamp'), error);
       return;
     }
 
@@ -105,7 +105,7 @@ export default function CampsPage() {
     const { error } = await supabase.from("camps").delete().eq("id", id);
 
     if (error) {
-      console.error("Error deleting camp:", error);
+      console.error(t('camps.errorDeletingCamp'), error);
       return;
     }
 
@@ -116,7 +116,7 @@ export default function CampsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-64">
-        <div className="text-gray-600">Chargement des camps...</div>
+        <div className="text-gray-600">{t('camps.loadingCamps')}</div>
       </div>
     );
   }

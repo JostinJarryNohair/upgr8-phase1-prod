@@ -21,7 +21,8 @@
     "no": "Non",
     "login": "Se connecter",
     "register": "S'inscrire",
-    "logout": "Se déconnecter"
+    "logout": "Se déconnecter",
+    "notAuthenticated": "Aucun utilisateur authentifié"
   },
   "navigation": {
     "dashboard": "Tableau de bord",
@@ -103,7 +104,12 @@
     "totalPlayers": "Total des joueurs",
     "confirmedPlayers": "Confirmés",
     "pendingPlayers": "En attente",
-    "totalRegistrations": "Total des inscriptions"
+    "totalRegistrations": "Total des inscriptions",
+    "loadingCamps": "Chargement des camps...",
+    "errorLoadingCamps": "Erreur lors du chargement des camps :",
+    "errorAddingCamp": "Erreur lors de l'ajout du camp :",
+    "errorUpdatingCamp": "Erreur lors de la mise à jour du camp :",
+    "errorDeletingCamp": "Erreur lors de la suppression du camp :"
   },
   "players": {
     "title": "Gestion des joueurs",

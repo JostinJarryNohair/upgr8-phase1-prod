@@ -21,7 +21,8 @@
     "no": "No",
     "login": "Sign In",
     "register": "Sign Up",
-    "logout": "Sign Out"
+    "logout": "Sign Out",
+    "notAuthenticated": "No authenticated user"
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -103,7 +104,12 @@
     "totalPlayers": "Total Players",
     "confirmedPlayers": "Confirmed",
     "pendingPlayers": "Pending",
-    "totalRegistrations": "Total Registrations"
+    "totalRegistrations": "Total Registrations",
+    "loadingCamps": "Loading camps...",
+    "errorLoadingCamps": "Error loading camps:",
+    "errorAddingCamp": "Error adding camp:",
+    "errorUpdatingCamp": "Error updating camp:",
+    "errorDeletingCamp": "Error deleting camp:"
   },
   "players": {
     "title": "Player Management",

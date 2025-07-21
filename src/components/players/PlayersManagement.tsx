@@ -6,7 +6,6 @@ import { Camp } from "@/types/camp";
 import { CampRegistrationWithDetails } from "@/types/campRegistration";
 import { AddPlayerModal } from "./AddPlayerModal";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
   Table, 
@@ -76,7 +75,6 @@ export function PlayersManagement({
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [selectedCamp, setSelectedCamp] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedPosition, setSelectedPosition] = useState<string | null>(null);
   const [managingRegistrations, setManagingRegistrations] = useState<Player | null>(null);
 
@@ -118,7 +116,7 @@ export function PlayersManagement({
       onAddPlayer(playerData);
       setIsAddModalOpen(false);
       setError(null);
-    } catch (err) {
+    } catch {
       setError("Erreur lors de l'ajout du joueur");
     }
   };
@@ -130,7 +128,7 @@ export function PlayersManagement({
       onUpdatePlayer(editingPlayer.id, playerData);
       setEditingPlayer(null);
       setError(null);
-    } catch (err) {
+    } catch {
       setError("Erreur lors de la modification du joueur");
     }
   };
@@ -140,7 +138,7 @@ export function PlayersManagement({
       try {
         onDeletePlayer(id);
         setError(null);
-      } catch (err) {
+      } catch {
         setError("Erreur lors de la suppression du joueur");
       }
     }
@@ -193,7 +191,7 @@ export function PlayersManagement({
   };
 
   // Mock statistics for demonstration
-  const getPlayerStats = (player: Player) => ({
+  const getPlayerStats = () => ({
     matches: Math.floor(Math.random() * 20) + 1,
     goals: Math.floor(Math.random() * 15),
     assists: Math.floor(Math.random() * 20),
@@ -266,7 +264,6 @@ export function PlayersManagement({
                   ? "bg-red-600 hover:bg-red-700" 
                   : "text-gray-700 hover:bg-gray-100"
               }`}
-              onClick={() => setSelectedCategory(category.id)}
             >
               {category.name} ({category.count})
             </Button>
@@ -281,10 +278,10 @@ export function PlayersManagement({
         <div className="grid grid-cols-2 gap-6 mb-6">
           {/* Camp Filter */}
           <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <h3 className="text-lg font-semibold mb-3 text-gray-900">Filtrer par camp d'entraînement</h3>
+            <h3 className="text-lg font-semibold mb-3 text-gray-900">Filtrer par camp d&apos;entraînement</h3>
             <div className="space-y-2">
               {camps.length === 0 ? (
-                <p className="text-gray-500 text-sm">Aucun camp d'entraînement disponible</p>
+                <p className="text-gray-500 text-sm">Aucun camp d&apos;entraînement disponible</p>
               ) : (
                 camps.map((camp, index) => {
                   const registeredPlayers = campRegistrations.filter(reg => reg.camp_id === camp.id).length;
@@ -396,7 +393,7 @@ export function PlayersManagement({
                   </TableRow>
                 ) : (
                   filteredPlayers.map((player) => {
-                    const stats = getPlayerStats(player);
+                    const stats = getPlayerStats();
                     return (
                       <TableRow key={player.id} className="border-gray-200 hover:bg-gray-50">
                         <TableCell>
@@ -420,7 +417,7 @@ export function PlayersManagement({
                                   {campRegistrations
                                     .filter(reg => reg.player_id === player.id)
                                     .slice(0, 2)
-                                    .map((reg, index) => {
+                                    .map((reg) => {
                                       const camp = camps.find(c => c.id === reg.camp_id);
                                       return camp ? (
                                         <span key={reg.id} className="text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">

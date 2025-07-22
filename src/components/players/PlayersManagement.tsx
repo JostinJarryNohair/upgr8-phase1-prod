@@ -543,7 +543,6 @@ export function PlayersManagement({
           isOpen={isImportModalOpen}
           onClose={() => setIsImportModalOpen(false)}
           onImportComplete={handleImportComplete}
-          camps={camps}
         />
 
         {/* Camp Registration Management Modal */}

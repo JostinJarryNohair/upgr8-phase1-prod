@@ -1,6 +1,6 @@
 export interface CSVParseResult {
   headers: string[];
-  data: any[];
+  data: Record<string, string>[];
   errors: string[];
 }
 
@@ -21,7 +21,7 @@ export function parseCSV(csvText: string): CSVParseResult {
   }
 
   // Parse data lines
-  const data: any[] = [];
+      const data: Record<string, string>[] = [];
   
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -35,7 +35,7 @@ export function parseCSV(csvText: string): CSVParseResult {
     }
     
     // Create object from headers and values
-    const row: any = {};
+    const row: Record<string, string> = {};
     headers.forEach((header, index) => {
       row[header.trim()] = values[index]?.trim() || '';
     });

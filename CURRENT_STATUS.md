@@ -122,6 +122,14 @@ UpGr8 is a comprehensive hockey camp management platform built with Next.js, Typ
 
 ## 🚧 **In Progress**
 
+### **Player Evaluation System** 
+
+- 🔄 Evaluation data structure (skills tracking: skating, shooting, passing, etc.)
+- 🔄 Evaluation form UI for coaches to input ratings and notes
+- 🔄 Player evaluation history and progress tracking over time
+- 🔄 Skill comparison and player development monitoring
+- 🔄 Integration with existing player profiles
+
 ### **Advanced Features & Enhancements**
 
 - 🔄 Camp registration management integration (add/remove players from camps)

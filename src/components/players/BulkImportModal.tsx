@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from "react";
 import { Player, PlayerFormData } from "@/types/player";
-import { Camp } from "@/types/camp";
 import { Button } from "@/components/ui/button";
 import { 
   Upload, 
@@ -14,7 +13,7 @@ import {
   Users
 } from "lucide-react";
 import { parseCSV, readFileAsText, CSVParseResult } from "@/lib/csvParser";
-import { autoMapFields, applyMapping, FieldMapping, MappingResult } from "@/lib/fieldMapping";
+import { autoMapFields, applyMapping, MappingResult } from "@/lib/fieldMapping";
 import { supabase } from "@/lib/supabase/client";
 import { toDatabaseFormat, fromDatabaseFormat } from "@/lib/mappers/playerMapper";
 
@@ -22,7 +21,6 @@ interface BulkImportModalProps {
   isOpen: boolean;
   onClose: () => void;
   onImportComplete: (importedPlayers: Player[]) => void;
-  camps: Camp[];
 }
 
 type ImportStep = 'upload' | 'mapping' | 'preview' | 'importing' | 'results';
@@ -45,8 +43,7 @@ interface ImportState {
 export function BulkImportModal({
   isOpen,
   onClose,
-  onImportComplete,
-  camps
+  onImportComplete
 }: BulkImportModalProps) {
   const [state, setState] = useState<ImportState>({
     step: 'upload',

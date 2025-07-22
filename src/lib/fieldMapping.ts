@@ -185,8 +185,8 @@ function levenshteinDistance(str1: string, str2: string): number {
   return matrix[str2.length][str1.length];
 }
 
-export function applyMapping(csvData: any[], mappings: FieldMapping[]): PlayerFormData[] {
-  return csvData.map(row => {
+export function applyMapping(csvData: Record<string, string>[], mappings: FieldMapping[]): PlayerFormData[] {
+      return csvData.map((row: Record<string, string>) => {
     const playerData: Partial<PlayerFormData> = {};
     
     mappings.forEach(mapping => {
@@ -216,7 +216,7 @@ export function applyMapping(csvData: any[], mappings: FieldMapping[]): PlayerFo
               }
               break;
             default:
-              (playerData as any)[mapping.playerField] = value;
+              (playerData as Record<string, unknown>)[mapping.playerField] = value;
           }
         }
       }

@@ -5,6 +5,7 @@ import { Player, PlayerFormData } from "@/types/player";
 import { Camp } from "@/types/camp";
 import { CampRegistrationWithDetails } from "@/types/campRegistration";
 import { AddPlayerModal } from "./AddPlayerModal";
+import { BulkImportModal } from "./BulkImportModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -47,6 +48,7 @@ interface PlayersManagementProps {
   onAddPlayer: (player: PlayerFormData) => void;
   onUpdatePlayer: (id: string, updates: Partial<PlayerFormData>) => void;
   onDeletePlayer: (id: string) => void;
+  onImportPlayers: (players: Player[]) => void;
 }
 
 const categories = [
@@ -69,6 +71,7 @@ export function PlayersManagement({
   onAddPlayer,
   onUpdatePlayer,
   onDeletePlayer,
+  onImportPlayers,
 }: PlayersManagementProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
@@ -77,6 +80,7 @@ export function PlayersManagement({
   const [selectedCamp, setSelectedCamp] = useState<string | null>(null);
   const [selectedPosition, setSelectedPosition] = useState<string | null>(null);
   const [managingRegistrations, setManagingRegistrations] = useState<Player | null>(null);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   // Calculate counts for categories and positions
   const calculateCounts = () => {
@@ -146,6 +150,13 @@ export function PlayersManagement({
 
   const handleManageRegistrations = (player: Player) => {
     setManagingRegistrations(player);
+  };
+
+  const handleImportComplete = (importedPlayers: Player[]) => {
+    // Call parent component to update players list
+    onImportPlayers(importedPlayers);
+    setIsImportModalOpen(false);
+    setError(null);
   };
 
   const getPositionLabel = (position: string | undefined) => {
@@ -233,9 +244,13 @@ export function PlayersManagement({
               <Plus className="w-4 h-4 mr-2" />
               Ajouter un joueur
             </Button>
-            <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
+            <Button 
+              variant="outline" 
+              className="border-gray-300 text-gray-700 hover:bg-gray-50"
+              onClick={() => setIsImportModalOpen(true)}
+            >
               <Upload className="w-4 h-4 mr-2" />
-              Importer
+              Importer CSV
             </Button>
             <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
               <Download className="w-4 h-4 mr-2" />
@@ -521,6 +536,14 @@ export function PlayersManagement({
           onSubmit={handleEditPlayer}
           initialData={editingPlayer}
           error={error}
+        />
+
+        {/* Bulk Import Modal */}
+        <BulkImportModal
+          isOpen={isImportModalOpen}
+          onClose={() => setIsImportModalOpen(false)}
+          onImportComplete={handleImportComplete}
+          camps={camps}
         />
 
         {/* Camp Registration Management Modal */}

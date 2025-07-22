@@ -131,6 +131,13 @@ export default function PlayersPage() {
     setPlayers(players.filter((player) => player.id !== id));
   };
 
+  const handleImportPlayers = (importedPlayers: Player[]) => {
+    // Add imported players to the current list (avoid duplicates)
+    const existingIds = new Set(players.map(p => p.id));
+    const newPlayers = importedPlayers.filter(p => !existingIds.has(p.id));
+    setPlayers([...newPlayers, ...players]);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-64">
@@ -147,6 +154,7 @@ export default function PlayersPage() {
       onAddPlayer={handleAddPlayer}
       onUpdatePlayer={handleUpdatePlayer}
       onDeletePlayer={handleDeletePlayer}
+      onImportPlayers={handleImportPlayers}
     />
   );
 } 

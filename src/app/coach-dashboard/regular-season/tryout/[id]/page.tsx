@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tryout } from "@/types/tryout";
+import { RegularSeasonFormData } from "@/types/regularSeason";
 import { supabase } from "@/lib/supabase/client";
 import { fromDatabaseFormat } from "@/lib/mappers/tryoutMapper";
 import { TryoutPlayers } from "@/components/regular-season/tryout/TryoutPlayers";
@@ -36,6 +37,66 @@ export default function TryoutDetailPage({ params }: PageProps) {
     cutPlayers: 0,
     totalRegistrations: 0,
   });
+
+  // Separate function to load player stats (can be called multiple times)
+  const loadPlayerStats = async (tryoutId: string) => {
+    try {
+      // Load player stats for this tryout
+      const { data: registrationsData, error: registrationsError } =
+        await supabase
+          .from("tryout_registrations")
+          .select(
+            `
+          *,
+          player:players (
+            id,
+            first_name,
+            last_name,
+            email,
+            is_active
+          )
+        `
+          )
+          .eq("tryout_id", tryoutId);
+
+      if (registrationsError) {
+        console.error("Error loading registrations:", registrationsError);
+        return;
+      }
+
+      // Calculate stats and extract selected players
+      if (registrationsData) {
+        const totalRegistrations = registrationsData.length;
+        // Include confirmed, pending, and attended players as "selected" (not cancelled)
+        const selectedPlayersData = registrationsData.filter(
+          (reg) => reg.status !== "cancelled"
+        );
+        const cutPlayers = registrationsData.filter(
+          (reg) => reg.status === "cancelled"
+        ).length;
+        const totalPlayers = registrationsData.filter(
+          (reg) => reg.status !== "cancelled"
+        ).length;
+
+        setStats({
+          totalPlayers,
+          selectedPlayers: selectedPlayersData.length,
+          cutPlayers,
+          totalRegistrations,
+        });
+
+        // Extract selected players for the modal
+        const playersForSeason = selectedPlayersData
+          .map(reg => reg.player)
+          .filter(player => player !== null);
+        setSelectedPlayers(playersForSeason);
+        
+        console.log(`🔄 Stats updated: ${selectedPlayersData.length} selected players`);
+      }
+    } catch (error) {
+      console.error("Error loading player stats:", error);
+    }
+  };
 
   useEffect(() => {
     const loadTryoutAndStats = async () => {
@@ -69,55 +130,9 @@ export default function TryoutDetailPage({ params }: PageProps) {
           setTryout(formattedTryout);
         }
 
-        // Load player stats for this tryout
-        const { data: registrationsData, error: registrationsError } =
-          await supabase
-            .from("tryout_registrations")
-            .select(
-              `
-            *,
-            player:players (
-              id,
-              first_name,
-              last_name,
-              email,
-              is_active
-            )
-          `
-            )
-            .eq("tryout_id", id);
-
-        if (registrationsError) {
-          console.error("Error loading registrations:", registrationsError);
-          return;
-        }
-
-        // Calculate stats and extract selected players
-        if (registrationsData) {
-          const totalRegistrations = registrationsData.length;
-          const selectedPlayersData = registrationsData.filter(
-            (reg) => reg.status === "confirmed"
-          );
-          const cutPlayers = registrationsData.filter(
-            (reg) => reg.status === "cancelled"
-          ).length;
-          const totalPlayers = registrationsData.filter(
-            (reg) => reg.status !== "cancelled"
-          ).length;
-
-          setStats({
-            totalPlayers,
-            selectedPlayers: selectedPlayersData.length,
-            cutPlayers,
-            totalRegistrations,
-          });
-
-          // Extract selected players for the modal
-          const playersForSeason = selectedPlayersData
-            .map(reg => reg.player)
-            .filter(player => player !== null);
-          setSelectedPlayers(playersForSeason);
-        }
+        // Load initial player stats
+        await loadPlayerStats(id);
+        
       } catch (error) {
         console.error("Error loading tryout:", error);
       } finally {
@@ -127,6 +142,15 @@ export default function TryoutDetailPage({ params }: PageProps) {
 
     loadTryoutAndStats();
   }, [params]);
+
+  // Handle tab change and reload stats when switching to overview
+  const handleTabChange = async (newTab: string) => {
+    setActiveTab(newTab);
+    if (newTab === "overview" && tryout) {
+      console.log("🔄 Reloading stats due to tab change to overview");
+      await loadPlayerStats(tryout.id);
+    }
+  };
 
   const getStatusColor = () => {
     if (!tryout) return "bg-gray-100 text-gray-800";
@@ -150,14 +174,14 @@ export default function TryoutDetailPage({ params }: PageProps) {
     }
   };
 
-  const handleEndTryout = async (regularSeasonData: any) => {
+  const handleEndTryout = async (regularSeasonData: RegularSeasonFormData) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
-      // 1. Create the regular season (new tryout with different purpose)
+      // 1. Create the regular season in the regular_seasons table
       const { data: newSeasonData, error: seasonError } = await supabase
-        .from("tryouts")
+        .from("regular_seasons")
         .insert({
           name: regularSeasonData.name,
           description: regularSeasonData.description,
@@ -167,25 +191,24 @@ export default function TryoutDetailPage({ params }: PageProps) {
           level: regularSeasonData.level,
           status: "active",
           coach_id: user.id,
-          // Mark as regular season vs tryout
-          metadata: { type: "regular_season", source_tryout_id: (await params).id }
         })
         .select()
         .single();
 
       if (seasonError) throw seasonError;
 
-      // 2. Add selected players to the new regular season
+      // 2. Add selected players to the regular_season_players table
       if (selectedPlayers.length > 0) {
-        const registrations = selectedPlayers.map(player => ({
-          tryout_id: newSeasonData.id,
+        const playerRegistrations = selectedPlayers.map(player => ({
+          regular_season_id: newSeasonData.id,
           player_id: player.id,
-          status: "confirmed"
+          status: "active", // Players start as active in regular season
+          notes: `Transferred from tryout: ${tryout?.name}`
         }));
 
         const { error: registrationError } = await supabase
-          .from("tryout_registrations")
-          .insert(registrations);
+          .from("regular_season_players")
+          .insert(playerRegistrations);
 
         if (registrationError) throw registrationError;
       }
@@ -198,7 +221,7 @@ export default function TryoutDetailPage({ params }: PageProps) {
 
       if (updateError) throw updateError;
 
-      // 4. Navigate back to tryouts list
+      // 4. Navigate back to tryouts list (or could navigate to new regular season)
       router.push("/coach-dashboard/regular-season");
     } catch (error) {
       console.error("Error ending tryout:", error);
@@ -267,7 +290,11 @@ export default function TryoutDetailPage({ params }: PageProps) {
             {/* End Tryout Button */}
             {tryout.status === "active" && (
               <Button
-                onClick={() => setIsEndModalOpen(true)}
+                onClick={async () => {
+                  console.log("🔄 Reloading stats before opening end tryout modal");
+                  await loadPlayerStats(tryout.id);
+                  setIsEndModalOpen(true);
+                }}
                 className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
               >
                 <CheckCircle className="h-4 w-4" />
@@ -312,7 +339,7 @@ export default function TryoutDetailPage({ params }: PageProps) {
       <div className="px-8 py-6">
         <Tabs
           value={activeTab}
-          onValueChange={setActiveTab}
+          onValueChange={handleTabChange}
           className="space-y-6"
         >
           <TabsList className="grid w-full grid-cols-2 bg-gray-100">

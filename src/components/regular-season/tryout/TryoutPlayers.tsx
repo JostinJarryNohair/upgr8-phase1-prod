@@ -15,12 +15,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
+
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -30,7 +25,6 @@ import {
   Users, 
   UserCheck, 
   UserX, 
-  MoreHorizontal,
   CheckCircle,
   XCircle,
   Trophy
@@ -138,29 +132,46 @@ export function TryoutPlayers({ tryoutId }: TryoutPlayersProps) {
     try {
       // Find the current registration
       const registration = registrations.find(reg => reg.player_id === playerId);
-      if (!registration) return;
+      if (!registration) {
+        console.error("Registration not found for player:", playerId);
+        return;
+      }
 
       const newStatus = registration.status === "cancelled" ? "confirmed" : "cancelled";
+      console.log(`🔄 Changing player ${playerId} from "${registration.status}" to "${newStatus}"`);
 
-      const { error } = await supabase
+      // Update in database with returned data
+      const { data: updatedData, error } = await supabase
         .from("tryout_registrations")
-        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .update({ 
+          status: newStatus,
+          updated_at: new Date().toISOString() 
+        })
         .eq("tryout_id", tryoutId)
-        .eq("player_id", playerId);
+        .eq("player_id", playerId)
+        .select(`
+          *,
+          player:players(*)
+        `)
+        .single();
 
       if (error) {
         console.error("Error updating registration status:", error);
         return;
       }
 
-      // Update local state
-      setRegistrations(prev =>
-        prev.map(reg =>
-          reg.player_id === playerId
-            ? { ...reg, status: newStatus as any }
-            : reg
-        )
-      );
+      if (updatedData) {
+        // Update local state with the returned data from database
+        const updatedRegistration = fromTryoutRegistrationDatabaseFormat(updatedData);
+        
+        setRegistrations(prev => {
+          const newRegistrations = prev.map(reg =>
+            reg.player_id === playerId ? updatedRegistration : reg
+          );
+          console.log("✅ Local state updated successfully");
+          return newRegistrations;
+        });
+      }
     } catch (error) {
       console.error("Error toggling cut status:", error);
     }
@@ -399,31 +410,26 @@ export function TryoutPlayers({ tryoutId }: TryoutPlayersProps) {
                     <PlayerStatusBadge registration={registration} />
                   </TableCell>
                   <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => handleToggleCut(player.id)}
-                          className={registration.status === "cancelled" ? "text-green-600" : "text-red-600"}
-                        >
-                          {registration.status === "cancelled" ? (
-                            <>
-                              <UserCheck className="mr-2 h-4 w-4" />
-                              Sélectionner
-                            </>
-                          ) : (
-                            <>
-                              <UserX className="mr-2 h-4 w-4" />
-                              Retrancher
-                            </>
-                          )}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    {registration.status === "cancelled" ? (
+                      <Button
+                        onClick={() => handleToggleCut(player.id)}
+                        size="sm"
+                        className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white h-6 px-2 py-1 text-xs"
+                      >
+                        <UserCheck className="h-3 w-3" />
+                        Sélectionner
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => handleToggleCut(player.id)}
+                        size="sm"
+                        variant="destructive"
+                        className="flex items-center gap-1 h-6 px-2 py-1 text-xs"
+                      >
+                        <UserX className="h-3 w-3" />
+                        Retrancher
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
                 );

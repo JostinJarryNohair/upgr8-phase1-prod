@@ -22,13 +22,13 @@ import {
   ArrowRight,
   CheckCircle
 } from "lucide-react";
-import { TryoutFormData, CampLevel } from "@/types/tryout";
+import { RegularSeasonFormData, CampLevel } from "@/types/regularSeason";
 import { useTranslation } from '@/hooks/useTranslation';
 
 interface EndTryoutModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onEndTryout: (regularSeasonData: TryoutFormData) => void;
+  onEndTryout: (regularSeasonData: RegularSeasonFormData) => void;
   selectedPlayers: Player[];
   tryoutName: string;
 }
@@ -81,7 +81,7 @@ export function EndTryoutModal({
   const nextYear = currentYear + 1;
   const defaultSeasonName = `Saison Régulière ${nextYear}`;
   
-  const [seasonData, setSeasonData] = useState<TryoutFormData>({
+  const [seasonData, setSeasonData] = useState<RegularSeasonFormData>({
     name: defaultSeasonName,
     description: `Saison régulière formée à partir des sélections de: ${tryoutName}`,
     status: "active",

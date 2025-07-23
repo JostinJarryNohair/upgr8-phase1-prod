@@ -195,7 +195,7 @@ export function TryoutManagement({
                   <Button
                     variant="outline"
                     className="w-full"
-                    onClick={() => window.location.href = `/coach-dashboard/regular-season/${tryout.id}`}
+                    onClick={() => window.location.href = `/coach-dashboard/regular-season/tryout/${tryout.id}`}
                   >
                     Gérer les joueurs
                   </Button>

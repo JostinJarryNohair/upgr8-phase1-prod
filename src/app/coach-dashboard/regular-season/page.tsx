@@ -1,34 +1,132 @@
 "use client";
 
-export default function RegularSeasonPage() {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold">Gestion de la saison régulière</h1>
-            <div className="flex items-center space-x-4">
-              <p className="text-gray-600">Page en développement</p>
-            </div>
-          </div>
-        </div>
+import { useState, useEffect } from "react";
+import { Tryout, TryoutFormData } from "@/types/tryout";
+import { TryoutManagement } from "@/components/regular-season/TryoutManagement";
+import { supabase } from "@/lib/supabase/client";
+import { fromDatabaseFormat, toDatabaseFormat } from "@/lib/mappers/tryoutMapper";
+import { useTranslation } from '@/hooks/useTranslation';
 
-        {/* Content */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Gestion de la saison régulière
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Cette fonctionnalité sera bientôt disponible.
-            </p>
-            <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-              <span className="text-2xl">📅</span>
-            </div>
-          </div>
-        </div>
+export default function RegularSeasonPage() {
+  const { t } = useTranslation();
+  const [tryouts, setTryouts] = useState<Tryout[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load real tryouts from database
+  useEffect(() => {
+    const loadTryouts = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        console.error(t('common.notAuthenticated'));
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("tryouts")
+        .select("*")
+        .eq("coach_id", user.id) // Only this coach's tryouts
+        .order("created_at", { ascending: false }); // Newest first
+
+      if (error) {
+        console.error('Error loading tryouts:', error);
+      } else {
+        // Convert all tryouts from database format
+        const formattedTryouts = (data || []).map(fromDatabaseFormat);
+        setTryouts(formattedTryouts);
+      }
+
+      setLoading(false);
+    };
+
+    loadTryouts();
+  }, [t]);
+
+  const handleAddTryout = async (newTryout: TryoutFormData) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      console.error(t('common.notAuthenticated'));
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("tryouts")
+      .insert([
+        {
+          ...toDatabaseFormat(newTryout),
+          coach_id: user.id,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding tryout:', error);
+      return;
+    }
+
+    if (data) {
+      // Convert raw DB data to frontend format
+      const formattedTryout = fromDatabaseFormat(data);
+      setTryouts([formattedTryout, ...tryouts]);
+    }
+  };
+
+  const handleUpdateTryout = async (
+    id: string,
+    updates: Partial<TryoutFormData>
+  ) => {
+    const { data, error } = await supabase
+      .from("tryouts")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating tryout:', error);
+      return;
+    }
+
+    if (data) {
+      // Convert DB format to frontend format
+      const formattedTryout = fromDatabaseFormat(data);
+      setTryouts(tryouts.map((tryout) => (tryout.id === id ? formattedTryout : tryout)));
+    }
+  };
+
+  const handleDeleteTryout = async (id: string) => {
+    const { error } = await supabase.from("tryouts").delete().eq("id", id);
+
+    if (error) {
+      console.error('Error deleting tryout:', error);
+      return;
+    }
+
+    setTryouts(tryouts.filter((tryout) => tryout.id !== id));
+  };
+
+  // Show loading state while fetching data
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-64">
+        <div className="text-gray-600">{t('tryouts.loadingTryouts') || 'Chargement des tryouts...'}</div>
       </div>
-    </div>
+    );
+  }
+
+  return (
+    <TryoutManagement
+      tryouts={tryouts}
+      onAddTryout={handleAddTryout}
+      onUpdateTryout={handleUpdateTryout}
+      onDeleteTryout={handleDeleteTryout}
+    />
   );
 } 

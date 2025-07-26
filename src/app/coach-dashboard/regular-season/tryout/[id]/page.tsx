@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, MapPin, Users, ArrowLeft, Eye, Trophy, CheckCircle } from "lucide-react";
+import { Calendar, MapPin, Users, ArrowLeft, Eye, CheckCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,7 +30,7 @@ export default function TryoutDetailPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
   const [isEndModalOpen, setIsEndModalOpen] = useState(false);
-  const [selectedPlayers, setSelectedPlayers] = useState<any[]>([]);
+  const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [stats, setStats] = useState<TryoutStats>({
     totalPlayers: 0,
     selectedPlayers: 0,

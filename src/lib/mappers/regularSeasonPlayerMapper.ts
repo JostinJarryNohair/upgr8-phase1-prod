@@ -1,12 +1,11 @@
 import {
-  RegularSeasonPlayer,
   RegularSeasonPlayerFormData,
   RegularSeasonPlayerWithDetails,
   RegularSeasonPlayerStatus,
 } from "@/types/regularSeasonPlayer";
 
 // Map database row to frontend format (with joined data)
-export function fromDatabaseFormat(dbRow: any): RegularSeasonPlayerWithDetails {
+export function fromDatabaseFormat(dbRow: Record<string, unknown>): RegularSeasonPlayerWithDetails {
   return {
     id: dbRow.id,
     regular_season_id: dbRow.regular_season_id,
@@ -49,7 +48,7 @@ export function fromDatabaseFormat(dbRow: any): RegularSeasonPlayerWithDetails {
 }
 
 // Map frontend form data to database format (for Supabase insert/update)
-export function toDatabaseFormat(formData: RegularSeasonPlayerFormData): any {
+export function toDatabaseFormat(formData: RegularSeasonPlayerFormData): Record<string, unknown> {
   return {
     regular_season_id: formData.regular_season_id,
     player_id: formData.player_id,

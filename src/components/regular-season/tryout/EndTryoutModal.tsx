@@ -23,8 +23,6 @@ import {
   CheckCircle
 } from "lucide-react";
 import { RegularSeasonFormData, CampLevel } from "@/types/regularSeason";
-import { useTranslation } from '@/hooks/useTranslation';
-
 interface EndTryoutModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -72,7 +70,6 @@ export function EndTryoutModal({
   selectedPlayers,
   tryoutName 
 }: EndTryoutModalProps) {
-  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'confirm' | 'create-season'>('confirm');
   
@@ -159,7 +156,7 @@ export function EndTryoutModal({
                   <Trophy className="h-8 w-8 text-green-600" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Terminer "{tryoutName}"
+                  Terminer &quot;{tryoutName}&quot;
                 </h3>
                 <p className="text-gray-600">
                   Vous êtes sur le point de terminer ce tryout et créer une équipe de saison régulière 

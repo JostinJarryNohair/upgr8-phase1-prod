@@ -21,8 +21,6 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { useTranslation } from '@/hooks/useTranslation';
-
 interface TryoutManagementProps {
   tryouts: Tryout[];
   onAddTryout: (tryout: TryoutFormData) => void;
@@ -54,7 +52,6 @@ export function TryoutManagement({
   onUpdateTryout,
   onDeleteTryout,
 }: TryoutManagementProps) {
-  const { t } = useTranslation();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingTryout, setEditingTryout] = useState<Tryout | null>(null);
 

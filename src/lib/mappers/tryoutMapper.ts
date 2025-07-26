@@ -1,7 +1,7 @@
 import { Tryout, TryoutFormData, TryoutStatus } from "@/types/tryout";
 
 // Map database row to frontend format
-export function fromDatabaseFormat(dbRow: any): Tryout {
+export function fromDatabaseFormat(dbRow: Record<string, unknown>): Tryout {
   return {
     id: dbRow.id,
     coach_id: dbRow.coach_id,
@@ -18,7 +18,7 @@ export function fromDatabaseFormat(dbRow: any): Tryout {
 }
 
 // Map frontend form data to database format (for Supabase insert/update)
-export function toDatabaseFormat(formData: TryoutFormData): any {
+export function toDatabaseFormat(formData: TryoutFormData): Record<string, unknown> {
   return {
     name: formData.name,
     description: formData.description || null,

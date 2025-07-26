@@ -16,8 +16,7 @@ import {
   ArrowRight,
   Zap,
   Target,
-  BarChart3,
-  Globe
+  BarChart3
 } from "lucide-react";
 import { useTranslation } from '@/hooks/useTranslation';
 import { LanguageSwitcher } from '@/components/common/LanguageSwitcher';

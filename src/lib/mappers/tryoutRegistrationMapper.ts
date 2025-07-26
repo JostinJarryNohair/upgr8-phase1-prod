@@ -1,12 +1,11 @@
 import { 
-  TryoutRegistration, 
   TryoutRegistrationFormData, 
   TryoutRegistrationWithDetails,
   RegistrationStatus 
 } from "@/types/tryoutRegistration";
 
 // Map database row to frontend format
-export function fromDatabaseFormat(dbRow: any): TryoutRegistrationWithDetails {
+export function fromDatabaseFormat(dbRow: Record<string, unknown>): TryoutRegistrationWithDetails {
   return {
     id: dbRow.id,
     tryout_id: dbRow.tryout_id,
@@ -48,7 +47,7 @@ export function fromDatabaseFormat(dbRow: any): TryoutRegistrationWithDetails {
 }
 
 // Map frontend form data to database format (for Supabase insert/update)
-export function toDatabaseFormat(formData: TryoutRegistrationFormData): any {
+export function toDatabaseFormat(formData: TryoutRegistrationFormData): Record<string, unknown> {
   return {
     tryout_id: formData.tryout_id,
     player_id: formData.player_id,

@@ -13,8 +13,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { X, Plus } from "lucide-react";
-import { useTranslation } from '@/hooks/useTranslation';
-
 interface AddTryoutModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -36,7 +34,6 @@ const CAMP_LEVELS: { value: CampLevel; label: string }[] = [
 ];
 
 export function AddTryoutModal({ isOpen, onClose, onAdd }: AddTryoutModalProps) {
-  const { t } = useTranslation();
   const [formData, setFormData] = useState<TryoutFormData>({
     name: "",
     description: "",

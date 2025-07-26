@@ -26,13 +26,11 @@ import {
   UserCheck, 
   UserX, 
   CheckCircle,
-  XCircle,
-  Trophy
+  XCircle
 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { fromDatabaseFormat as fromTryoutRegistrationDatabaseFormat } from "@/lib/mappers/tryoutRegistrationMapper";
-import { fromDatabaseFormat as fromPlayerDatabaseFormat, toDatabaseFormat as toPlayerDatabaseFormat } from "@/lib/mappers/playerMapper";
-import { useTranslation } from '@/hooks/useTranslation';
+import { toDatabaseFormat as toPlayerDatabaseFormat } from "@/lib/mappers/playerMapper";
 
 interface TryoutPlayersProps {
   tryoutId: string;
@@ -57,10 +55,8 @@ const getPositionInitial = (position?: string) => {
 };
 
 export function TryoutPlayers({ tryoutId }: TryoutPlayersProps) {
-  const { t } = useTranslation();
   const [registrations, setRegistrations] = useState<TryoutRegistrationWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
-  const [addingPlayer, setAddingPlayer] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [positionFilter, setPositionFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -177,10 +173,8 @@ export function TryoutPlayers({ tryoutId }: TryoutPlayersProps) {
     }
   };
 
-  const handleAddPlayer = async (playerData: any) => {
+  const handleAddPlayer = async (playerData: unknown) => {
     try {
-      setAddingPlayer(true);
-
       // Create the player first
       const { data: playerDbData, error: playerError } = await supabase
         .from("players")
@@ -218,8 +212,6 @@ export function TryoutPlayers({ tryoutId }: TryoutPlayersProps) {
 
     } catch (error) {
       console.error("Error adding player:", error);
-    } finally {
-      setAddingPlayer(false);
     }
   };
 

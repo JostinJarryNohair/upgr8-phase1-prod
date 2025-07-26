@@ -202,6 +202,69 @@
     "subtitle": "Page under development",
     "description": "This feature will be available soon."
   },
+  "waitingList": {
+    "comingSoon": "Coming Soon",
+    "launchDate": "Launching Early 2025",
+    "revolutionaryPlatform": "🚀 Revolutionary Hockey Platform",
+    "title": "The Future of",
+    "titleHighlight": "Hockey Development",
+    "titleSuffix": "Is Coming",
+    "subtitle": "Join thousands of coaches, players, and scouts getting ready for the most comprehensive hockey management platform ever built. Be first in line when we launch.",
+    "rolePrompt": "I am a:",
+    "roles": {
+      "coach": "Coach",
+      "coachDescription": "Manage camps & develop players",
+      "player": "Player", 
+      "playerDescription": "Build your hockey profile",
+      "scout": "Scout",
+      "scoutDescription": "Discover top talent",
+      "parent": "Parent",
+      "parentDescription": "Support your player's journey"
+    },
+    "emailPlaceholder": "Enter your email address",
+    "joinWaitingList": "Join Waiting List",
+    "privacyNote": "🔒 We respect your privacy. Unsubscribe at any time.",
+    "successTitle": "Welcome to the Team!",
+    "successMessage": "You're now on the exclusive waiting list. We'll notify you as soon as UpGr8 launches!",
+    "successBenefits": {
+      "earlyAccess": "✅ Early access guaranteed",
+      "specialPricing": "✅ Special launch pricing", 
+      "premiumFeatures": "✅ Premium features included"
+    },
+    "socialProof": "Trusted by hockey professionals across North America",
+    "stats": {
+      "coachesRegistered": "Coaches Registered",
+      "playersSignedUp": "Players Signed Up",
+      "scoutsWaiting": "Scouts Waiting",
+      "organizations": "Organizations"
+    },
+    "featuresTitle": "What Makes UpGr8 Different?",
+    "featuresSubtitle": "We're building the most comprehensive hockey platform with features that actually matter to your success on and off the ice.",
+    "features": {
+      "smartCampManagement": {
+        "title": "Smart Camp Management",
+        "description": "Create, manage and track hockey camps with intelligent scheduling and player management tools."
+      },
+      "performanceAnalytics": {
+        "title": "Performance Analytics", 
+        "description": "Advanced player evaluation system with real-time stats tracking and development insights."
+      },
+      "connectedCommunity": {
+        "title": "Connected Community",
+        "description": "Seamlessly connect coaches, players, scouts and parents in one unified platform."
+      },
+      "aiPoweredInsights": {
+        "title": "AI-Powered Insights",
+        "description": "Get personalized recommendations and insights to accelerate player development."
+      }
+    },
+    "finalCtaTitle": "Don't Miss Out on the Hockey Revolution",
+    "finalCtaSubtitle": "Early access members get exclusive benefits, special pricing, and premium features from day one. Join over {count} hockey professionals already on the list.",
+    "secureSpotNow": "Secure Your Spot Now",
+    "footerDescription": "The complete platform for modern hockey development.",
+    "footerContact": "Questions? Email us at",
+    "footerCopyright": "© 2024 UpGr8. All rights reserved."
+  },
   "validation": {
     "required": "This field is required",
     "invalidEmail": "Invalid email format",

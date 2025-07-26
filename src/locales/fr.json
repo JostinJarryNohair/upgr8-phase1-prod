@@ -201,6 +201,69 @@
     "subtitle": "Page en développement",
     "description": "Cette fonctionnalité sera bientôt disponible."
   },
+  "waitingList": {
+    "comingSoon": "Bientôt disponible",
+    "launchDate": "Lancement début 2025",
+    "revolutionaryPlatform": "🚀 Plateforme révolutionnaire de hockey",
+    "title": "L'avenir du",
+    "titleHighlight": "développement hockey",
+    "titleSuffix": "arrive bientôt",
+    "subtitle": "Rejoignez des milliers d'entraîneurs, joueurs et dépisteurs qui se préparent pour la plateforme de gestion hockey la plus complète jamais construite. Soyez parmi les premiers lors du lancement.",
+    "rolePrompt": "Je suis un(e) :",
+    "roles": {
+      "coach": "Entraîneur",
+      "coachDescription": "Gérer les camps et développer les joueurs",
+      "player": "Joueur", 
+      "playerDescription": "Construire votre profil hockey",
+      "scout": "Dépisteur",
+      "scoutDescription": "Découvrir les meilleurs talents",
+      "parent": "Parent",
+      "parentDescription": "Soutenir le parcours de votre joueur"
+    },
+    "emailPlaceholder": "Entrez votre adresse courriel",
+    "joinWaitingList": "Rejoindre la liste d'attente",
+    "privacyNote": "🔒 Nous respectons votre vie privée. Désabonnez-vous à tout moment.",
+    "successTitle": "Bienvenue dans l'équipe !",
+    "successMessage": "Vous êtes maintenant sur la liste d'attente exclusive. Nous vous aviserons dès qu'UpGr8 sera lancé !",
+    "successBenefits": {
+      "earlyAccess": "✅ Accès anticipé garanti",
+      "specialPricing": "✅ Prix de lancement spécial",
+      "premiumFeatures": "✅ Fonctionnalités premium incluses"
+    },
+    "socialProof": "Fait confiance par les professionnels du hockey à travers l'Amérique du Nord",
+    "stats": {
+      "coachesRegistered": "Entraîneurs inscrits",
+      "playersSignedUp": "Joueurs enregistrés",
+      "scoutsWaiting": "Dépisteurs en attente",
+      "organizations": "Organisations"
+    },
+    "featuresTitle": "Qu'est-ce qui rend UpGr8 différent ?",
+    "featuresSubtitle": "Nous construisons la plateforme hockey la plus complète avec des fonctionnalités qui comptent vraiment pour votre succès sur et hors glace.",
+    "features": {
+      "smartCampManagement": {
+        "title": "Gestion intelligente des camps",
+        "description": "Créez, gérez et suivez les camps de hockey avec des outils intelligents de planification et de gestion des joueurs."
+      },
+      "performanceAnalytics": {
+        "title": "Analytiques de performance",
+        "description": "Système d'évaluation avancé des joueurs avec suivi des statistiques en temps réel et aperçus de développement."
+      },
+      "connectedCommunity": {
+        "title": "Communauté connectée",
+        "description": "Connectez facilement entraîneurs, joueurs, dépisteurs et parents dans une plateforme unifiée."
+      },
+      "aiPoweredInsights": {
+        "title": "Insights alimentés par IA",
+        "description": "Obtenez des recommandations personnalisées et des insights pour accélérer le développement des joueurs."
+      }
+    },
+    "finalCtaTitle": "Ne manquez pas la révolution hockey",
+    "finalCtaSubtitle": "Les membres à accès anticipé obtiennent des avantages exclusifs, des prix spéciaux et des fonctionnalités premium dès le jour un. Rejoignez plus de {count} professionnels du hockey déjà sur la liste.",
+    "secureSpotNow": "Réservez votre place maintenant",
+    "footerDescription": "La plateforme complète pour le développement hockey moderne.",
+    "footerContact": "Questions ? Écrivez-nous à",
+    "footerCopyright": "© 2024 UpGr8. Tous droits réservés."
+  },
   "validation": {
     "required": "Ce champ est requis",
     "invalidEmail": "Format d'email invalide",

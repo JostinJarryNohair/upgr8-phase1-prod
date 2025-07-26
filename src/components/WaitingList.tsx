@@ -95,47 +95,47 @@ export default function WaitingList() {
     {
       id: "coach",
       label: t('waitingList.roles.coach'),
-      icon: <Users className="w-5 h-5" />,
+      icon: <Users className="w-4 h-4 sm:w-5 sm:h-5" />,
       description: t('waitingList.roles.coachDescription')
     },
     {
       id: "player",
       label: t('waitingList.roles.player'),
-      icon: <Star className="w-5 h-5" />,
+      icon: <Star className="w-4 h-4 sm:w-5 sm:h-5" />,
       description: t('waitingList.roles.playerDescription')
     },
     {
       id: "scout", 
       label: t('waitingList.roles.scout'),
-      icon: <Search className="w-5 h-5" />,
+      icon: <Search className="w-4 h-4 sm:w-5 sm:h-5" />,
       description: t('waitingList.roles.scoutDescription')
     },
     {
       id: "parent",
       label: t('waitingList.roles.parent'),
-      icon: <Trophy className="w-5 h-5" />,
+      icon: <Trophy className="w-4 h-4 sm:w-5 sm:h-5" />,
       description: t('waitingList.roles.parentDescription')
     }
   ];
 
   const features = [
     {
-      icon: <Target className="w-6 h-6" />,
+      icon: <Target className="w-5 h-5 sm:w-6 sm:h-6" />,
       title: t('waitingList.features.smartCampManagement.title'),
       description: t('waitingList.features.smartCampManagement.description')
     },
     {
-      icon: <BarChart3 className="w-6 h-6" />,
+      icon: <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6" />,
       title: t('waitingList.features.performanceAnalytics.title'),
       description: t('waitingList.features.performanceAnalytics.description')
     },
     {
-      icon: <Users className="w-6 h-6" />,
+      icon: <Users className="w-5 h-5 sm:w-6 sm:h-6" />,
       title: t('waitingList.features.connectedCommunity.title'),
       description: t('waitingList.features.connectedCommunity.description')
     },
     {
-      icon: <Zap className="w-6 h-6" />,
+      icon: <Zap className="w-5 h-5 sm:w-6 sm:h-6" />,
       title: t('waitingList.features.aiPoweredInsights.title'),
       description: t('waitingList.features.aiPoweredInsights.description')
     }
@@ -145,22 +145,23 @@ export default function WaitingList() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center h-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex justify-between items-center h-14 sm:h-16">
           <div className="flex items-center">
             <Image
               src="/logo.png"
               alt="UpGr8 Logo"
-              width={120}
-              height={60}
+              width={100}
+              height={50}
+              className="w-20 sm:w-[120px] h-auto"
               priority
             />
-            <Badge className="ml-3 bg-red-100 text-red-600 text-xs">
+            <Badge className="ml-2 sm:ml-3 bg-red-100 text-red-600 text-xs px-2 py-1">
               {t('waitingList.comingSoon')}
             </Badge>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <LanguageSwitcher />
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-600">
               <Clock className="w-4 h-4" />
               <span>{t('waitingList.launchDate')}</span>
             </div>
@@ -169,47 +170,47 @@ export default function WaitingList() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-br from-red-50 via-white to-gray-50 overflow-hidden">
+      <section className="relative py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-red-50 via-white to-gray-50 overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDYwIDAgTCAwIDAgMCA2MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZjMzNTQxIiBzdHJva2Utd2lkdGg9IjAuNSIgb3BhY2l0eT0iMC4xIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30"></div>
         
-        <div className="relative max-w-6xl mx-auto px-6 text-center">
-          <Badge className="bg-red-600 text-white mb-6 px-4 py-2 text-sm font-medium">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 text-center">
+          <Badge className="bg-red-600 text-white mb-4 sm:mb-6 px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium">
             {t('waitingList.revolutionaryPlatform')}
           </Badge>
           
-          <h1 className="text-6xl font-bold text-gray-900 mb-6 leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight px-2">
             {t('waitingList.title')} <br />
             <span className="text-red-600">{t('waitingList.titleHighlight')}</span> <br />
             {t('waitingList.titleSuffix')}
           </h1>
           
-          <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl text-gray-600 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-4">
             {t('waitingList.subtitle')}
           </p>
 
           {/* Waiting List Form */}
           {!isSubmitted ? (
-            <div className="max-w-2xl mx-auto">
-              <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="max-w-2xl mx-auto px-4">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 {/* Role Selection */}
                 <div>
-                  <p className="text-sm font-medium text-gray-700 mb-3">{t('waitingList.rolePrompt')}</p>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <p className="text-sm font-medium text-gray-700 mb-3 px-2">{t('waitingList.rolePrompt')}</p>
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     {roles.map((roleOption) => (
                       <button
                         key={roleOption.id}
                         type="button"
                         onClick={() => setRole(roleOption.id)}
-                        className={`p-4 rounded-xl border-2 transition-all duration-200 hover:shadow-md ${
+                        className={`p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 hover:shadow-md ${
                           role === roleOption.id
                             ? "border-red-500 bg-red-50 text-red-700"
                             : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
                         }`}
                       >
-                        <div className="flex flex-col items-center space-y-2">
+                        <div className="flex flex-col items-center space-y-1 sm:space-y-2">
                           {roleOption.icon}
-                          <span className="font-medium text-sm">{roleOption.label}</span>
-                          <span className="text-xs text-gray-500 text-center leading-tight">
+                          <span className="font-medium text-xs sm:text-sm">{roleOption.label}</span>
+                          <span className="text-xs text-gray-500 text-center leading-tight hidden sm:block">
                             {roleOption.description}
                           </span>
                         </div>
@@ -219,50 +220,53 @@ export default function WaitingList() {
                 </div>
 
                 {/* Email Input */}
-                <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex flex-col gap-3">
                   <div className="flex-1">
                     <Input
                       type="email"
                       placeholder={t('waitingList.emailPlaceholder')}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="h-14 text-lg border-gray-300 focus:border-red-500 focus:ring-red-500"
+                      className="h-12 sm:h-14 text-base sm:text-lg border-gray-300 focus:border-red-500 focus:ring-red-500"
                       required
                     />
                   </div>
                   <Button
                     type="submit"
                     disabled={!email || !role || isLoading}
-                    className="h-14 px-8 bg-red-600 hover:bg-red-700 text-white font-semibold text-lg"
+                    className="h-12 sm:h-14 px-6 sm:px-8 bg-red-600 hover:bg-red-700 text-white font-semibold text-base sm:text-lg"
                   >
                     {isLoading ? (
-                      <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <>
-                        {t('waitingList.joinWaitingList')}
-                        <ArrowRight className="w-5 h-5 ml-2" />
+                        <span className="hidden sm:inline">{t('waitingList.joinWaitingList')}</span>
+                        <span className="sm:hidden">{t('waitingList.joinWaitingList')}</span>
+                        <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
                       </>
                     )}
                   </Button>
                 </div>
               </form>
 
-              <p className="text-sm text-gray-500 mt-4">
+              <p className="text-xs sm:text-sm text-gray-500 mt-3 sm:mt-4 px-2">
                 {t('waitingList.privacyNote')}
               </p>
             </div>
           ) : (
-            <div className="max-w-2xl mx-auto bg-green-50 border border-green-200 rounded-2xl p-8">
+            <div className="max-w-2xl mx-auto bg-green-50 border border-green-200 rounded-2xl p-6 sm:p-8 mx-4">
               <div className="flex items-center justify-center mb-4">
-                <CheckCircle className="w-12 h-12 text-green-500" />
+                <CheckCircle className="w-10 h-10 sm:w-12 sm:h-12 text-green-500" />
               </div>
-              <h3 className="text-2xl font-bold text-green-800 mb-2">{t('waitingList.successTitle')}</h3>
-              <p className="text-green-700 mb-4">
+              <h3 className="text-xl sm:text-2xl font-bold text-green-800 mb-2">{t('waitingList.successTitle')}</h3>
+              <p className="text-green-700 mb-4 text-sm sm:text-base">
                 {t('waitingList.successMessage')}
               </p>
-              <div className="flex items-center justify-center space-x-4 text-sm text-green-600">
+              <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm text-green-600">
                 <span>{t('waitingList.successBenefits.earlyAccess')}</span>
+                <span className="hidden sm:inline">•</span>
                 <span>{t('waitingList.successBenefits.specialPricing')}</span>
+                <span className="hidden sm:inline">•</span>
                 <span>{t('waitingList.successBenefits.premiumFeatures')}</span>
               </div>
             </div>
@@ -271,56 +275,56 @@ export default function WaitingList() {
       </section>
 
       {/* Social Proof */}
-      <section className="py-16 bg-white border-b">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <p className="text-gray-600 mb-8">{t('waitingList.socialProof')}</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center opacity-60">
+      <section className="py-12 sm:py-16 bg-white border-b">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
+          <p className="text-gray-600 mb-6 sm:mb-8 text-sm sm:text-base">{t('waitingList.socialProof')}</p>
+          <div className="grid grid-cols-2 gap-4 sm:gap-8 items-center opacity-60">
             <div className="text-center">
-              <div className="text-3xl font-bold text-red-600">{stats.coaches}+</div>
-              <div className="text-sm text-gray-600">{t('waitingList.stats.coachesRegistered')}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-red-600">{stats.coaches}+</div>
+              <div className="text-xs sm:text-sm text-gray-600">{t('waitingList.stats.coachesRegistered')}</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-red-600">{stats.players.toLocaleString()}+</div>
-              <div className="text-sm text-gray-600">{t('waitingList.stats.playersSignedUp')}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-red-600">{stats.players.toLocaleString()}+</div>
+              <div className="text-xs sm:text-sm text-gray-600">{t('waitingList.stats.playersSignedUp')}</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-red-600">{stats.scouts}+</div>
-              <div className="text-sm text-gray-600">{t('waitingList.stats.scoutsWaiting')}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-red-600">{stats.scouts}+</div>
+              <div className="text-xs sm:text-sm text-gray-600">{t('waitingList.stats.scoutsWaiting')}</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-red-600">{Math.floor(stats.total / 25)}+</div>
-              <div className="text-sm text-gray-600">{t('waitingList.stats.organizations')}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-red-600">{Math.floor(stats.total / 25)}+</div>
+              <div className="text-xs sm:text-sm text-gray-600">{t('waitingList.stats.organizations')}</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Preview */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+      <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
               {t('waitingList.featuresTitle')}
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
               {t('waitingList.featuresSubtitle')}
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
             {features.map((feature, index) => (
-              <div key={index} className="bg-white rounded-2xl p-8 shadow-sm border hover:shadow-md transition-shadow">
-                <div className="flex items-start space-x-4">
-                  <div className="bg-red-100 rounded-xl p-3 flex-shrink-0">
+              <div key={index} className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border hover:shadow-md transition-shadow">
+                <div className="flex items-start space-x-3 sm:space-x-4">
+                  <div className="bg-red-100 rounded-xl p-2 sm:p-3 flex-shrink-0">
                     <div className="text-red-600">
                       {feature.icon}
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
                       {feature.title}
                     </h3>
-                    <p className="text-gray-600 leading-relaxed">
+                    <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                       {feature.description}
                     </p>
                   </div>
@@ -332,12 +336,12 @@ export default function WaitingList() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-20 bg-red-600 text-white">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold mb-4">
+      <section className="py-12 sm:py-16 lg:py-20 bg-red-600 text-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">
             {t('waitingList.finalCtaTitle')}
           </h2>
-          <p className="text-xl mb-8 text-red-100">
+          <p className="text-lg sm:text-xl mb-6 sm:mb-8 text-red-100 px-4">
             {t('waitingList.finalCtaSubtitle', { count: stats.total })}
           </p>
           
@@ -346,9 +350,9 @@ export default function WaitingList() {
               <Button
                 onClick={() => document.querySelector('form')?.scrollIntoView({ behavior: 'smooth' })}
                 size="lg"
-                className="bg-white text-red-600 hover:bg-red-50 font-semibold"
+                className="bg-white text-red-600 hover:bg-red-50 font-semibold text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4"
               >
-                <Mail className="w-5 h-5 mr-2" />
+                <Mail className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 {t('waitingList.secureSpotNow')}
               </Button>
             </div>
@@ -357,23 +361,23 @@ export default function WaitingList() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-12 px-6">
+      <footer className="bg-gray-900 text-gray-400 py-8 sm:py-12 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto text-center">
           <Image
             src="/logo.png"
             alt="UpGr8 Logo"
-            width={120}
-            height={60}
-            className="mx-auto mb-4 opacity-75"
+            width={100}
+            height={50}
+            className="mx-auto mb-4 opacity-75 w-20 sm:w-[120px] h-auto"
           />
-          <p className="mb-4">{t('waitingList.footerDescription')}</p>
-          <p className="text-sm">
+          <p className="mb-4 text-sm sm:text-base px-4">{t('waitingList.footerDescription')}</p>
+          <p className="text-xs sm:text-sm px-4">
             {t('waitingList.footerContact')}{" "}
             <a href="mailto:hello@upgr8.com" className="text-red-400 hover:text-red-300">
               hello@upgr8.com
             </a>
           </p>
-          <div className="mt-8 text-sm border-t border-gray-800 pt-6">
+          <div className="mt-6 sm:mt-8 text-xs sm:text-sm border-t border-gray-800 pt-4 sm:pt-6">
             {t('waitingList.footerCopyright')}
           </div>
         </div>

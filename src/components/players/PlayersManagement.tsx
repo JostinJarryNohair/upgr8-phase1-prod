@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Player, PlayerFormData } from "@/types/player";
 import { Camp } from "@/types/camp";
 import { CampRegistrationWithDetails } from "@/types/campRegistration";
@@ -73,6 +74,7 @@ export function PlayersManagement({
   onDeletePlayer,
   onImportPlayers,
 }: PlayersManagementProps) {
+  const router = useRouter();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -150,6 +152,10 @@ export function PlayersManagement({
 
   const handleManageRegistrations = (player: Player) => {
     setManagingRegistrations(player);
+  };
+
+  const handleViewProfile = (playerId: string) => {
+    router.push(`/coach-dashboard/players/${playerId}`);
   };
 
   const handleImportComplete = (importedPlayers: Player[]) => {
@@ -420,7 +426,10 @@ export function PlayersManagement({
                               {getInitials(player.first_name, player.last_name)}
                             </div>
                             <div>
-                              <div className="font-medium text-gray-900">
+                              <div 
+                                className="font-medium text-gray-900 cursor-pointer hover:text-blue-600 transition-colors"
+                                onClick={() => handleViewProfile(player.id)}
+                              >
                                 {player.first_name} {player.last_name}
                               </div>
                               <div className="text-sm text-gray-500">
@@ -487,7 +496,10 @@ export function PlayersManagement({
                                 <Edit className="w-4 h-4 mr-2" />
                                 Modifier
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="text-gray-700 hover:bg-gray-100">
+                              <DropdownMenuItem 
+                                onClick={() => handleViewProfile(player.id)}
+                                className="text-gray-700 hover:bg-gray-100"
+                              >
                                 <Eye className="w-4 h-4 mr-2" />
                                 Voir profil
                               </DropdownMenuItem>

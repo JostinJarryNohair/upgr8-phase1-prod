@@ -1,0 +1,241 @@
+# UpGr8 Platform - Development Rules & Roadmap
+
+## 🏗️ **Codebase Architecture Analysis**
+
+### **Tech Stack & Dependencies**
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript with strict configuration
+- **Styling**: Tailwind CSS v4 with custom design system
+- **Database**: Supabase (PostgreSQL) with real-time capabilities
+- **UI Components**: Radix UI primitives with custom shadcn/ui components
+- **Internationalization**: i18next with French/English support
+- **Forms**: React Hook Form with Zod validation
+- **Icons**: Lucide React
+
+### **Project Structure Strengths**
+✅ **Clean Architecture**: Well-organized folder structure following Next.js App Router conventions
+✅ **Type Safety**: Comprehensive TypeScript types generated from Supabase schema
+✅ **Component Design**: Modular, reusable components with proper separation of concerns
+✅ **Internationalization**: Proper i18n setup with fallback to French
+✅ **Database Design**: Well-structured Supabase schema with proper relationships
+
+### **Key Features Implemented**
+- **Multi-role Dashboard**: Coach, Player, and Scout dashboards
+- **Camp Management**: Full CRUD operations for hockey camps
+- **Player Management**: Player profiles, registrations, and evaluations
+- **Regular Season Management**: Season planning and player tracking
+- **Tryout System**: Tryout management and player registration
+- **Waiting List**: Landing page with email collection
+- **Responsive Design**: Mobile-first approach with Tailwind CSS
+
+## 🎯 **Current Development Status**
+
+### **Completed Features** ✅
+1. **Database Foundation**: Complete Supabase schema with proper relationships
+2. **Landing Page**: Waiting list with email collection and statistics
+3. **Dashboard Structure**: Multi-role dashboard layouts with navigation
+4. **Camp Management**: Basic camp CRUD operations
+5. **Player Management**: Player profiles and basic operations
+6. **Internationalization**: French/English support throughout
+7. **UI Component Library**: Consistent design system with shadcn/ui
+
+### **In Progress** 🔄
+1. **Add Player to Camp**: Modal for adding players to camps (see add-player.md)
+2. **Real-time Data Integration**: Connecting components to live database
+
+## 🚀 **Priority Development Tasks**
+
+### **Phase 1: Core Functionality (Immediate)**
+1. **Authentication & Authorization**
+   - [ ] Implement Supabase Auth guards on dashboard routes
+   - [ ] Add role-based access control (Coach/Player/Scout)
+   - [ ] Session management and persistence
+   - [ ] Protected route middleware
+
+2. **Add Player to Camp Feature**
+   - [ ] Create AddPlayerModal component
+   - [ ] Implement "Add New Player" flow
+   - [ ] Implement "Add Existing Player" search
+   - [ ] Database integration for player registration
+   - [ ] Error handling and validation
+
+3. **Camp Player Management**
+   - [ ] Cut/uncut functionality with database updates
+   - [ ] Player evaluation system
+   - [ ] Registration status management
+   - [ ] Bulk operations
+
+### **Phase 2: Enhanced Features (Next Sprint)**
+1. **Bulk Player Import**
+   - [ ] CSV/Excel file upload
+   - [ ] Smart field mapping
+   - [ ] Duplicate detection
+   - [ ] Import preview and validation
+   - [ ] Template download
+
+2. **Real-time Updates**
+   - [ ] Supabase real-time subscriptions
+   - [ ] Live dashboard updates
+   - [ ] Notifications system
+
+3. **Advanced Search & Filtering**
+   - [ ] Global search across all entities
+   - [ ] Advanced filtering options
+   - [ ] Saved search preferences
+
+### **Phase 3: Performance & Polish (Future)**
+1. **Performance Optimization**
+   - [ ] React.memo for expensive components
+   - [ ] API response caching
+   - [ ] Image optimization
+   - [ ] Code splitting and lazy loading
+
+2. **Testing Implementation**
+   - [ ] Unit tests with Jest/Vitest
+   - [ ] Integration tests
+   - [ ] E2E tests with Playwright
+   - [ ] Component testing
+
+3. **Monitoring & Analytics**
+   - [ ] Error tracking (Sentry)
+   - [ ] Analytics integration
+   - [ ] Performance monitoring
+   - [ ] User behavior tracking
+
+## 🔧 **Technical Improvements Needed**
+
+### **State Management**
+- [ ] Implement global state management (Zustand/Redux)
+- [ ] Reduce prop drilling in components
+- [ ] Add proper caching strategies
+- [ ] Optimize re-renders
+
+### **Security Enhancements**
+- [ ] API rate limiting
+- [ ] Input sanitization
+- [ ] XSS protection
+- [ ] CSRF protection
+- [ ] Database query optimization
+
+### **Developer Experience**
+- [ ] Add comprehensive error boundaries
+- [ ] Implement proper loading states
+- [ ] Add development tools and debugging
+- [ ] Improve TypeScript strictness
+
+## 📋 **Code Quality Standards**
+
+### **Must Follow**
+1. **TypeScript**: Strict mode, no `any` types
+2. **Component Structure**: Proper separation of concerns
+3. **Error Handling**: Comprehensive error states
+4. **Loading States**: User feedback for async operations
+5. **Responsive Design**: Mobile-first approach
+6. **Internationalization**: All text must be translatable
+7. **Accessibility**: ARIA labels, keyboard navigation
+
+### **Best Practices**
+1. **Naming**: Consistent naming conventions
+2. **Comments**: JSDoc for complex functions
+3. **Performance**: Optimize for Core Web Vitals
+4. **Security**: Validate all inputs
+5. **Testing**: Write tests for critical paths
+
+## 🗄️ **Database Guidelines**
+
+### **Schema Principles**
+- Use proper foreign key relationships
+- Implement soft deletes where appropriate
+- Add indexes for frequently queried fields
+- Use enums for status fields
+- Include audit fields (created_at, updated_at)
+
+### **Query Optimization**
+- Use Supabase's built-in optimizations
+- Implement proper pagination
+- Use select() to limit returned fields
+- Leverage RLS (Row Level Security) for data access
+
+## 🎨 **UI/UX Standards**
+
+### **Design System**
+- Use shadcn/ui components consistently
+- Follow UpGr8 brand colors (red-600 primary)
+- Maintain responsive breakpoints
+- Use Lucide React icons exclusively
+
+### **User Experience**
+- Provide immediate feedback for actions
+- Show loading states for async operations
+- Implement proper error messages
+- Use progressive disclosure for complex features
+
+## 🚨 **Critical Issues to Address**
+
+### **High Priority**
+1. **Authentication**: No auth guards on dashboard routes
+2. **Error Boundaries**: Missing error handling in components
+3. **Loading States**: Inconsistent loading feedback
+4. **Form Validation**: Incomplete validation in some forms
+
+### **Medium Priority**
+1. **Performance**: Missing React.memo optimizations
+2. **Testing**: No test coverage
+3. **Monitoring**: No error tracking
+4. **Caching**: No API response caching
+
+## 📝 **Development Workflow**
+
+### **Before Starting New Features**
+1. Check this rules file for standards
+2. Review existing similar components
+3. Plan database schema changes
+4. Consider internationalization needs
+5. Plan error handling strategy
+
+### **During Development**
+1. Follow TypeScript strict mode
+2. Write self-documenting code
+3. Add proper loading states
+4. Handle edge cases
+5. Test responsive design
+
+### **Before Merging**
+1. Ensure all tests pass
+2. Check for TypeScript errors
+3. Verify responsive design
+4. Test error scenarios
+5. Update documentation
+
+## 🔄 **Regular Maintenance Tasks**
+
+### **Weekly**
+- [ ] Review and update dependencies
+- [ ] Check for security vulnerabilities
+- [ ] Review error logs
+- [ ] Update documentation
+
+### **Monthly**
+- [ ] Performance audit
+- [ ] Code quality review
+- [ ] User feedback analysis
+- [ ] Feature usage analytics
+
+## 📚 **Resources & References**
+
+### **Documentation**
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Supabase Documentation](https://supabase.com/docs)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [shadcn/ui Documentation](https://ui.shadcn.com)
+
+### **Code Examples**
+- See existing components in `src/components/`
+- Follow patterns in `src/app/coach-dashboard/`
+- Reference types in `src/types/`
+
+---
+
+**Last Updated**: December 2024
+**Next Review**: Weekly during development
+**Maintained By**: Development Team 

@@ -1,34 +1,118 @@
 "use client";
 
-export default function EvaluationsPage() {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold">Gestion des évaluations</h1>
-            <div className="flex items-center space-x-4">
-              <p className="text-gray-600">Page en développement</p>
-            </div>
-          </div>
-        </div>
+import { useState, useEffect, useCallback } from "react";
+import { Player } from "@/types/player";
+import { PlayerEvaluationWithScores } from "@/types/evaluation";
+import { supabase } from "@/lib/supabase/client";
+import { fromDatabaseFormat as fromPlayerDatabaseFormat } from "@/lib/mappers/playerMapper";
+import { fromEvaluationWithScoresDatabaseFormat } from "@/lib/mappers/evaluationMapper";
+import { useTranslation } from '@/hooks/useTranslation';
+import { EvaluationsManagement } from "@/components/evaluations/EvaluationsManagement";
 
-        {/* Content */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Gestion des évaluations
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Cette fonctionnalité sera bientôt disponible.
-            </p>
-            <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-              <span className="text-2xl">✅</span>
-            </div>
-          </div>
-        </div>
+export default function EvaluationsPage() {
+  const { t } = useTranslation();
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [evaluations, setEvaluations] = useState<PlayerEvaluationWithScores[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadEvaluations = useCallback(async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      console.error(t('common.notAuthenticated'));
+      return;
+    }
+
+    // Load evaluations with scores, player, and coach details
+    const { data: evaluationsData, error: evaluationsError } = await supabase
+      .from("player_evaluations")
+      .select(`
+        *,
+        scores:evaluation_scores(
+          *,
+          criteria:evaluation_criteria(*)
+        ),
+        player:players(id, first_name, last_name, position, jersey_number),
+        coach:coaches(id, first_name, last_name)
+      `)
+      .eq("coach_id", user.id)
+      .order("evaluation_date", { ascending: false });
+
+    if (evaluationsError) {
+      console.error("Error loading evaluations:", evaluationsError);
+    } else {
+      const formattedEvaluations = (evaluationsData || []).map(fromEvaluationWithScoresDatabaseFormat);
+      setEvaluations(formattedEvaluations);
+    }
+  }, [t]);
+
+  // Load players and evaluations from database
+  useEffect(() => {
+    const loadData = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        console.error(t('common.notAuthenticated'));
+        setLoading(false);
+        return;
+      }
+
+      // Load all players
+      const { data: playersData, error: playersError } = await supabase
+        .from("players")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (playersError) {
+        console.error("Error loading players:", playersError);
+      } else {
+        const formattedPlayers = (playersData || []).map(fromPlayerDatabaseFormat);
+        setPlayers(formattedPlayers);
+      }
+
+      // Load evaluations
+      await loadEvaluations();
+
+      setLoading(false);
+    };
+
+    loadData();
+  }, [t, loadEvaluations]);
+
+  const handleCreateEvaluation = () => {
+    // Refresh evaluations data after creation
+    loadEvaluations();
+  };
+
+  const handleViewEvaluation = (evaluationId: string) => {
+    // TODO: Open evaluation details modal
+    console.log("View evaluation:", evaluationId);
+  };
+
+  const handleEditEvaluation = (evaluationId: string) => {
+    // TODO: Open evaluation edit modal
+    console.log("Edit evaluation:", evaluationId);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-64">
+        <div className="text-gray-600">Chargement des évaluations...</div>
       </div>
-    </div>
+    );
+  }
+
+  return (
+    <EvaluationsManagement
+      players={players}
+      evaluations={evaluations}
+      onCreateEvaluation={handleCreateEvaluation}
+      onViewEvaluation={handleViewEvaluation}
+      onEditEvaluation={handleEditEvaluation}
+    />
   );
 } 

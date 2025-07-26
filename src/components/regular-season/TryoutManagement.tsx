@@ -55,6 +55,7 @@ export function TryoutManagement({
 
   const handleEdit = (tryout: Tryout) => {
     setIsAddModalOpen(true);
+    console.log(tryout);
   };
 
 

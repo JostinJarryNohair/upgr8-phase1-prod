@@ -3,56 +3,70 @@ import {
   RegularSeasonPlayerWithDetails,
   RegularSeasonPlayerStatus,
 } from "@/types/regularSeasonPlayer";
+import { Database } from "@/types/database";
+
+// Use the generated database types
+type DbRegularSeasonPlayer = Database["public"]["Tables"]["regular_season_players"]["Row"];
+type DbRegularSeasonPlayerInsert = Database["public"]["Tables"]["regular_season_players"]["Insert"];
+type DbPlayer = Database["public"]["Tables"]["players"]["Row"];
+type DbRegularSeason = Database["public"]["Tables"]["regular_seasons"]["Row"];
+type RegularSeasonPlayerStatusEnum = Database["public"]["Enums"]["regular_season_player_status"];
+
+// Extended type for joined data
+type DbRegularSeasonPlayerWithJoins = DbRegularSeasonPlayer & {
+  player?: DbPlayer;
+  regular_season?: DbRegularSeason;
+};
 
 // Map database row to frontend format (with joined data)
-export function fromDatabaseFormat(dbRow: Record<string, unknown>): RegularSeasonPlayerWithDetails {
+export function fromDatabaseFormat(dbRow: DbRegularSeasonPlayerWithJoins): RegularSeasonPlayerWithDetails {
   return {
-    id: dbRow.id as string,
-    regular_season_id: dbRow.regular_season_id as string,
-    player_id: dbRow.player_id as string,
+    id: dbRow.id,
+    regular_season_id: dbRow.regular_season_id || "",
+    player_id: dbRow.player_id || "",
     status: dbRow.status as RegularSeasonPlayerStatus,
-    notes: (dbRow.notes as string) || "",
-    created_at: dbRow.created_at as string,
-    updated_at: dbRow.updated_at as string,
+    notes: dbRow.notes || "",
+    created_at: dbRow.created_at || "",
+    updated_at: dbRow.updated_at || "",
 
     // Include joined player data if present
     player: dbRow.player ? {
-      id: (dbRow.player as Record<string, unknown>).id as string,
-      first_name: (dbRow.player as Record<string, unknown>).first_name as string,
-      last_name: (dbRow.player as Record<string, unknown>).last_name as string,
-      email: (dbRow.player as Record<string, unknown>).email as string | undefined,
-      position: (dbRow.player as Record<string, unknown>).position as string | undefined,
-      jersey_number: (dbRow.player as Record<string, unknown>).jersey_number as number | undefined,
-      phone: (dbRow.player as Record<string, unknown>).phone as string | undefined,
-      birth_date: (dbRow.player as Record<string, unknown>).birth_date as string | undefined,
-      parent_name: (dbRow.player as Record<string, unknown>).parent_name as string | undefined,
-      parent_email: (dbRow.player as Record<string, unknown>).parent_email as string | undefined,
-      parent_phone: (dbRow.player as Record<string, unknown>).parent_phone as string | undefined,
-      emergency_contact: (dbRow.player as Record<string, unknown>).emergency_contact as string | undefined,
-      medical_notes: (dbRow.player as Record<string, unknown>).medical_notes as string | undefined,
-      is_active: (dbRow.player as Record<string, unknown>).is_active as boolean | undefined,
+      id: dbRow.player.id,
+      first_name: dbRow.player.first_name,
+      last_name: dbRow.player.last_name,
+      email: dbRow.player.email || undefined,
+      position: dbRow.player.position || undefined,
+      jersey_number: dbRow.player.jersey_number || undefined,
+      phone: dbRow.player.phone || undefined,
+      birth_date: dbRow.player.birth_date || undefined,
+      parent_name: dbRow.player.parent_name || undefined,
+      parent_email: dbRow.player.parent_email || undefined,
+      parent_phone: dbRow.player.parent_phone || undefined,
+      emergency_contact: dbRow.player.emergency_contact || undefined,
+      medical_notes: dbRow.player.medical_notes || undefined,
+      is_active: dbRow.player.is_active || undefined,
     } : undefined,
 
     // Include joined regular season data if present
     regular_season: dbRow.regular_season ? {
-      id: (dbRow.regular_season as Record<string, unknown>).id as string,
-      name: (dbRow.regular_season as Record<string, unknown>).name as string,
-      description: (dbRow.regular_season as Record<string, unknown>).description as string,
-      status: (dbRow.regular_season as Record<string, unknown>).status as string,
-      level: (dbRow.regular_season as Record<string, unknown>).level as string,
-      start_date: (dbRow.regular_season as Record<string, unknown>).start_date as string,
-      end_date: (dbRow.regular_season as Record<string, unknown>).end_date as string,
-      location: (dbRow.regular_season as Record<string, unknown>).location as string,
+      id: dbRow.regular_season.id,
+      name: dbRow.regular_season.name,
+      description: dbRow.regular_season.description || "",
+      status: dbRow.regular_season.status || "",
+      level: dbRow.regular_season.level || "",
+      start_date: dbRow.regular_season.start_date || "",
+      end_date: dbRow.regular_season.end_date || "",
+      location: dbRow.regular_season.location || "",
     } : undefined,
   };
 }
 
 // Map frontend form data to database format (for Supabase insert/update)
-export function toDatabaseFormat(formData: RegularSeasonPlayerFormData): Record<string, unknown> {
+export function toDatabaseFormat(formData: RegularSeasonPlayerFormData): Omit<DbRegularSeasonPlayerInsert, "id" | "created_at" | "updated_at"> {
   return {
     regular_season_id: formData.regular_season_id,
     player_id: formData.player_id,
-    status: formData.status || 'active',
+    status: formData.status as RegularSeasonPlayerStatusEnum || 'active',
     notes: formData.notes || null,
   };
 } 

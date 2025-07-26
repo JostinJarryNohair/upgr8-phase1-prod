@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Player } from "@/types/player";
+import { Player, PlayerFormData } from "@/types/player";
 import { TryoutRegistrationWithDetails } from "@/types/tryoutRegistration";
 import { BulkImportModal } from "@/components/players/BulkImportModal";
 import { AddPlayerModal } from "@/components/players/AddPlayerModal";
@@ -173,7 +173,7 @@ export function TryoutPlayers({ tryoutId }: TryoutPlayersProps) {
     }
   };
 
-  const handleAddPlayer = async (playerData: unknown) => {
+  const handleAddPlayer = async (playerData: PlayerFormData) => {
     try {
       // Create the player first
       const { data: playerDbData, error: playerError } = await supabase

@@ -1,34 +1,138 @@
 "use client";
 
-export default function TeamsPage() {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold">Gestion des équipes</h1>
-            <div className="flex items-center space-x-4">
-              <p className="text-gray-600">Page en développement</p>
-            </div>
-          </div>
-        </div>
+import { useState, useEffect } from "react";
+import { Team, TeamFormData } from "@/types/team";
+import { TeamsManagement } from "@/components/teams/TeamsManagement";
+import { supabase } from "@/lib/supabase/client";
+import { fromDatabaseFormat, toDatabaseFormat } from "@/lib/mappers/teamMapper";
+import { useTranslation } from '@/hooks/useTranslation';
 
-        {/* Content */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Gestion des équipes
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Cette fonctionnalité sera bientôt disponible.
-            </p>
-            <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-              <span className="text-2xl">👥</span>
-            </div>
-          </div>
-        </div>
+export default function TeamsPage() {
+  const { t } = useTranslation();
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load teams from database
+  useEffect(() => {
+    const loadTeams = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        console.error(t('common.notAuthenticated'));
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("teams")
+        .select("*")
+        .eq("coach_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error loading teams:", error);
+      } else {
+        // Convert all teams from database format
+        const formattedTeams = (data || []).map(fromDatabaseFormat);
+        setTeams(formattedTeams);
+      }
+
+      setLoading(false);
+    };
+
+    loadTeams();
+  }, [t]);
+
+  const handleAddTeam = async (teamData: TeamFormData) => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        console.error(t('common.notAuthenticated'));
+        return;
+      }
+
+      const dbTeam = toDatabaseFormat(teamData, user.id);
+
+      const { data, error } = await supabase
+        .from("teams")
+        .insert(dbTeam)
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Error creating team:", error);
+        return;
+      }
+
+      // Add the new team to the list
+      const newTeam = fromDatabaseFormat(data);
+      setTeams([newTeam, ...teams]);
+    } catch (error) {
+      console.error("Error creating team:", error);
+    }
+  };
+
+  // const handleUpdateTeam = async (id: string, updates: Partial<TeamFormData>) => {
+  //   try {
+  //     const dbUpdates = toDatabaseUpdateFormat(updates);
+
+  //     const { data, error } = await supabase
+  //       .from("teams")
+  //       .update(dbUpdates)
+  //       .eq("id", id)
+  //       .select()
+  //       .single();
+
+  //     if (error) {
+  //       console.error("Error updating team:", error);
+  //       return;
+  //     }
+
+  //     // Update the team in the list
+  //     const updatedTeam = fromDatabaseFormat(data);
+  //     setTeams(teams.map(team => team.id === id ? updatedTeam : team));
+  //   } catch (error) {
+  //     console.error("Error updating team:", error);
+  //   }
+  // };
+
+  const handleDeleteTeam = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("teams")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        console.error("Error deleting team:", error);
+        return;
+      }
+
+      // Remove the team from the list
+      setTeams(teams.filter(team => team.id !== id));
+    } catch (error) {
+      console.error("Error deleting team:", error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-64">
+        <div className="text-gray-600">{t('teams.loading')}</div>
       </div>
-    </div>
+    );
+  }
+
+  return (
+    <TeamsManagement
+      teams={teams}
+      onAddTeam={handleAddTeam}
+      onDeleteTeam={handleDeleteTeam}
+    />
   );
 } 

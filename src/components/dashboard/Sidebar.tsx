@@ -95,7 +95,6 @@ export function Sidebar({ isCollapsed, className }: SidebarProps) {
     { id: "regular-season", label: t('navigation.regularSeason'), icon: Calendar, href: "/coach-dashboard/regular-season" },
     { id: "teams", label: t('navigation.teams'), icon: Users, href: "/coach-dashboard/teams" },
     { id: "players", label: t('navigation.players'), icon: User, href: "/coach-dashboard/players" },
-    { id: "training", label: t('navigation.training'), icon: Dumbbell, href: "/coach-dashboard/training" },
     { id: "evaluations", label: t('navigation.evaluations'), icon: ClipboardCheck, href: "/coach-dashboard/evaluations" },
     { id: "staff", label: t('navigation.staff'), icon: Users2, href: "/coach-dashboard/staff" },
   ];

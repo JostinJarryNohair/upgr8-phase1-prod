@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tryout } from "@/types/tryout";
 import { RegularSeasonFormData } from "@/types/regularSeason";
+import { Player } from "@/types/player";
 import { supabase } from "@/lib/supabase/client";
 import { fromDatabaseFormat } from "@/lib/mappers/tryoutMapper";
 import { TryoutPlayers } from "@/components/regular-season/tryout/TryoutPlayers";
@@ -30,7 +31,7 @@ export default function TryoutDetailPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
   const [isEndModalOpen, setIsEndModalOpen] = useState(false);
-  const [selectedPlayers, setSelectedPlayers] = useState<any[]>([]);
+  const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
   const [stats, setStats] = useState<TryoutStats>({
     totalPlayers: 0,
     selectedPlayers: 0,

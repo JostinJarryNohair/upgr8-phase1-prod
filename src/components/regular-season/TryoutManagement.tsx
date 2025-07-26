@@ -49,29 +49,18 @@ const getStatusLabel = (status: string) => {
 export function TryoutManagement({
   tryouts,
   onAddTryout,
-  onUpdateTryout,
   onDeleteTryout,
 }: TryoutManagementProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editingTryout, setEditingTryout] = useState<Tryout | null>(null);
 
   const handleEdit = (tryout: Tryout) => {
-    setEditingTryout(tryout);
     setIsAddModalOpen(true);
   };
 
-  const handleAddOrUpdate = async (tryoutData: TryoutFormData) => {
-    if (editingTryout) {
-      await onUpdateTryout(editingTryout.id, tryoutData);
-      setEditingTryout(null);
-    } else {
-      await onAddTryout(tryoutData);
-    }
-  };
+
 
   const handleCloseModal = () => {
     setIsAddModalOpen(false);
-    setEditingTryout(null);
   };
 
   const formatDate = (dateString?: string) => {

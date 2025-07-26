@@ -30,7 +30,7 @@ export default function TryoutDetailPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
   const [isEndModalOpen, setIsEndModalOpen] = useState(false);
-  const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
+  const [selectedPlayers, setSelectedPlayers] = useState<any[]>([]);
   const [stats, setStats] = useState<TryoutStats>({
     totalPlayers: 0,
     selectedPlayers: 0,

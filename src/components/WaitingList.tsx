@@ -338,7 +338,7 @@ export default function WaitingList() {
             {t('waitingList.finalCtaTitle')}
           </h2>
           <p className="text-xl mb-8 text-red-100">
-            {t('waitingList.finalCtaSubtitle', { count: stats.total.toLocaleString() })}
+            {t('waitingList.finalCtaSubtitle', { count: stats.total })}
           </p>
           
           {!isSubmitted && (

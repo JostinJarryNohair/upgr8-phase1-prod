@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, MapPin, Users, ArrowLeft, Eye, Settings } from "lucide-react";
+import { Calendar, MapPin, Users, ArrowLeft, Eye, Settings, Edit, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RegularSeason } from "@/types/regularSeason";
 import { supabase } from "@/lib/supabase/client";
 import { fromDatabaseFormat } from "@/lib/mappers/regularSeasonMapper";
+import EditRegularSeasonModal from "@/components/regular-season/EditRegularSeasonModal";
+import DeleteRegularSeasonModal from "@/components/regular-season/DeleteRegularSeasonModal";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -34,6 +36,8 @@ export default function RegularSeasonDetailPage({ params }: PageProps) {
     injuredPlayers: 0,
     suspendedPlayers: 0,
   });
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // Separate function to load player stats (can be called multiple times)
   const loadPlayerStats = async (seasonId: string) => {
@@ -159,6 +163,14 @@ export default function RegularSeasonDetailPage({ params }: PageProps) {
     }
   };
 
+  const handleSeasonUpdated = (updatedSeason: RegularSeason) => {
+    setRegularSeason(updatedSeason);
+  };
+
+  const handleSeasonDeleted = () => {
+    router.push("/coach-dashboard/regular-season");
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -218,19 +230,25 @@ export default function RegularSeasonDetailPage({ params }: PageProps) {
                 </div>
               </div>
             </div>
-            {/* Season Management Button */}
-            {regularSeason.status === "active" && (
+            {/* Season Management Buttons */}
+            <div className="flex items-center space-x-3">
               <Button
-                onClick={() => {
-                  // TODO: Add season management functionality
-                  console.log("Season management clicked");
-                }}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                onClick={() => setIsEditModalOpen(true)}
+                variant="outline"
+                className="flex items-center gap-2"
               >
-                <Settings className="h-4 w-4" />
-                Gérer la Saison
+                <Edit className="h-4 w-4" />
+                Modifier
               </Button>
-            )}
+              <Button
+                onClick={() => setIsDeleteModalOpen(true)}
+                variant="destructive"
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-700"
+              >
+                <Trash2 className="h-4 w-4" />
+                Supprimer
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -412,6 +430,21 @@ export default function RegularSeasonDetailPage({ params }: PageProps) {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Modals */}
+      <EditRegularSeasonModal
+        regularSeason={regularSeason}
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSeasonUpdated={handleSeasonUpdated}
+      />
+      
+      <DeleteRegularSeasonModal
+        regularSeason={regularSeason}
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onSeasonDeleted={handleSeasonDeleted}
+      />
     </div>
   );
 } 

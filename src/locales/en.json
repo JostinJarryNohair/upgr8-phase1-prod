@@ -61,7 +61,27 @@
     "registrationError": "Registration error",
     "userAlreadyExists": "An account already exists with this email",
     "passwordTooShort": "Password must be at least 6 characters",
-    "invalidEmail": "Invalid email address"
+    "invalidEmail": "Invalid email address",
+    "forgotPasswordTitle": "Forgot Password",
+    "forgotPasswordSubtitle": "Enter your email address to receive a reset link",
+    "sendResetLink": "Send Reset Link",
+    "resetPasswordEmailSent": "Reset email sent",
+    "resetPasswordEmailSentDescription": "Check your inbox for the reset link",
+    "checkEmailInstructions": "We've sent an email with a reset link. Check your inbox and spam folder.",
+    "backToLogin": "Back to Login",
+    "resetPasswordTitle": "Reset Password",
+    "resetPasswordSubtitle": "Enter your new password",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "resetPassword": "Reset Password",
+    "passwordResetSuccess": "Password reset successfully",
+    "passwordResetSuccessTitle": "Password Updated",
+    "passwordResetSuccessDescription": "Your password has been updated successfully",
+    "redirectingToLogin": "Redirecting to login page...",
+    "userNotFound": "No user found with this email address",
+    "invalidResetLink": "Invalid or expired reset link",
+    "resetPasswordError": "Password reset error",
+    "passwordResetError": "Error resetting password"
   },
   "camps": {
     "title": "Camp Management",
@@ -313,6 +333,9 @@
     "maxLength": "Must not exceed {max} characters",
     "invalidNumber": "Invalid number",
     "numberRange": "Number must be between {min} and {max}",
-    "endDateAfterStartDate": "End date must be after start date"
+    "endDateAfterStartDate": "End date must be after start date",
+    "passwordRequired": "Password is required",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "passwordsDoNotMatch": "Passwords do not match"
   }
 } 

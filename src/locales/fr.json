@@ -61,7 +61,27 @@
     "registrationError": "Erreur d'inscription",
     "userAlreadyExists": "Un compte existe déjà avec cette adresse email",
     "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères",
-    "invalidEmail": "Adresse email invalide"
+    "invalidEmail": "Adresse email invalide",
+    "forgotPasswordTitle": "Mot de passe oublié",
+    "forgotPasswordSubtitle": "Entrez votre adresse email pour recevoir un lien de réinitialisation",
+    "sendResetLink": "Envoyer le lien de réinitialisation",
+    "resetPasswordEmailSent": "Email de réinitialisation envoyé",
+    "resetPasswordEmailSentDescription": "Vérifiez votre boîte de réception pour le lien de réinitialisation",
+    "checkEmailInstructions": "Nous avons envoyé un email avec un lien de réinitialisation. Vérifiez votre boîte de réception et vos spams.",
+    "backToLogin": "Retour à la connexion",
+    "resetPasswordTitle": "Réinitialiser le mot de passe",
+    "resetPasswordSubtitle": "Entrez votre nouveau mot de passe",
+    "newPassword": "Nouveau mot de passe",
+    "confirmNewPassword": "Confirmer le nouveau mot de passe",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "passwordResetSuccess": "Mot de passe réinitialisé avec succès",
+    "passwordResetSuccessTitle": "Mot de passe mis à jour",
+    "passwordResetSuccessDescription": "Votre mot de passe a été mis à jour avec succès",
+    "redirectingToLogin": "Redirection vers la page de connexion...",
+    "userNotFound": "Aucun utilisateur trouvé avec cette adresse email",
+    "invalidResetLink": "Lien de réinitialisation invalide ou expiré",
+    "resetPasswordError": "Erreur de réinitialisation du mot de passe",
+    "passwordResetError": "Erreur lors de la réinitialisation du mot de passe"
   },
   "camps": {
     "title": "Gestion des camps",
@@ -312,6 +332,9 @@
     "maxLength": "Ne doit pas dépasser {max} caractères",
     "invalidNumber": "Numéro invalide",
     "numberRange": "Le numéro doit être entre {min} et {max}",
-    "endDateAfterStartDate": "La date de fin doit être après la date de début"
+    "endDateAfterStartDate": "La date de fin doit être après la date de début",
+    "passwordRequired": "Le mot de passe est requis",
+    "passwordTooShort": "Le mot de passe doit contenir au moins 6 caractères",
+    "passwordsDoNotMatch": "Les mots de passe ne correspondent pas"
   }
 } 

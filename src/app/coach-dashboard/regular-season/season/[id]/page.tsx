@@ -11,6 +11,7 @@ import { supabase } from "@/lib/supabase/client";
 import { fromDatabaseFormat } from "@/lib/mappers/regularSeasonMapper";
 import EditRegularSeasonModal from "@/components/regular-season/EditRegularSeasonModal";
 import DeleteRegularSeasonModal from "@/components/regular-season/DeleteRegularSeasonModal";
+import { RegularSeasonPlayers } from "@/components/regular-season/RegularSeasonPlayers";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -419,13 +420,7 @@ export default function RegularSeasonDetailPage({ params }: PageProps) {
 
           <TabsContent value="players">
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                Joueurs de la Saison Régulière
-              </h2>
-              <p className="text-gray-600">
-                La gestion des joueurs de saison régulière sera bientôt disponible.
-              </p>
-              {/* TODO: Add RegularSeasonPlayers component */}
+              <RegularSeasonPlayers seasonId={regularSeason.id} />
             </div>
           </TabsContent>
         </Tabs>

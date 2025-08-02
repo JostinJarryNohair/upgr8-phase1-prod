@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, MapPin, Users, ArrowLeft, Eye, Settings, Edit, Trash2 } from "lucide-react";
+import { Calendar, MapPin, Users, ArrowLeft, Eye, Settings, Edit, Trash2, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,6 +12,7 @@ import { fromDatabaseFormat } from "@/lib/mappers/regularSeasonMapper";
 import EditRegularSeasonModal from "@/components/regular-season/EditRegularSeasonModal";
 import DeleteRegularSeasonModal from "@/components/regular-season/DeleteRegularSeasonModal";
 import { RegularSeasonPlayers } from "@/components/regular-season/RegularSeasonPlayers";
+import { RegularSeasonTeams } from "@/components/regular-season/RegularSeasonTeams";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -297,7 +298,7 @@ export default function RegularSeasonDetailPage({ params }: PageProps) {
           onValueChange={handleTabChange}
           className="space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-2 bg-gray-100">
+          <TabsList className="grid w-full grid-cols-3 bg-gray-100">
             <TabsTrigger
               value="overview"
               className="flex items-center space-x-2"
@@ -311,6 +312,13 @@ export default function RegularSeasonDetailPage({ params }: PageProps) {
             >
               <Users className="w-4 h-4" />
               <span>Joueurs ({stats.totalPlayers})</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="teams"
+              className="flex items-center space-x-2"
+            >
+              <Trophy className="w-4 h-4" />
+              <span>Équipes</span>
             </TabsTrigger>
           </TabsList>
 
@@ -421,6 +429,12 @@ export default function RegularSeasonDetailPage({ params }: PageProps) {
           <TabsContent value="players">
             <div className="bg-white rounded-lg shadow-sm p-6">
               <RegularSeasonPlayers seasonId={regularSeason.id} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="teams">
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <RegularSeasonTeams seasonId={regularSeason.id} />
             </div>
           </TabsContent>
         </Tabs>

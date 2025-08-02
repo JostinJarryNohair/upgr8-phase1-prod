@@ -44,6 +44,18 @@ export default function PlayersPage() {
         setCamps(formattedCamps);
       }
 
+      // Load teams for the current coach
+      const { data: teamsData, error: teamsError } = await supabase
+        .from("teams")
+        .select("*")
+        .eq("coach_id", user.id);
+
+      // Load regular seasons for the current coach
+      const { data: seasonsData, error: seasonsError } = await supabase
+        .from("regular_seasons")
+        .select("*")
+        .eq("coach_id", user.id);
+
       // Load camp registrations with player and camp details
       const { data: registrationsData, error: registrationsError } = await supabase
         .from("camp_registrations")
@@ -61,11 +73,63 @@ export default function PlayersPage() {
         setCampRegistrations(formattedRegistrations);
       }
 
-      // Load all players (we'll filter by camp registrations in the component)
-      const { data: playersData, error: playersError } = await supabase
-        .from("players")
-        .select("*")
-        .order("created_at", { ascending: false });
+      // Get all player IDs associated with the current coach
+      const playerIds = new Set<string>();
+
+      // 1. Get players from camps
+      const { data: campPlayers, error: campError } = await supabase
+        .from("camp_registrations")
+        .select("player_id")
+        .in("camp_id", camps.map(camp => camp.id));
+
+      if (!campError && campPlayers) {
+        campPlayers.forEach(cp => playerIds.add(cp.player_id));
+      }
+
+      // 2. Get players from teams
+      const { data: teamPlayers, error: teamError } = await supabase
+        .from("team_players")
+        .select("player_id")
+        .in("team_id", teamsData?.map(team => team.id) || []);
+
+      if (!teamError && teamPlayers) {
+        teamPlayers.forEach(tp => playerIds.add(tp.player_id));
+      }
+
+      // 3. Get players from evaluations
+      const { data: evalPlayers, error: evalError } = await supabase
+        .from("player_evaluations")
+        .select("player_id")
+        .eq("coach_id", user.id);
+
+      if (!evalError && evalPlayers) {
+        evalPlayers.forEach(ep => playerIds.add(ep.player_id));
+      }
+
+      // 4. Get players from regular seasons
+      const { data: seasonPlayers, error: seasonError } = await supabase
+        .from("regular_season_players")
+        .select("player_id")
+        .in("regular_season_id", seasonsData?.map(season => season.id) || []);
+
+      if (!seasonError && seasonPlayers) {
+        seasonPlayers.forEach(sp => playerIds.add(sp.player_id));
+      }
+
+      // Load only the players associated with this coach
+      const playerIdsArray = Array.from(playerIds);
+      let playersData = null;
+      let playersError = null;
+
+      if (playerIdsArray.length > 0) {
+        const result = await supabase
+          .from("players")
+          .select("*")
+          .in("id", playerIdsArray)
+          .order("created_at", { ascending: false });
+        playersData = result.data;
+        playersError = result.error;
+      }
 
       if (playersError) {
         console.error("Error loading players:", playersError);

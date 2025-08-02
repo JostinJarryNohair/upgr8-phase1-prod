@@ -199,7 +199,14 @@
     "addFirstPlayer": "Ajoutez votre premier joueur pour commencer",
     "allPositions": "Toutes les positions",
     "errorAddingPlayer": "Erreur lors de l'ajout du joueur",
-    "remove": "Retirer"
+    "remove": "Retirer",
+    "addPlayerToTeam": "Ajouter un joueur à l'équipe",
+    "addToTeam": "Ajouter à l'équipe",
+    "noAvailablePlayers": "Aucun joueur disponible",
+    "allPlayersAlreadyInTeam": "Tous les joueurs sont déjà dans cette équipe",
+    "noResults": "Aucun résultat trouvé",
+    "tryDifferentSearch": "Essayez d'ajuster vos critères de recherche",
+    "fromTeam": "de l'équipe"
   },
   "teams": {
     "title": "Gestion des équipes",

@@ -69,14 +69,34 @@ export default function TeamDetailPage({ params }: PageProps) {
           setTeam(formattedTeam);
         }
 
-        // TODO: When player_teams table is created, replace this with proper team player stats
-        // For now, show 0 players since the junction table doesn't exist yet
+        // Load team player statistics
+        const { data: teamPlayersData, error: teamPlayersError } = await supabase
+          .from("team_players")
+          .select(`
+            player:players (
+              id,
+              position,
+              is_active
+            )
+          `)
+          .eq("team_id", id);
+
+        if (teamPlayersError) {
+          console.error("Error loading team players:", teamPlayersError);
+        }
+
+        const players = teamPlayersData || [];
+        const activePlayers = players.filter((p: any) => p.player && p.player.is_active).length;
+        const forwards = players.filter((p: any) => p.player && p.player.position === 'forward').length;
+        const defensemen = players.filter((p: any) => p.player && p.player.position === 'defense').length;
+        const goalies = players.filter((p: any) => p.player && p.player.position === 'goalie').length;
+
         setStats({
-          totalPlayers: 0,
-          activePlayers: 0,
-          forwards: 0,
-          defensemen: 0,
-          goalies: 0,
+          totalPlayers: players.length,
+          activePlayers,
+          forwards,
+          defensemen,
+          goalies,
         });
       } catch (error) {
         console.error("Error loading team:", error);

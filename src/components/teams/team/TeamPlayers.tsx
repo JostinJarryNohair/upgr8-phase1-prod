@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Search, AlertCircle, CheckCircle, UserPlus, Users } from "lucide-react";
+import { Search, AlertCircle, CheckCircle, UserPlus, Users, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,8 +13,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Player, PlayerFormData } from "@/types/player";
+import { TeamPlayerWithPlayerInfo, TeamPlayerFormData } from "@/types/teamPlayer";
 import { supabase } from "@/lib/supabase/client";
-import { AddPlayerModal } from "@/components/players/AddPlayerModal";
+import { AddPlayerToTeamModal } from "./AddPlayerToTeamModal";
+import { fromTeamPlayerDatabaseFormat, toTeamPlayerDatabaseFormat } from "@/lib/mappers/teamPlayerMapper";
 import { useTranslation } from '@/hooks/useTranslation';
 
 interface TeamPlayersProps {
@@ -22,13 +24,14 @@ interface TeamPlayersProps {
 }
 
 export function TeamPlayers({ teamId }: TeamPlayersProps) {
-  console.log("TeamPlayers component rendered with teamId:", teamId);
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPosition, setSelectedPosition] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [teamPlayers, setTeamPlayers] = useState<TeamPlayerWithPlayerInfo[]>([]);
+  const [availablePlayers, setAvailablePlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingAvailablePlayers, setLoadingAvailablePlayers] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Add Player Modal state
@@ -51,48 +54,90 @@ export function TeamPlayers({ teamId }: TeamPlayersProps) {
         return;
       }
 
-      // TODO: When player_teams table is created, replace this with:
-      // const { data, error } = await supabase
-      //   .from("player_teams")
-      //   .select(`
-      //     *,
-      //     players (
-      //       id,
-      //       first_name,
-      //       last_name,
-      //       email,
-      //       phone,
-      //       birth_date,
-      //       position,
-      //       jersey_number,
-      //       parent_name,
-      //       parent_phone,
-      //       parent_email,
-      //       emergency_contact,
-      //       medical_notes,
-      //       is_active,
-      //       created_at,
-      //       updated_at
-      //     )
-      //   `)
-      //   .eq("team_id", teamId);
+      const { data, error } = await supabase
+        .from("team_players")
+        .select(`
+          *,
+          player:players (
+            id,
+            first_name,
+            last_name,
+            email,
+            phone,
+            position,
+            jersey_number,
+            is_active
+          )
+        `)
+        .eq("team_id", teamId);
 
-      // For now, show empty state since player_teams table doesn't exist yet
-      setPlayers([]);
+      if (error) {
+        console.error("Error loading team players:", error);
+        setError(t('players.errorLoadingPlayers'));
+        return;
+      }
+
+      const formattedTeamPlayers = (data || []).map(fromTeamPlayerDatabaseFormat);
+      setTeamPlayers(formattedTeamPlayers);
     } catch (error) {
       console.error("Error loading team players:", error);
       setError(t('players.errorLoadingPlayers'));
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [teamId, t]);
 
-  // Load players for this team
+  // Load available players (not already in this team)
+  const loadAvailablePlayers = useCallback(async () => {
+    try {
+      setLoadingAvailablePlayers(true);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // First get all players in this team
+      const { data: teamPlayerIds, error: teamPlayerError } = await supabase
+        .from("team_players")
+        .select("player_id")
+        .eq("team_id", teamId);
+
+      if (teamPlayerError) {
+        console.error("Error loading team player IDs:", teamPlayerError);
+        return;
+      }
+
+      // Get all active players
+      const { data, error } = await supabase
+        .from("players")
+        .select("id, first_name, last_name, email, phone, position, jersey_number, is_active, created_at, updated_at")
+        .eq("is_active", true);
+
+      if (error) {
+        console.error("Error loading available players:", error);
+        return;
+      }
+
+      // Filter out players already in the team
+      const teamPlayerIdSet = new Set(teamPlayerIds?.map(tp => tp.player_id) || []);
+      const availablePlayers = data?.filter(player => !teamPlayerIdSet.has(player.id)) || [];
+
+      console.log("Available players loaded:", availablePlayers.length);
+      setAvailablePlayers(availablePlayers);
+    } catch (error) {
+      console.error("Error loading available players:", error);
+    } finally {
+      setLoadingAvailablePlayers(false);
+    }
+  }, [teamId]);
+
+  // Load data
   useEffect(() => {
     loadTeamPlayers();
-  }, [loadTeamPlayers]);
+    loadAvailablePlayers();
+  }, [loadTeamPlayers, loadAvailablePlayers]);
 
-  const handleAddPlayer = async (playerData: PlayerFormData) => {
+  const handleAddPlayerToTeam = async (playerId: string) => {
     try {
       setAddingPlayer(true);
       setAddPlayerError(null);
@@ -105,39 +150,70 @@ export function TeamPlayers({ teamId }: TeamPlayersProps) {
         return;
       }
 
-      // Add player to database
-      const { data, error } = await supabase
-        .from("players")
-        .insert([playerData])
-        .select()
-        .single();
+      // Add player to team
+      const teamPlayerData = toTeamPlayerDatabaseFormat({
+        player_id: playerId,
+        team_id: teamId,
+      });
+
+      const { error } = await supabase
+        .from("team_players")
+        .insert([teamPlayerData]);
 
       if (error) {
-        console.error("Error adding player:", error);
+        console.error("Error adding player to team:", error);
         setAddPlayerError(t('players.errorAddingPlayer'));
         return;
       }
 
-      // Add player to team (this would be done through team_players table in the future)
-      // For now, just add to the local state
-      setPlayers([data, ...players]);
+      // Reload data
+      await loadTeamPlayers();
+      await loadAvailablePlayers();
       setIsAddPlayerModalOpen(false);
     } catch (error) {
-      console.error("Error adding player:", error);
+      console.error("Error adding player to team:", error);
       setAddPlayerError(t('players.errorAddingPlayer'));
     } finally {
       setAddingPlayer(false);
     }
   };
 
-  const handleRemovePlayer = async (playerId: string) => {
+  const handleRemovePlayerFromTeam = async (teamPlayerId: string) => {
     try {
-      // In the future, this would remove from team_players table
-      // For now, just remove from local state
-      setPlayers(players.filter(p => p.id !== playerId));
+      const { error } = await supabase
+        .from("team_players")
+        .delete()
+        .eq("id", teamPlayerId);
+
+      if (error) {
+        console.error("Error removing player from team:", error);
+        return;
+      }
+
+      // Reload data
+      await loadTeamPlayers();
+      await loadAvailablePlayers();
     } catch (error) {
-      console.error("Error removing player:", error);
+      console.error("Error removing player from team:", error);
     }
+  };
+
+  // Add loading state for remove operation
+  const [removingPlayerId, setRemovingPlayerId] = useState<string | null>(null);
+  const [playerToRemove, setPlayerToRemove] = useState<TeamPlayerWithPlayerInfo | null>(null);
+
+  const handleRemovePlayerWithLoading = async (teamPlayerId: string) => {
+    setRemovingPlayerId(teamPlayerId);
+    try {
+      await handleRemovePlayerFromTeam(teamPlayerId);
+    } finally {
+      setRemovingPlayerId(null);
+      setPlayerToRemove(null);
+    }
+  };
+
+  const handleRemoveClick = (teamPlayer: TeamPlayerWithPlayerInfo) => {
+    setPlayerToRemove(teamPlayer);
   };
 
   const getStatusBadge = (isActive: boolean | null) => {
@@ -180,8 +256,9 @@ export function TeamPlayers({ teamId }: TeamPlayersProps) {
   };
 
   // Memoized filtering for performance
-  const filteredPlayers = useMemo(() => {
-    return players.filter((player) => {
+  const filteredTeamPlayers = useMemo(() => {
+    return teamPlayers.filter((teamPlayer) => {
+      const player = teamPlayer.player;
       const fullName = `${player.first_name || ""} ${player.last_name || ""}`
         .trim()
         .toLowerCase();
@@ -199,7 +276,7 @@ export function TeamPlayers({ teamId }: TeamPlayersProps) {
 
       return matchesSearch && matchesPosition && matchesStatus;
     });
-  }, [players, searchQuery, selectedPosition, statusFilter]);
+  }, [teamPlayers, searchQuery, selectedPosition, statusFilter]);
 
   if (loading) {
     return (
@@ -264,28 +341,30 @@ export function TeamPlayers({ teamId }: TeamPlayersProps) {
             <Button
               onClick={() => setIsAddPlayerModalOpen(true)}
               className="flex items-center gap-2"
+              disabled={availablePlayers.length === 0 || loadingAvailablePlayers}
+              title={availablePlayers.length === 0 ? t('players.allPlayersAlreadyInTeam') : undefined}
             >
               <UserPlus className="w-4 h-4" />
-              {t('players.addPlayer')}
+              {loadingAvailablePlayers ? t('common.loading') : t('players.addPlayer')}
             </Button>
           </div>
         </div>
 
         {/* Players List */}
         <div className="p-6">
-          {filteredPlayers.length === 0 ? (
+          {filteredTeamPlayers.length === 0 ? (
             <div className="text-center py-12">
               <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {players.length === 0 ? t('players.noPlayers') : t('players.noResults')}
+                {teamPlayers.length === 0 ? t('players.noPlayers') : t('players.noResults')}
               </h3>
               <p className="text-gray-600 mb-4">
-                {players.length === 0 
+                {teamPlayers.length === 0 
                   ? t('players.addFirstPlayer') 
                   : t('players.tryDifferentSearch')
                 }
               </p>
-              {players.length === 0 && (
+              {teamPlayers.length === 0 && availablePlayers.length > 0 && (
                 <Button onClick={() => setIsAddPlayerModalOpen(true)}>
                   <UserPlus className="w-4 h-4 mr-2" />
                   {t('players.addPlayer')}
@@ -294,13 +373,14 @@ export function TeamPlayers({ teamId }: TeamPlayersProps) {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredPlayers.map((player) => {
+              {filteredTeamPlayers.map((teamPlayer) => {
+                const player = teamPlayer.player;
                 const fullName = `${player.first_name || ""} ${
                   player.last_name || ""
                 }`.trim();
                 return (
                   <div
-                    key={player.id}
+                    key={teamPlayer.id}
                     className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow relative"
                   >
                     <div className="flex items-start justify-between mb-3">
@@ -342,11 +422,11 @@ export function TeamPlayers({ teamId }: TeamPlayersProps) {
                       <Button
                         size="sm"
                         variant="destructive"
-                        onClick={() => handleRemovePlayer(player.id)}
-                        disabled={loading || addingPlayer}
+                        onClick={() => handleRemoveClick(teamPlayer)}
+                        disabled={loading || addingPlayer || removingPlayerId === teamPlayer.id}
                         aria-label={`${t('players.remove')} ${fullName}`}
                       >
-                        {t('players.remove')}
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
@@ -358,15 +438,40 @@ export function TeamPlayers({ teamId }: TeamPlayersProps) {
       </div>
 
       {/* Add Player Modal */}
-      <AddPlayerModal
+      <AddPlayerToTeamModal
         isOpen={isAddPlayerModalOpen}
         onClose={() => {
           setIsAddPlayerModalOpen(false);
           setAddPlayerError(null);
         }}
-        onSubmit={handleAddPlayer}
+        onSubmit={handleAddPlayerToTeam}
         error={addPlayerError}
+        availablePlayers={availablePlayers}
       />
+
+      {/* Remove Player Confirmation Modal */}
+      {playerToRemove && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">{t('players.remove')}</h3>
+            <p className="text-gray-600 mb-6">
+              {t('players.remove')} {playerToRemove.player.first_name} {playerToRemove.player.last_name} {t('players.fromTeam')}?
+            </p>
+            <div className="flex justify-end space-x-3">
+              <Button variant="outline" onClick={() => setPlayerToRemove(null)}>
+                {t('common.cancel')}
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={() => handleRemovePlayerWithLoading(playerToRemove.id)}
+                disabled={removingPlayerId === playerToRemove.id}
+              >
+                {removingPlayerId === playerToRemove.id ? t('common.deleting') : t('players.remove')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 } 

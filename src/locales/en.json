@@ -200,7 +200,11 @@
     "addFirstPlayer": "Add your first player to get started",
     "allPositions": "All positions",
     "errorAddingPlayer": "Error adding player",
-    "remove": "Remove"
+    "remove": "Remove",
+    "addPlayerToTeam": "Add Player to Team",
+    "addToTeam": "Add to Team",
+    "noAvailablePlayers": "No Available Players",
+    "allPlayersAlreadyInTeam": "All players are already in this team"
   },
   "teams": {
     "title": "Team Management",

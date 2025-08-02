@@ -29,10 +29,12 @@ import {
   ClipboardCheck,
   Calendar,
   Star,
-  Filter
+  Filter,
+  FileText
 } from "lucide-react";
 
 import { CreateEvaluationModal } from "./CreateEvaluationModal";
+import { downloadEvaluationPDF } from "@/lib/pdfService";
 
 interface EvaluationsManagementProps {
   players: Player[];
@@ -165,6 +167,15 @@ export function EvaluationsManagement({
   const handleEvaluationCreated = () => {
     // Refresh the evaluations list
     onCreateEvaluation(selectedPlayerForEvaluation || "");
+  };
+
+  const handleExportPDF = (evaluation: PlayerEvaluationWithScores) => {
+    try {
+      downloadEvaluationPDF(evaluation, { language: 'fr' });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Erreur lors de la génération du PDF');
+    }
   };
 
   return (
@@ -397,6 +408,10 @@ export function EvaluationsManagement({
                         <DropdownMenuItem onClick={() => onEditEvaluation(evaluation.id)}>
                           <Edit className="w-4 h-4 mr-2" />
                           Modifier
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleExportPDF(evaluation)}>
+                          <FileText className="w-4 h-4 mr-2" />
+                          Exporter PDF
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

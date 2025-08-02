@@ -206,7 +206,8 @@
     "allPlayersAlreadyInTeam": "Tous les joueurs sont déjà dans cette équipe",
     "noResults": "Aucun résultat trouvé",
     "tryDifferentSearch": "Essayez d'ajuster vos critères de recherche",
-    "fromTeam": "de l'équipe"
+    "fromTeam": "de l'équipe",
+    "exportPDF": "Exporter PDF"
   },
   "teams": {
     "title": "Gestion des équipes",

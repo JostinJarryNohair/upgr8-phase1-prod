@@ -73,7 +73,7 @@ export class EvaluationPDFService {
     }[this.language];
   }
 
-  public generateEvaluationPDF(evaluation: PlayerEvaluationWithScores, options: PDFOptions = {}): jsPDF {
+  public generateEvaluationPDF(evaluation: PlayerEvaluationWithScores): jsPDF {
     const t = this.getTranslations();
     
     // Header
@@ -160,7 +160,7 @@ export class EvaluationPDFService {
     return this.doc;
   }
 
-  private addScoresList(scores: any[]) {
+  private addScoresList(scores: Array<{ criteria: { name_fr: string; name_en: string; max_score: number | null }; score: number }>) {
     scores.forEach(score => {
       this.checkPageBreak(8);
       const criteriaName = this.language === 'fr' ? score.criteria.name_fr : score.criteria.name_en;
@@ -185,7 +185,7 @@ export class EvaluationPDFService {
 // Convenience function
 export function generateEvaluationPDF(evaluation: PlayerEvaluationWithScores, options: PDFOptions = {}): jsPDF {
   const service = new EvaluationPDFService(options);
-  return service.generateEvaluationPDF(evaluation, options);
+  return service.generateEvaluationPDF(evaluation);
 }
 
 export function downloadEvaluationPDF(evaluation: PlayerEvaluationWithScores, options: PDFOptions = {}): void {

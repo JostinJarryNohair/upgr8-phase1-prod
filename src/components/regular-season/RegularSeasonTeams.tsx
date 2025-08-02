@@ -48,6 +48,7 @@ const getLevelBadgeColor = (level: string) => {
 };
 
 export function RegularSeasonTeams({ seasonId }: RegularSeasonTeamsProps) {
+  console.log("seasonId", seasonId);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");

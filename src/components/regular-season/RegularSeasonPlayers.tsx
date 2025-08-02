@@ -22,12 +22,7 @@ import {
   Search, 
   Plus,
   Users, 
-  UserCheck, 
-  UserX, 
-  CheckCircle,
   XCircle,
-  AlertTriangle,
-  Clock
 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { fromDatabaseFormat as fromRegularSeasonPlayerDatabaseFormat } from "@/lib/mappers/regularSeasonPlayerMapper";
@@ -138,10 +133,6 @@ export function RegularSeasonPlayers({ seasonId }: RegularSeasonPlayersProps) {
     return matchesSearch && matchesPosition && matchesStatus;
   });
 
-  const getPlayerInitials = (firstName: string, lastName: string) => {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-  };
-
   const PlayerStatusBadge = ({ player }: { player: RegularSeasonPlayerWithDetails }) => {
     return (
       <Badge className={getStatusColor(player.status)}>
@@ -164,7 +155,7 @@ export function RegularSeasonPlayers({ seasonId }: RegularSeasonPlayersProps) {
 
       // Update local state
       setPlayers(prev => prev.map(p => 
-        p.id === playerId ? { ...p, status: newStatus as any } : p
+        p.id === playerId ? { ...p, status: newStatus as "active" | "inactive" | "injured" | "suspended" } : p
       ));
     } catch (error) {
       console.error("Error updating player status:", error);

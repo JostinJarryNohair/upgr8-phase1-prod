@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Calendar, MapPin, BookOpen, Users } from "lucide-react";
+import { X, Calendar, MapPin, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/lib/supabase/client";
-import { RegularSeason, RegularSeasonFormData, RegularSeasonStatus, CampLevel } from "@/types/regularSeason";
+import { RegularSeason, RegularSeasonFormData, RegularSeasonStatus } from "@/types/regularSeason";
 import { toDatabaseFormat } from "@/lib/mappers/regularSeasonMapper";
 
 interface EditRegularSeasonModalProps {

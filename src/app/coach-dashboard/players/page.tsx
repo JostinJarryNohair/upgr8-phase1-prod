@@ -45,13 +45,13 @@ export default function PlayersPage() {
       }
 
       // Load teams for the current coach
-      const { data: teamsData, error: teamsError } = await supabase
+      const { data: teamsData } = await supabase
         .from("teams")
         .select("*")
         .eq("coach_id", user.id);
 
       // Load regular seasons for the current coach
-      const { data: seasonsData, error: seasonsError } = await supabase
+      const { data: seasonsData } = await supabase
         .from("regular_seasons")
         .select("*")
         .eq("coach_id", user.id);
@@ -142,7 +142,7 @@ export default function PlayersPage() {
     };
 
     loadData();
-  }, [t]);
+  }, [t, camps]);
 
   const handleAddPlayer = async (newPlayer: PlayerFormData) => {
     const { data, error } = await supabase

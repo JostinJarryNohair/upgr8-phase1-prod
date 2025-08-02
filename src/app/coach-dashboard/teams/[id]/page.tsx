@@ -85,11 +85,17 @@ export default function TeamDetailPage({ params }: PageProps) {
           console.error("Error loading team players:", teamPlayersError);
         }
 
-        const players = teamPlayersData || [];
-        const activePlayers = players.filter((p: any) => p.player && p.player.is_active).length;
-        const forwards = players.filter((p: any) => p.player && p.player.position === 'forward').length;
-        const defensemen = players.filter((p: any) => p.player && p.player.position === 'defense').length;
-        const goalies = players.filter((p: any) => p.player && p.player.position === 'goalie').length;
+        const players = (teamPlayersData || []) as unknown as Array<{
+          player: {
+            id: string;
+            position: string | null;
+            is_active: boolean | null;
+          } | null;
+        }>;
+        const activePlayers = players.filter((p) => p.player && p.player.is_active).length;
+        const forwards = players.filter((p) => p.player && p.player.position === 'forward').length;
+        const defensemen = players.filter((p) => p.player && p.player.position === 'defense').length;
+        const goalies = players.filter((p) => p.player && p.player.position === 'goalie').length;
 
         setStats({
           totalPlayers: players.length,

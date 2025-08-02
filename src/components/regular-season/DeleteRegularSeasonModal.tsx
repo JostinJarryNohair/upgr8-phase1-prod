@@ -137,7 +137,7 @@ export default function DeleteRegularSeasonModal({
                   <ul className="list-disc list-inside space-y-1">
                     <li>Cette action est irréversible</li>
                     <li>Toutes les données de la saison seront perdues</li>
-                    <li>Les joueurs associés devront être supprimés d'abord</li>
+                    <li>Les joueurs associé&apos;s devront être supprimés d&apos;abord</li>
                   </ul>
                 </div>
               </div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, MapPin, Users, ArrowLeft, Eye, Settings, Edit, Trash2, Trophy } from "lucide-react";
+import { Calendar, MapPin, Users, ArrowLeft, Eye, Edit, Trash2, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

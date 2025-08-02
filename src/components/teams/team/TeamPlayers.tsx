@@ -12,8 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Player, PlayerFormData } from "@/types/player";
-import { TeamPlayerWithPlayerInfo, TeamPlayerFormData } from "@/types/teamPlayer";
+import { Player } from "@/types/player";
+import { TeamPlayerWithPlayerInfo } from "@/types/teamPlayer";
 import { supabase } from "@/lib/supabase/client";
 import { AddPlayerToTeamModal } from "./AddPlayerToTeamModal";
 import { fromTeamPlayerDatabaseFormat, toTeamPlayerDatabaseFormat } from "@/lib/mappers/teamPlayerMapper";

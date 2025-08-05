@@ -180,23 +180,37 @@ export default function TryoutDetailPage({ params }: PageProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
+      console.log("🔄 Creating regular season for team:", tryout?.team_id);
+      console.log("🔄 Full tryout object:", tryout);
+      console.log("🔄 Regular season data:", regularSeasonData);
+
       // 1. Create the regular season in the regular_seasons table
+      const seasonInsertData = {
+        name: regularSeasonData.name,
+        description: regularSeasonData.description,
+        start_date: regularSeasonData.start_date,
+        end_date: regularSeasonData.end_date,
+        location: regularSeasonData.location,
+        level: regularSeasonData.level,
+        status: "active",
+        coach_id: user.id,
+        team_id: tryout?.team_id, // Link the season to the same team as the tryout
+      };
+
+      console.log("🔄 Inserting season data:", seasonInsertData);
+
       const { data: newSeasonData, error: seasonError } = await supabase
         .from("regular_seasons")
-        .insert({
-          name: regularSeasonData.name,
-          description: regularSeasonData.description,
-          start_date: regularSeasonData.start_date,
-          end_date: regularSeasonData.end_date,
-          location: regularSeasonData.location,
-          level: regularSeasonData.level,
-          status: "active",
-          coach_id: user.id,
-        })
+        .insert(seasonInsertData)
         .select()
         .single();
 
-      if (seasonError) throw seasonError;
+      if (seasonError) {
+        console.error("❌ Season creation error:", seasonError);
+        throw seasonError;
+      }
+
+      console.log("✅ Season created successfully:", newSeasonData);
 
       // 2. Add selected players to the regular_season_players table
       if (selectedPlayers.length > 0) {
@@ -222,8 +236,14 @@ export default function TryoutDetailPage({ params }: PageProps) {
 
       if (updateError) throw updateError;
 
-      // 4. Navigate back to tryouts list (or could navigate to new regular season)
-      router.push("/coach-dashboard/regular-season");
+      // 4. Navigate back to team page to see the new regular season
+      console.log("✅ Tryout ended successfully, navigating back to team:", tryout?.team_id);
+      if (tryout?.team_id) {
+        router.push(`/coach-dashboard/regular-season/team/${tryout.team_id}`);
+      } else {
+        console.log("⚠️ No team_id found on tryout, going to main page");
+        router.push("/coach-dashboard/regular-season");
+      }
     } catch (error) {
       console.error("Error ending tryout:", error);
     }
@@ -461,7 +481,10 @@ export default function TryoutDetailPage({ params }: PageProps) {
           </TabsContent>
 
           <TabsContent value="players">
-            <TryoutPlayers tryoutId={tryout.id} />
+            <TryoutPlayers 
+              tryoutId={tryout.id} 
+              onStatsChange={() => loadPlayerStats(tryout.id)}
+            />
           </TabsContent>
         </Tabs>
       </div>

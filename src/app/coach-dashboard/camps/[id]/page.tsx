@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, MapPin, Users, ArrowLeft, Eye } from "lucide-react";
+import { Calendar, MapPin, Users, ArrowLeft, Eye, ClipboardCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Camp } from "@/types/camp";
 import { supabase } from "@/lib/supabase/client";
 import { fromDatabaseFormat } from "@/lib/mappers/campMapper";
 import { CampPlayers } from "@/components/camps/camp/CampPlayer";
+import { CampEvaluations } from "@/components/camps/camp/CampEvaluations";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -19,6 +20,7 @@ interface CampStats {
   activePlayers: number;
   pendingPlayers: number;
   totalRegistrations: number;
+  totalEvaluations: number;
 }
 
 export default function CampDetailPage({ params }: PageProps) {
@@ -31,92 +33,108 @@ export default function CampDetailPage({ params }: PageProps) {
     activePlayers: 0,
     pendingPlayers: 0,
     totalRegistrations: 0,
+    totalEvaluations: 0,
   });
 
-  useEffect(() => {
-    const loadCampAndStats = async () => {
-      try {
-        const { id } = await params;
+  const loadCampAndStats = useCallback(async () => {
+    try {
+      const { id } = await params;
 
-        // Get authenticated user
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (!user) {
-          console.error("No authenticated user");
-          return;
-        }
-
-        // Load camp data from database
-        const { data: campData, error: campError } = await supabase
-          .from("camps")
-          .select("*")
-          .eq("id", id)
-          .eq("coach_id", user.id)
-          .single();
-
-        if (campError) {
-          console.error("Error loading camp:", campError);
-          return;
-        }
-
-        if (campData) {
-          const formattedCamp = fromDatabaseFormat(campData);
-          setCamp(formattedCamp);
-        }
-
-        // Load player stats for this camp
-        const { data: registrationsData, error: registrationsError } =
-          await supabase
-            .from("camp_registrations")
-            .select(
-              `
-            *,
-            players (
-              id,
-              first_name,
-              last_name,
-              email,
-              is_active
-            )
-          `
-            )
-            .eq("camp_id", id);
-
-        if (registrationsError) {
-          console.error("Error loading registrations:", registrationsError);
-          return;
-        }
-
-        // Calculate stats
-        if (registrationsData) {
-          const totalRegistrations = registrationsData.length;
-          const activePlayers = registrationsData.filter(
-            (reg) => reg.status === "confirmed"
-          ).length;
-          const pendingPlayers = registrationsData.filter(
-            (reg) => reg.status === "pending"
-          ).length;
-          const totalPlayers = registrationsData.filter(
-            (reg) => reg.status !== "cancelled"
-          ).length;
-
-          setStats({
-            totalPlayers,
-            activePlayers,
-            pendingPlayers,
-            totalRegistrations,
-          });
-        }
-      } catch (error) {
-        console.error("Error loading camp:", error);
-      } finally {
-        setLoading(false);
+      // Get authenticated user
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        console.error("No authenticated user");
+        return;
       }
-    };
 
-    loadCampAndStats();
+      // Load camp data from database
+      const { data: campData, error: campError } = await supabase
+        .from("camps")
+        .select("*")
+        .eq("id", id)
+        .eq("coach_id", user.id)
+        .single();
+
+      if (campError) {
+        console.error("Error loading camp:", campError);
+        return;
+      }
+
+      if (campData) {
+        const formattedCamp = fromDatabaseFormat(campData);
+        setCamp(formattedCamp);
+      }
+
+      // Load player stats for this camp
+      const { data: registrationsData, error: registrationsError } =
+        await supabase
+          .from("camp_registrations")
+          .select(
+            `
+          *,
+          players (
+            id,
+            first_name,
+            last_name,
+            email,
+            is_active
+          )
+        `
+          )
+          .eq("camp_id", id);
+
+      if (registrationsError) {
+        console.error("Error loading registrations:", registrationsError);
+        return;
+      }
+
+      // Calculate stats
+      if (registrationsData) {
+        const totalRegistrations = registrationsData.length;
+        const activePlayers = registrationsData.filter(
+          (reg) => reg.status === "confirmed"
+        ).length;
+        const pendingPlayers = registrationsData.filter(
+          (reg) => reg.status === "pending"
+        ).length;
+        const totalPlayers = registrationsData.filter(
+          (reg) => reg.status !== "cancelled"
+        ).length;
+
+        // Get evaluations count for camp players
+        const playerIds = registrationsData
+          .filter(reg => reg.players && reg.status !== "cancelled")
+          .map(reg => reg.players.id);
+
+        let totalEvaluations = 0;
+        if (playerIds.length > 0) {
+          const { data: evaluationsData } = await supabase
+            .from("player_evaluations")
+            .select("id")
+            .in("player_id", playerIds);
+          totalEvaluations = evaluationsData?.length || 0;
+        }
+
+        setStats({
+          totalPlayers,
+          activePlayers,
+          pendingPlayers,
+          totalRegistrations,
+          totalEvaluations,
+        });
+      }
+    } catch (error) {
+      console.error("Error loading camp:", error);
+    } finally {
+      setLoading(false);
+    }
   }, [params]);
+
+  useEffect(() => {
+    loadCampAndStats();
+  }, [params, loadCampAndStats]);
 
   const getStatusColor = () => {
     if (!camp?.isActive) return "bg-gray-100 text-gray-800";
@@ -235,7 +253,7 @@ export default function CampDetailPage({ params }: PageProps) {
           onValueChange={setActiveTab}
           className="space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-2 bg-gray-100">
+          <TabsList className="grid w-full grid-cols-3 bg-gray-100">
             <TabsTrigger
               value="overview"
               className="flex items-center space-x-2"
@@ -249,6 +267,13 @@ export default function CampDetailPage({ params }: PageProps) {
             >
               <Users className="w-4 h-4" />
               <span>Players ({stats.totalPlayers})</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="evaluations"
+              className="flex items-center space-x-2"
+            >
+              <ClipboardCheck className="w-4 h-4" />
+              <span>Evaluations ({stats.totalEvaluations})</span>
             </TabsTrigger>
           </TabsList>
 
@@ -346,6 +371,10 @@ export default function CampDetailPage({ params }: PageProps) {
 
           <TabsContent value="players">
             <CampPlayers campId={camp.id} />
+          </TabsContent>
+
+          <TabsContent value="evaluations">
+            <CampEvaluations campId={camp.id} />
           </TabsContent>
         </Tabs>
       </div>

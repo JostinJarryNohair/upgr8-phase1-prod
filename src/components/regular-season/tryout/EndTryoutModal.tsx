@@ -13,7 +13,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { 
   X, 
   Trophy, 
@@ -54,14 +53,6 @@ const getPositionColor = (position?: string) => {
   }
 };
 
-const getPositionInitial = (position?: string) => {
-  switch (position) {
-    case "forward": return "F";
-    case "defense": return "D";
-    case "goalie": return "G";
-    default: return "?";
-  }
-};
 
 export function EndTryoutModal({ 
   isOpen, 
@@ -189,14 +180,6 @@ export function EndTryoutModal({
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-medium text-gray-900 truncate">
                             {player.first_name} {player.last_name}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-xs">
-                              {getPositionInitial(player.position)}
-                            </Badge>
-                            {player.jersey_number && (
-                              <span className="text-xs text-gray-500">#{player.jersey_number}</span>
-                            )}
                           </div>
                         </div>
                       </div>

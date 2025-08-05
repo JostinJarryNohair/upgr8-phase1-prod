@@ -26,6 +26,7 @@ interface TryoutManagementProps {
   onAddTryout: (tryout: TryoutFormData) => void;
   onUpdateTryout: (id: string, updates: Partial<TryoutFormData>) => void;
   onDeleteTryout: (id: string) => void;
+  teamContext?: { name: string; level: string };
 }
 
 const getStatusColor = (status: string) => {
@@ -49,19 +50,33 @@ const getStatusLabel = (status: string) => {
 export function TryoutManagement({
   tryouts,
   onAddTryout,
+  onUpdateTryout,
   onDeleteTryout,
+  teamContext,
 }: TryoutManagementProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingTryout, setEditingTryout] = useState<Tryout | null>(null);
 
   const handleEdit = (tryout: Tryout) => {
+    setEditingTryout(tryout);
     setIsAddModalOpen(true);
-    console.log(tryout);
   };
 
 
 
   const handleCloseModal = () => {
     setIsAddModalOpen(false);
+    setEditingTryout(null);
+  };
+
+  const handleSave = async (tryoutData: TryoutFormData) => {
+    if (editingTryout) {
+      await onUpdateTryout(editingTryout.id, tryoutData);
+    } else {
+      await onAddTryout(tryoutData);
+    }
+    setIsAddModalOpen(false);
+    setEditingTryout(null);
   };
 
   const formatDate = (dateString?: string) => {
@@ -75,7 +90,16 @@ export function TryoutManagement({
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold">Gestion des Tryouts</h1>
+            <div>
+              <h1 className="text-3xl font-bold">
+                {teamContext ? `Tryouts - ${teamContext.name}` : "Gestion des Tryouts"}
+              </h1>
+              {teamContext && (
+                <p className="text-gray-600 mt-1">
+                  Niveau {teamContext.level}
+                </p>
+              )}
+            </div>
             <Button
               onClick={() => setIsAddModalOpen(true)}
               className="flex items-center gap-2"
@@ -179,24 +203,35 @@ export function TryoutManagement({
 
                 {/* Tryout Actions */}
                 <div className="mt-6 pt-4 border-t border-gray-200">
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => window.location.href = `/coach-dashboard/regular-season/tryout/${tryout.id}`}
-                  >
-                    Gérer les joueurs
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => window.location.href = `/coach-dashboard/regular-season/tryout/${tryout.id}`}
+                    >
+                      Gérer les joueurs
+                    </Button>
+                    {tryout.status === "active" && (
+                      <Button
+                        className="flex-1 bg-green-600 hover:bg-green-700"
+                        onClick={() => window.location.href = `/coach-dashboard/regular-season/tryout/${tryout.id}`}
+                      >
+                        Terminer le tryout
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         )}
 
-                 {/* Add Tryout Modal */}
+                 {/* Add/Edit Tryout Modal */}
          <AddTryoutModal
            isOpen={isAddModalOpen}
            onClose={handleCloseModal}
-           onAdd={onAddTryout}
+           onAdd={handleSave}
+           editingTryout={editingTryout}
          />
       </div>
     </div>

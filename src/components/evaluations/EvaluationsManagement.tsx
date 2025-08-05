@@ -388,7 +388,7 @@ export function EvaluationsManagement({
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       evaluation.is_completed
                         ? "bg-green-100 text-green-800"
-                        : "bg-yellow-100 text-yellow-800"
+                        : "bg-orange-100 text-orange-800 animate-pulse"
                     }`}>
                       {evaluation.is_completed ? "Complétée" : "En cours"}
                     </span>
@@ -405,9 +405,12 @@ export function EvaluationsManagement({
                           <Eye className="w-4 h-4 mr-2" />
                           Voir
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onEditEvaluation(evaluation.id)}>
+                        <DropdownMenuItem 
+                          onClick={() => onEditEvaluation(evaluation.id)}
+                          className={!evaluation.is_completed ? "bg-orange-50 text-orange-700" : ""}
+                        >
                           <Edit className="w-4 h-4 mr-2" />
-                          Modifier
+                          {evaluation.is_completed ? "Modifier" : "Continuer l'évaluation"}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleExportPDF(evaluation)}>
                           <FileText className="w-4 h-4 mr-2" />

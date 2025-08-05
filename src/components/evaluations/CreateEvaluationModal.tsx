@@ -38,6 +38,7 @@ interface CreateEvaluationModalProps {
   selectedPlayerId?: string;
   players: Player[];
   onEvaluationCreated: () => void;
+  editingEvaluationId?: string; // New prop for editing
 }
 
 const criteriaCategories = [
@@ -52,6 +53,7 @@ export function CreateEvaluationModal({
   selectedPlayerId,
   players,
   onEvaluationCreated,
+  editingEvaluationId,
 }: CreateEvaluationModalProps) {
   const [criteria, setCriteria] = useState<EvaluationCriteria[]>([]);
   const [selectedPlayer, setSelectedPlayer] = useState<string>(selectedPlayerId || "");
@@ -59,34 +61,69 @@ export function CreateEvaluationModal({
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Load evaluation criteria
+  // Load evaluation criteria and existing evaluation data
   useEffect(() => {
-    const loadCriteria = async () => {
-      const { data, error } = await supabase
+    const loadData = async () => {
+      // Load criteria
+      const { data: criteriaData, error: criteriaError } = await supabase
         .from("evaluation_criteria")
         .select("*")
         .eq("is_active", true)
         .order("category, name_fr");
 
-      if (error) {
-        console.error("Error loading criteria:", error);
+      if (criteriaError) {
+        console.error("Error loading criteria:", criteriaError);
         return;
       }
 
-      setCriteria(data || []);
+      setCriteria(criteriaData || []);
       
-      // Initialize scores with 0
+      // Initialize scores
       const initialScores: { [criteriaId: string]: number } = {};
-      (data || []).forEach(criterion => {
+      (criteriaData || []).forEach(criterion => {
         initialScores[criterion.id] = 0;
       });
-      setScores(initialScores);
+
+      // If editing, load existing evaluation data
+      if (editingEvaluationId) {
+        const { data: evaluationData, error: evaluationError } = await supabase
+          .from("player_evaluations")
+          .select(`
+            *,
+            evaluation_scores (
+              criteria_id,
+              score
+            )
+          `)
+          .eq("id", editingEvaluationId)
+          .single();
+
+        if (evaluationError) {
+          console.error("Error loading evaluation:", evaluationError);
+        } else if (evaluationData) {
+          // Load existing scores
+          const existingScores = { ...initialScores };
+          evaluationData.evaluation_scores?.forEach((score: {
+            criteria_id: string;
+            score: number;
+          }) => {
+            existingScores[score.criteria_id] = score.score;
+          });
+          
+          setScores(existingScores);
+          setNotes(evaluationData.notes || "");
+          setSelectedPlayer(evaluationData.player_id);
+        }
+      } else {
+        setScores(initialScores);
+        setNotes("");
+      }
     };
 
     if (isOpen) {
-      loadCriteria();
+      loadData();
     }
-  }, [isOpen]);
+  }, [isOpen, editingEvaluationId]);
 
   // Update selected player when prop changes
   useEffect(() => {
@@ -125,38 +162,95 @@ export function CreateEvaluationModal({
         throw new Error("Utilisateur non authentifié");
       }
 
-      // Create the evaluation
-      const { data: evaluation, error: evaluationError } = await supabase
-        .from("player_evaluations")
-        .insert({
-          player_id: selectedPlayer,
-          coach_id: user.id,
-          evaluation_date: new Date().toISOString(),
-          notes: notes,
-          overall_score: calculateOverallScore(),
-          is_completed: true,
-        })
-        .select()
-        .single();
+      let evaluationId: string;
 
-      if (evaluationError) {
-        throw evaluationError;
+      if (editingEvaluationId) {
+        console.log("Updating evaluation:", editingEvaluationId);
+        
+        // First, verify the evaluation exists and belongs to this coach
+        const { data: existingEvaluation, error: fetchError } = await supabase
+          .from("player_evaluations")
+          .select("id, coach_id")
+          .eq("id", editingEvaluationId)
+          .single();
+
+        if (fetchError) {
+          console.error("Error fetching existing evaluation:", fetchError);
+          throw new Error("Impossible de trouver l'évaluation à modifier");
+        }
+
+        if (existingEvaluation.coach_id !== user.id) {
+          throw new Error("Vous n'avez pas la permission de modifier cette évaluation");
+        }
+
+        // Update existing evaluation
+        const { data: evaluation, error: evaluationError } = await supabase
+          .from("player_evaluations")
+          .update({
+            notes: notes,
+            overall_score: calculateOverallScore(),
+            is_completed: true,
+          })
+          .eq("id", editingEvaluationId)
+          .eq("coach_id", user.id) // Add coach_id check for security
+          .select()
+          .single();
+
+        if (evaluationError) {
+          console.error("Error updating evaluation:", evaluationError);
+          throw new Error(`Erreur lors de la mise à jour: ${evaluationError.message}`);
+        }
+
+        if (!evaluation) {
+          throw new Error("Aucune évaluation mise à jour - vérifiez vos permissions");
+        }
+
+        evaluationId = evaluation.id;
+
+        console.log("Successfully updated evaluation");
+      } else {
+        // Create new evaluation
+        const { data: evaluation, error: evaluationError } = await supabase
+          .from("player_evaluations")
+          .insert({
+            player_id: selectedPlayer,
+            coach_id: user.id,
+            evaluation_date: new Date().toISOString(),
+            notes: notes,
+            overall_score: calculateOverallScore(),
+            is_completed: true,
+          })
+          .select()
+          .single();
+
+        if (evaluationError) {
+          throw evaluationError;
+        }
+
+        evaluationId = evaluation.id;
       }
 
-      // Create all the scores
+      // Create/update all the scores using UPSERT
       const scoresData = Object.entries(scores).map(([criteriaId, score]) => ({
-        player_evaluation_id: evaluation.id,
+        player_evaluation_id: evaluationId,
         criteria_id: criteriaId,
         score: score,
       }));
 
+      console.log("Upserting scores:", scoresData.length, "scores");
+
       const { error: scoresError } = await supabase
         .from("evaluation_scores")
-        .insert(scoresData);
+        .upsert(scoresData, {
+          onConflict: 'player_evaluation_id,criteria_id', // Handle duplicates on this unique constraint
+        });
 
       if (scoresError) {
-        throw scoresError;
+        console.error("Error upserting scores:", scoresError);
+        throw new Error(`Erreur lors de l'enregistrement des scores: ${scoresError.message}`);
       }
+
+      console.log("Successfully upserted scores");
 
       // Success!
       onEvaluationCreated();
@@ -168,8 +262,18 @@ export function CreateEvaluationModal({
       setNotes("");
 
     } catch (error) {
-      console.error("Error creating evaluation:", error);
-      alert("Erreur lors de la création de l'évaluation");
+      console.error("Error saving evaluation:", error);
+      
+      // More specific error messages
+      let errorMessage = editingEvaluationId 
+        ? "Erreur lors de la modification de l'évaluation" 
+        : "Erreur lors de la création de l'évaluation";
+        
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      alert(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -199,7 +303,7 @@ export function CreateEvaluationModal({
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <User className="w-5 h-5" />
-            <span>Créer une évaluation</span>
+            <span>{editingEvaluationId ? "Modifier une évaluation" : "Créer une évaluation"}</span>
           </DialogTitle>
         </DialogHeader>
 
@@ -331,12 +435,12 @@ export function CreateEvaluationModal({
             {saving ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Enregistrement...
+                {editingEvaluationId ? "Modification..." : "Enregistrement..."}
               </>
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Enregistrer l&apos;évaluation
+                {editingEvaluationId ? "Modifier l'évaluation" : "Enregistrer l'évaluation"}
               </>
             )}
           </Button>

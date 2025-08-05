@@ -19,6 +19,7 @@ export interface TryoutFormData {
 export interface Tryout extends TryoutFormData {
   id: string;
   coach_id: string;
+  team_id?: string;
   created_at: string;
   updated_at: string;
 }

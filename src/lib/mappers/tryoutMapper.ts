@@ -9,10 +9,11 @@ type TryoutStatusEnum = Database["public"]["Enums"]["tryout_status"];
 type CampLevelEnum = Database["public"]["Enums"]["camp_level"];
 
 // Map database row to frontend format
-export function fromDatabaseFormat(dbRow: DbTryout): Tryout {
+export function fromDatabaseFormat(dbRow: any): Tryout {
   return {
     id: dbRow.id,
     coach_id: dbRow.coach_id,
+    team_id: dbRow.team_id || undefined,
     name: dbRow.name,
     description: dbRow.description || "",
     status: dbRow.status as TryoutStatus,

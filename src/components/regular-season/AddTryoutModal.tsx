@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { TryoutFormData, TryoutStatus, CampLevel } from "@/types/tryout";
+import { useState, useEffect } from "react";
+import { Tryout, TryoutFormData, TryoutStatus, CampLevel } from "@/types/tryout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,7 @@ interface AddTryoutModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (tryout: TryoutFormData) => void;
+  editingTryout?: Tryout | null;
 }
 
 const CAMP_LEVELS: { value: CampLevel; label: string }[] = [
@@ -33,7 +34,7 @@ const CAMP_LEVELS: { value: CampLevel; label: string }[] = [
   { value: "Senior", label: "Senior" },
 ];
 
-export function AddTryoutModal({ isOpen, onClose, onAdd }: AddTryoutModalProps) {
+export function AddTryoutModal({ isOpen, onClose, onAdd, editingTryout }: AddTryoutModalProps) {
   const [formData, setFormData] = useState<TryoutFormData>({
     name: "",
     description: "",
@@ -45,6 +46,32 @@ export function AddTryoutModal({ isOpen, onClose, onAdd }: AddTryoutModalProps) 
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  // Initialize form data when editing
+  useEffect(() => {
+    if (editingTryout) {
+      setFormData({
+        name: editingTryout.name,
+        description: editingTryout.description || "",
+        status: editingTryout.status,
+        start_date: editingTryout.start_date || "",
+        end_date: editingTryout.end_date || "",
+        location: editingTryout.location || "",
+        level: editingTryout.level,
+      });
+    } else {
+      setFormData({
+        name: "",
+        description: "",
+        status: "active",
+        start_date: "",
+        end_date: "",
+        location: "",
+        level: undefined,
+      });
+    }
+    setErrors({});
+  }, [editingTryout, isOpen]);
 
   const validate = () => {
     const newErrors: { [key: string]: string } = {};
@@ -99,7 +126,7 @@ export function AddTryoutModal({ isOpen, onClose, onAdd }: AddTryoutModalProps) 
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">
-            Créer un nouveau tryout
+            {editingTryout ? "Modifier le tryout" : "Créer un nouveau tryout"}
           </h2>
           <button
             onClick={onClose}
@@ -222,7 +249,10 @@ export function AddTryoutModal({ isOpen, onClose, onAdd }: AddTryoutModalProps) 
               className="flex items-center gap-2"
             >
               <Plus className="h-4 w-4" />
-              {loading ? "Création..." : "Créer le tryout"}
+              {loading 
+                ? (editingTryout ? "Modification..." : "Création...")
+                : (editingTryout ? "Modifier le tryout" : "Créer le tryout")
+              }
             </Button>
           </div>
         </form>

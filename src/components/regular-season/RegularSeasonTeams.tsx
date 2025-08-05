@@ -55,7 +55,8 @@ export function RegularSeasonTeams({ seasonId }: RegularSeasonTeamsProps) {
   const [levelFilter, setLevelFilter] = useState<string>("all");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Load teams for this coach
+  // Load teams for this coach (for now, we show all teams by coach since teams table doesn't have season_id)
+  // TODO: In a future version, add season_id to teams table to properly associate teams with seasons
   useEffect(() => {
     const loadTeams = async () => {
       try {
@@ -89,7 +90,7 @@ export function RegularSeasonTeams({ seasonId }: RegularSeasonTeamsProps) {
     };
 
     loadTeams();
-  }, []);
+  }, [seasonId]);
 
   // Filter teams based on search and filters
   const filteredTeams = teams.filter(team => {

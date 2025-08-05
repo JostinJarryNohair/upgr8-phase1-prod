@@ -34,6 +34,7 @@ import { toDatabaseFormat as toPlayerDatabaseFormat } from "@/lib/mappers/player
 
 interface TryoutPlayersProps {
   tryoutId: string;
+  onStatsChange?: () => void;
 }
 
 const getPositionColor = (position?: string) => {
@@ -54,7 +55,7 @@ const getPositionInitial = (position?: string) => {
   }
 };
 
-export function TryoutPlayers({ tryoutId }: TryoutPlayersProps) {
+export function TryoutPlayers({ tryoutId, onStatsChange }: TryoutPlayersProps) {
   const [registrations, setRegistrations] = useState<TryoutRegistrationWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -165,6 +166,12 @@ export function TryoutPlayers({ tryoutId }: TryoutPlayersProps) {
             reg.player_id === playerId ? updatedRegistration : reg
           );
           console.log("✅ Local state updated successfully");
+          
+          // Notify parent component to refresh stats
+          if (onStatsChange) {
+            onStatsChange();
+          }
+          
           return newRegistrations;
         });
       }
@@ -209,6 +216,11 @@ export function TryoutPlayers({ tryoutId }: TryoutPlayersProps) {
       // Add to local state
       const formattedRegistration = fromTryoutRegistrationDatabaseFormat(registrationData);
       setRegistrations(prev => [formattedRegistration, ...prev]);
+      
+      // Notify parent component to refresh stats
+      if (onStatsChange) {
+        onStatsChange();
+      }
 
     } catch (error) {
       console.error("Error adding player:", error);
@@ -240,6 +252,11 @@ export function TryoutPlayers({ tryoutId }: TryoutPlayersProps) {
       // Update local state
       const newRegistrations = (data || []).map(fromTryoutRegistrationDatabaseFormat);
       setRegistrations(prev => [...newRegistrations, ...prev]);
+      
+      // Notify parent component to refresh stats
+      if (onStatsChange) {
+        onStatsChange();
+      }
     } catch (error) {
       console.error("Error importing players:", error);
     }

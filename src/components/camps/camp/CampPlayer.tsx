@@ -232,6 +232,7 @@ export function CampPlayers({ campId }: CampPlayersProps) {
     }
   };
 
+
   const getStatusBadge = (status: string | null) => {
     switch (status) {
       case "confirmed":
@@ -426,7 +427,9 @@ export function CampPlayers({ campId }: CampPlayersProps) {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      {getStatusBadge(player.registration_status || null)}
+                      <div className="flex flex-wrap gap-2">
+                        {getStatusBadge(player.registration_status || null)}
+                      </div>
                       {player.email && (
                         <div className="text-sm text-gray-600">
                           {player.email}

@@ -18,6 +18,7 @@ export interface RegularSeasonFormData {
 export interface RegularSeason extends RegularSeasonFormData {
   id: string;
   coach_id: string;
+  team_id?: string;
   created_at: string;
   updated_at: string;
 }

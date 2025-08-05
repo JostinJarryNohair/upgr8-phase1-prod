@@ -5,6 +5,7 @@ export function fromDatabaseFormat(dbRow: Record<string, unknown>): RegularSeaso
   return {
     id: dbRow.id as string,
     coach_id: dbRow.coach_id as string,
+    team_id: dbRow.team_id as string,
     name: dbRow.name as string,
     description: (dbRow.description as string) || "",
     status: dbRow.status as RegularSeasonStatus,

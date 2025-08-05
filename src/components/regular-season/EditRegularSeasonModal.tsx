@@ -249,11 +249,17 @@ export default function EditRegularSeasonModal({
                   <SelectValue placeholder="Sélectionner un niveau" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="initiation">Initiation</SelectItem>
-                  <SelectItem value="regional">Régional</SelectItem>
-                  <SelectItem value="provincial">Provincial</SelectItem>
-                  <SelectItem value="national">National</SelectItem>
-                  <SelectItem value="haute-performance">Haute Performance</SelectItem>
+                  <SelectItem value="U7">U7</SelectItem>
+                  <SelectItem value="U9">U9</SelectItem>
+                  <SelectItem value="U11">U11</SelectItem>
+                  <SelectItem value="U13">U13</SelectItem>
+                  <SelectItem value="U15">U15</SelectItem>
+                  <SelectItem value="U18">U18</SelectItem>
+                  <SelectItem value="M13">M13</SelectItem>
+                  <SelectItem value="M15">M15</SelectItem>
+                  <SelectItem value="M18">M18</SelectItem>
+                  <SelectItem value="Junior">Junior</SelectItem>
+                  <SelectItem value="Senior">Senior</SelectItem>
                 </SelectContent>
               </Select>
             </div>

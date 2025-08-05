@@ -4,10 +4,12 @@ import { useState, useEffect } from "react";
 import { Player, PlayerFormData } from "@/types/player";
 import { Camp } from "@/types/camp";
 import { CampRegistrationWithDetails } from "@/types/campRegistration";
+import { PlayerEvaluationWithScores } from "@/types/evaluation";
 import { supabase } from "@/lib/supabase/client";
 import { fromDatabaseFormat as fromPlayerDatabaseFormat, toDatabaseFormat as toPlayerDatabaseFormat } from "@/lib/mappers/playerMapper";
 import { fromDatabaseFormat as fromCampDatabaseFormat } from "@/lib/mappers/campMapper";
 import { fromDatabaseFormat as fromCampRegistrationDatabaseFormat } from "@/lib/mappers/campRegistrationMapper";
+import { fromEvaluationWithScoresDatabaseFormat } from "@/lib/mappers/evaluationMapper";
 import { useTranslation } from '@/hooks/useTranslation';
 import { PlayersManagement } from "@/components/players/PlayersManagement";
 export default function PlayersPage() {
@@ -15,6 +17,7 @@ export default function PlayersPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [camps, setCamps] = useState<Camp[]>([]);
   const [campRegistrations, setCampRegistrations] = useState<CampRegistrationWithDetails[]>([]);
+  const [evaluations, setEvaluations] = useState<PlayerEvaluationWithScores[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Load players and camps from database
@@ -138,6 +141,28 @@ export default function PlayersPage() {
         setPlayers(formattedPlayers);
       }
 
+      // Load evaluations for this coach
+      const { data: evaluationsData, error: evaluationsError } = await supabase
+        .from("player_evaluations")
+        .select(`
+          *,
+          player:players(id, first_name, last_name, position, jersey_number),
+          coach:coaches(id, first_name, last_name),
+          scores:evaluation_scores(
+            *,
+            criteria:evaluation_criteria(*)
+          )
+        `)
+        .eq("coach_id", user.id)
+        .order("evaluation_date", { ascending: false });
+
+      if (evaluationsError) {
+        console.error("Error loading evaluations:", evaluationsError);
+      } else {
+        const formattedEvaluations = (evaluationsData || []).map(fromEvaluationWithScoresDatabaseFormat);
+        setEvaluations(formattedEvaluations);
+      }
+
       setLoading(false);
     };
 
@@ -202,6 +227,36 @@ export default function PlayersPage() {
     setPlayers([...newPlayers, ...players]);
   };
 
+  const handleEvaluationCreated = async () => {
+    // Reload evaluations after creating a new one
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return;
+
+    const { data: evaluationsData, error: evaluationsError } = await supabase
+      .from("player_evaluations")
+      .select(`
+        *,
+        player:players(id, first_name, last_name, position, jersey_number),
+        coach:coaches(id, first_name, last_name),
+        scores:evaluation_scores(
+          *,
+          criteria:evaluation_criteria(*)
+        )
+      `)
+      .eq("coach_id", user.id)
+      .order("evaluation_date", { ascending: false });
+
+    if (evaluationsError) {
+      console.error("Error loading evaluations:", evaluationsError);
+    } else {
+      const formattedEvaluations = (evaluationsData || []).map(fromEvaluationWithScoresDatabaseFormat);
+      setEvaluations(formattedEvaluations);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-64">
@@ -215,10 +270,12 @@ export default function PlayersPage() {
       players={players}
       camps={camps}
       campRegistrations={campRegistrations}
+      evaluations={evaluations}
       onAddPlayer={handleAddPlayer}
       onUpdatePlayer={handleUpdatePlayer}
       onDeletePlayer={handleDeletePlayer}
       onImportPlayers={handleImportPlayers}
+      onEvaluationCreated={handleEvaluationCreated}
     />
   );
 } 

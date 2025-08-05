@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import { Player, PlayerFormData } from "@/types/player";
 import { Camp } from "@/types/camp";
 import { CampRegistrationWithDetails } from "@/types/campRegistration";
+import { PlayerEvaluationWithScores } from "@/types/evaluation";
 import { AddPlayerModal } from "./AddPlayerModal";
 import { BulkImportModal } from "./BulkImportModal";
+import { PlayerInfoModal } from "./PlayerInfoModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -46,10 +48,12 @@ interface PlayersManagementProps {
   players: Player[];
   camps: Camp[];
   campRegistrations: CampRegistrationWithDetails[];
+  evaluations: PlayerEvaluationWithScores[];
   onAddPlayer: (player: PlayerFormData) => void;
   onUpdatePlayer: (id: string, updates: Partial<PlayerFormData>) => void;
   onDeletePlayer: (id: string) => void;
   onImportPlayers: (players: Player[]) => void;
+  onEvaluationCreated?: () => void;
 }
 
 const categories = [
@@ -69,10 +73,12 @@ export function PlayersManagement({
   players,
   camps,
   campRegistrations,
+  evaluations,
   onAddPlayer,
   onUpdatePlayer,
   onDeletePlayer,
   onImportPlayers,
+  onEvaluationCreated,
 }: PlayersManagementProps) {
   const router = useRouter();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -83,6 +89,7 @@ export function PlayersManagement({
   const [selectedPosition, setSelectedPosition] = useState<string | null>(null);
   const [managingRegistrations, setManagingRegistrations] = useState<Player | null>(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
   // Calculate counts for categories and positions
   const calculateCounts = () => {
@@ -154,8 +161,12 @@ export function PlayersManagement({
     setManagingRegistrations(player);
   };
 
-  const handleViewProfile = (playerId: string) => {
-    router.push(`/coach-dashboard/players/${playerId}`);
+  const handleViewProfile = (player: Player) => {
+    setSelectedPlayer(player);
+  };
+
+  const handlePlayerRowClick = (player: Player) => {
+    setSelectedPlayer(player);
   };
 
   const handleImportComplete = (importedPlayers: Player[]) => {
@@ -207,14 +218,6 @@ export function PlayersManagement({
     return age;
   };
 
-  // Mock statistics for demonstration
-  const getPlayerStats = () => ({
-    matches: Math.floor(Math.random() * 20) + 1,
-    goals: Math.floor(Math.random() * 15),
-    assists: Math.floor(Math.random() * 20),
-    points: Math.floor(Math.random() * 30) + 5,
-    evaluation: ["A", "B", "C"][Math.floor(Math.random() * 3)] as string,
-  });
 
   const getCampColor = (index: number) => {
     const colors = ["bg-red-500", "bg-blue-500", "bg-green-500", "bg-purple-500", "bg-orange-500"];
@@ -381,14 +384,7 @@ export function PlayersManagement({
                   <TableHead>Joueur</TableHead>
                   <TableHead>Position</TableHead>
                   <TableHead>Âge</TableHead>
-                  <TableHead>Taille</TableHead>
-                  <TableHead>Poids</TableHead>
-                  <TableHead>Matchs</TableHead>
-                  <TableHead>Buts</TableHead>
-                  <TableHead>Passes</TableHead>
-                  <TableHead>Points</TableHead>
-                  <TableHead>Évaluation</TableHead>
-                  <TableHead className="w-[50px]">Act</TableHead>
+                  <TableHead className="w-[50px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -414,11 +410,18 @@ export function PlayersManagement({
                   </TableRow>
                 ) : (
                   filteredPlayers.map((player) => {
-                    const stats = getPlayerStats();
                     return (
-                      <TableRow key={player.id} className="border-gray-200 hover:bg-gray-50">
+                      <TableRow 
+                        key={player.id} 
+                        className="border-gray-200 hover:bg-blue-50 hover:border-blue-200 cursor-pointer transition-all duration-200 group"
+                        onClick={() => handlePlayerRowClick(player)}
+                      >
                         <TableCell>
-                          <input type="checkbox" className="rounded border-gray-300" />
+                          <input 
+                            type="checkbox" 
+                            className="rounded border-gray-300" 
+                            onClick={(e) => e.stopPropagation()}
+                          />
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center space-x-3">
@@ -426,10 +429,7 @@ export function PlayersManagement({
                               {getInitials(player.first_name, player.last_name)}
                             </div>
                             <div>
-                              <div 
-                                className="font-medium text-gray-900 cursor-pointer hover:text-blue-600 transition-colors"
-                                onClick={() => handleViewProfile(player.id)}
-                              >
+                              <div className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
                                 {player.first_name} {player.last_name}
                               </div>
                               <div className="text-sm text-gray-500">
@@ -468,54 +468,61 @@ export function PlayersManagement({
                           </div>
                         </TableCell>
                         <TableCell className="text-gray-900">{calculateAge(player.birth_date)}</TableCell>
-                        <TableCell className="text-gray-900">183 cm</TableCell>
-                        <TableCell className="text-gray-900">78 kg</TableCell>
-                        <TableCell className="text-gray-900">{stats.matches}</TableCell>
-                        <TableCell className="text-gray-900">{stats.goals}</TableCell>
-                        <TableCell className="text-gray-900">{stats.assists}</TableCell>
-                        <TableCell>
-                          <span className="text-green-600 font-semibold">{stats.points}</span>
-                        </TableCell>
-                        <TableCell>
-                          <div className={`w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold`}>
-                            {stats.evaluation}
-                          </div>
-                        </TableCell>
+                  
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={(e) => e.stopPropagation()}
+                              >
                                 <MoreHorizontal className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="bg-white border-gray-200">
                               <DropdownMenuItem
-                                onClick={() => setEditingPlayer(player)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingPlayer(player);
+                                }}
                                 className="text-gray-700 hover:bg-gray-100"
                               >
                                 <Edit className="w-4 h-4 mr-2" />
                                 Modifier
                               </DropdownMenuItem>
                               <DropdownMenuItem 
-                                onClick={() => handleViewProfile(player.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleViewProfile(player);
+                                }}
                                 className="text-gray-700 hover:bg-gray-100"
                               >
                                 <Eye className="w-4 h-4 mr-2" />
                                 Voir profil
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="text-gray-700 hover:bg-gray-100">
+                              <DropdownMenuItem 
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-gray-700 hover:bg-gray-100"
+                              >
                                 <Star className="w-4 h-4 mr-2" />
                                 Ajouter aux favoris
                               </DropdownMenuItem>
                               <DropdownMenuItem 
-                                onClick={() => handleManageRegistrations(player)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleManageRegistrations(player);
+                                }}
                                 className="text-gray-700 hover:bg-gray-100"
                               >
                                 <Users className="w-4 h-4 mr-2" />
                                 Gérer les inscriptions aux camps
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => handleDeletePlayer(player.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeletePlayer(player.id);
+                                }}
                                 className="text-red-600 hover:bg-gray-100"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
@@ -555,6 +562,15 @@ export function PlayersManagement({
           isOpen={isImportModalOpen}
           onClose={() => setIsImportModalOpen(false)}
           onImportComplete={handleImportComplete}
+        />
+
+        {/* Player Info Modal */}
+        <PlayerInfoModal
+          player={selectedPlayer}
+          evaluations={selectedPlayer ? evaluations.filter(e => e.player_id === selectedPlayer.id) : []}
+          isOpen={!!selectedPlayer}
+          onClose={() => setSelectedPlayer(null)}
+          onEvaluationCreated={onEvaluationCreated}
         />
 
         {/* Camp Registration Management Modal */}

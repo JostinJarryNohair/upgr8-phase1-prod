@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Users, ArrowLeft, Plus, Trophy, CheckCircle } from "lucide-react";
+import { Users, ArrowLeft, Plus, Trophy, CheckCircle, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,6 +17,7 @@ import { handleSupabaseError, showErrorToast, showSuccessToast, setToastCallback
 import { useToast } from '@/components/ui/toast';
 import { TryoutManagement } from "@/components/regular-season/TryoutManagement";
 import { RegularSeasonPlayers } from "@/components/regular-season/RegularSeasonPlayers";
+import { RegularSeasonSchedule } from "@/components/regular-season/RegularSeasonSchedule";
 
 interface PageProps {
   params: Promise<{ teamId: string }>;
@@ -357,7 +358,7 @@ export default function TeamRegularSeasonPage({ params }: PageProps) {
       {/* Content Tabs */}
       <div className="px-8 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 bg-gray-100">
+          <TabsList className="grid w-full grid-cols-5 bg-gray-100">
             <TabsTrigger value="overview" className="flex items-center space-x-2">
               <Trophy className="w-4 h-4" />
               <span>Aperçu</span>
@@ -373,6 +374,14 @@ export default function TeamRegularSeasonPage({ params }: PageProps) {
             >
               <Trophy className="w-4 h-4" />
               <span>Saison Régulière</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="schedule" 
+              className="flex items-center space-x-2"
+              disabled={!currentSeason}
+            >
+              <Calendar className="w-4 h-4" />
+              <span>Horaire</span>
             </TabsTrigger>
             <TabsTrigger value="players" className="flex items-center space-x-2">
               <Users className="w-4 h-4" />
@@ -617,6 +626,31 @@ export default function TeamRegularSeasonPage({ params }: PageProps) {
                   >
                     <Plus className="h-4 w-4" />
                     Voir les Tryouts
+                  </Button>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="schedule">
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              {currentSeason ? (
+                <RegularSeasonSchedule seasonId={currentSeason.id} />
+              ) : (
+                <div className="text-center py-8">
+                  <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    Aucune saison active
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Créez et terminez un tryout pour démarrer une saison régulière et voir l'horaire.
+                  </p>
+                  <Button
+                    onClick={() => setActiveTab("tryouts")}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Créer un Tryout
                   </Button>
                 </div>
               )}

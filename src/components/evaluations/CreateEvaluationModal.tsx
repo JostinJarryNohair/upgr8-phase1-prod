@@ -299,7 +299,7 @@ export function CreateEvaluationModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
+      <DialogContent className="max-w-[1400px] w-[90vw] max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <User className="w-5 h-5" />
@@ -347,13 +347,13 @@ export function CreateEvaluationModal({
               return (
                 <div key={category.id} className={`p-6 rounded-xl border-2 ${category.color}`}>
                   <h4 className="text-xl font-semibold text-gray-900 mb-6 text-center">{category.name}</h4>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                     {categoryCriteria.map((criterion) => (
-                      <div key={criterion.id} className="bg-white p-4 rounded-lg border shadow-sm">
-                        <Label htmlFor={`score-${criterion.id}`} className="text-base font-medium text-gray-900 mb-3 block">
+                      <div key={criterion.id} className="bg-white p-5 rounded-lg border shadow-sm hover:shadow-md transition-shadow">
+                        <Label htmlFor={`score-${criterion.id}`} className="text-base font-medium text-gray-900 mb-4 block">
                           {criterion.name_fr}
                         </Label>
-                        <div className="flex items-center space-x-4">
+                        <div className="flex items-center justify-between space-x-4">
                           <div className="flex items-center space-x-2">
                             <Input
                               id={`score-${criterion.id}`}
@@ -362,11 +362,11 @@ export function CreateEvaluationModal({
                               max="10"
                               value={scores[criterion.id] || 0}
                               onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleScoreChange(criterion.id, parseInt(e.target.value) || 0)}
-                              className="w-16 h-10 text-center font-semibold"
+                              className="w-20 h-12 text-center font-semibold text-lg"
                             />
-                            <span className="text-sm text-gray-500 font-medium">/ 10</span>
+                            <span className="text-base text-gray-500 font-medium">/ 10</span>
                           </div>
-                          <div className="flex space-x-1">
+                          <div className="flex space-x-0.5">
                             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
                               <button
                                 key={star}
@@ -392,16 +392,16 @@ export function CreateEvaluationModal({
           </div>
 
           {/* Overall Score */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border-2 border-blue-200">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-8 rounded-xl border-2 border-blue-200">
             <div className="text-center">
-              <h4 className="text-lg font-semibold text-gray-900 mb-2">Score global de l&apos;évaluation</h4>
-              <div className="flex items-center justify-center space-x-3">
-                <Star className="w-8 h-8 text-yellow-500" />
-                <span className="text-4xl font-bold text-blue-600">
+              <h4 className="text-xl font-semibold text-gray-900 mb-4">Score global de l&apos;évaluation</h4>
+              <div className="flex items-center justify-center space-x-4">
+                <Star className="w-12 h-12 text-yellow-500" />
+                <span className="text-6xl font-bold text-blue-600">
                   {calculateOverallScore()}/10
                 </span>
               </div>
-              <p className="text-sm text-gray-600 mt-2">
+              <p className="text-base text-gray-600 mt-3">
                 Moyenne calculée automatiquement sur tous les critères
               </p>
             </div>

@@ -20,6 +20,7 @@ export function toDatabaseFormat(player: PlayerFormData): DbPlayerInsert {
     emergency_contact: player.emergency_contact,
     medical_notes: player.medical_notes,
     is_active: player.is_active,
+    coach_id: player.coach_id,
   };
 }
 
@@ -39,6 +40,7 @@ export function fromDatabaseFormat(dbPlayer: DbPlayer): Player {
     emergency_contact: dbPlayer.emergency_contact || undefined,
     medical_notes: dbPlayer.medical_notes || undefined,
     is_active: dbPlayer.is_active || false,
+    coach_id: dbPlayer.coach_id || undefined,
     created_at: dbPlayer.created_at || "",
     updated_at: dbPlayer.updated_at || "",
   };

@@ -17,6 +17,7 @@ export interface PlayerFormData {
   emergency_contact?: string;
   medical_notes?: string;
   is_active: boolean;
+  coach_id?: string;
 }
 
 // What gets stored in database
@@ -24,6 +25,7 @@ export interface Player extends PlayerFormData {
   id: string;
   created_at: string;
   updated_at: string;
+  coach_id?: string;
 }
 
 // Player with registration info for camp context

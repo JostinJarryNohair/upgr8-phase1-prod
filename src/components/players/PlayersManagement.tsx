@@ -32,9 +32,8 @@ import {
   Trash2, 
   User,
   Upload,
-  Bell,
-  Settings,
-  Eye
+  Eye,
+  X
 } from "lucide-react";
 
 interface PlayersManagementProps {
@@ -67,16 +66,15 @@ export function PlayersManagement({
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
-  // Simple search filter - show all players matching search term
+  // Search filter - search by name or email
   const filteredPlayers = players.filter((player) => {
-    if (!searchTerm) return true;
+    if (!searchTerm.trim()) return true;
     
-    const matchesSearch = `${player.first_name} ${player.last_name}`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase()) ||
-      player.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    const search = searchTerm.toLowerCase().trim();
+    const fullName = `${player.first_name} ${player.last_name}`.toLowerCase();
+    const email = player.email?.toLowerCase() || '';
     
-    return matchesSearch;
+    return fullName.includes(search) || email.includes(search);
   });
 
   const handleAddPlayer = (playerData: PlayerFormData) => {
@@ -175,17 +173,7 @@ export function PlayersManagement({
         {/* Top Bar */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Gérez et analysez vos joueurs</h1>
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm">
-              <Search className="w-5 h-5" />
-            </Button>
-            <Button variant="ghost" size="sm">
-              <Bell className="w-5 h-5" />
-            </Button>
-            <Button variant="ghost" size="sm">
-              <Settings className="w-5 h-5" />
-            </Button>
-          </div>
+    
         </div>
 
         {/* Action Buttons and Search */}
@@ -210,20 +198,33 @@ export function PlayersManagement({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
-              placeholder="Rechercher un joueur..."
+              placeholder="Rechercher par nom ou email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-white border-gray-300 text-gray-900 placeholder-gray-500 w-80"
+              className="pl-10 pr-10 bg-white border-gray-300 text-gray-900 placeholder-gray-500 w-80"
             />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
 
         {/* Players Table */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="p-4 border-b border-gray-200">
+          <div className="p-4 border-b border-gray-200 flex justify-between items-center">
             <h2 className="text-xl font-semibold text-gray-900">
               Tous les joueurs
             </h2>
+            {searchTerm && (
+              <span className="text-sm text-gray-500">
+                {filteredPlayers.length} résultat{filteredPlayers.length > 1 ? 's' : ''} trouvé{filteredPlayers.length > 1 ? 's' : ''}
+              </span>
+            )}
           </div>
           
           <div className="overflow-x-auto">

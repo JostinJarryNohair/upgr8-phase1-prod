@@ -116,9 +116,6 @@ export function PlayerInfoModal({ player, evaluations, isOpen, onClose, onEvalua
                 <h1 className="text-3xl font-bold">
                   {player.first_name} {player.last_name}
                 </h1>
-                <Badge className="bg-red-600 hover:bg-red-700 text-white">
-                  Capitaine
-                </Badge>
               </div>
               
               <div className="flex items-center space-x-4 text-red-400">
@@ -141,30 +138,15 @@ export function PlayerInfoModal({ player, evaluations, isOpen, onClose, onEvalua
               >
                 Vue d'ensemble
               </TabsTrigger>
-              <TabsTrigger 
-                value="statistics" 
-                className="bg-transparent text-gray-400 hover:text-white data-[state=active]:text-cyan-400 data-[state=active]:bg-transparent border-b-2 border-transparent data-[state=active]:border-cyan-400 rounded-none px-6 py-4"
-              >
-                Statistiques
-              </TabsTrigger>
+    
               <TabsTrigger 
                 value="evaluation" 
                 className="bg-transparent text-gray-400 hover:text-white data-[state=active]:text-cyan-400 data-[state=active]:bg-transparent border-b-2 border-transparent data-[state=active]:border-cyan-400 rounded-none px-6 py-4"
               >
                 Évaluation
               </TabsTrigger>
-              <TabsTrigger 
-                value="development" 
-                className="bg-transparent text-gray-400 hover:text-white data-[state=active]:text-cyan-400 data-[state=active]:bg-transparent border-b-2 border-transparent data-[state=active]:border-cyan-400 rounded-none px-6 py-4"
-              >
-                Développement
-              </TabsTrigger>
-              <TabsTrigger 
-                value="history" 
-                className="bg-transparent text-gray-400 hover:text-white data-[state=active]:text-cyan-400 data-[state=active]:bg-transparent border-b-2 border-transparent data-[state=active]:border-cyan-400 rounded-none px-6 py-4"
-              >
-                Historique
-              </TabsTrigger>
+     
+
             </TabsList>
 
             <div className="p-8 max-h-[60vh] overflow-y-auto">

@@ -181,6 +181,18 @@ export function BulkImportModal({
   const handleImport = async () => {
     setState(prev => ({ ...prev, step: 'importing' }));
     
+    // Get current user for coach_id
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setState(prev => ({ 
+        ...prev, 
+        step: 'results',
+        errors: ['User not authenticated'],
+        importResults: { created: 0, skipped: 0, errors: [] }
+      }));
+      return;
+    }
+    
     const results = {
       created: 0,
       skipped: 0,
@@ -197,24 +209,26 @@ export function BulkImportModal({
         
         for (const playerData of batch) {
           try {
-            // Check for existing player by email (if provided) or name combination
+            // Check for existing player by email (if provided) or name combination for this coach
             let existingPlayer = null;
             if (playerData.email) {
               const { data: emailCheck } = await supabase
                 .from('players')
                 .select('*')
                 .eq('email', playerData.email)
+                .eq('coach_id', user.id)
                 .single();
               existingPlayer = emailCheck;
             }
 
-            // If no email match, check by name combination
+            // If no email match, check by name combination for this coach
             if (!existingPlayer) {
               const { data: nameCheck } = await supabase
                 .from('players')
                 .select('*')
                 .eq('first_name', playerData.first_name)
                 .eq('last_name', playerData.last_name)
+                .eq('coach_id', user.id)
                 .single();
               existingPlayer = nameCheck;
             }
@@ -225,8 +239,14 @@ export function BulkImportModal({
               continue;
             }
 
+            // Add coach_id to player data
+            const playerWithCoachId = {
+              ...playerData,
+              coach_id: user.id
+            };
+
             // Convert to database format and insert
-            const dbPlayerData = toDatabaseFormat(playerData);
+            const dbPlayerData = toDatabaseFormat(playerWithCoachId);
             const { data: insertedPlayer, error } = await supabase
               .from('players')
               .insert(dbPlayerData)

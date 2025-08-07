@@ -207,14 +207,14 @@ export function TryoutManagement({
                     <Button
                       variant="outline"
                       className="flex-1"
-                      onClick={() => window.location.href = `/coach-dashboard/regular-season/tryout/${tryout.id}`}
+                      onClick={() => window.location.href = `/coach-dashboard/tryouts/${tryout.id}`}
                     >
                       Gérer les joueurs
                     </Button>
                     {tryout.status === "active" && (
                       <Button
                         className="flex-1 bg-green-600 hover:bg-green-700"
-                        onClick={() => window.location.href = `/coach-dashboard/regular-season/tryout/${tryout.id}`}
+                        onClick={() => window.location.href = `/coach-dashboard/tryouts/${tryout.id}`}
                       >
                         Terminer le tryout
                       </Button>

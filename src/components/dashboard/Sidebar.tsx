@@ -14,6 +14,7 @@ import {
   ClipboardCheck,
   Users2,
   Calendar,
+  Trophy,
   LucideIcon
 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
@@ -35,7 +36,8 @@ export type ViewType =
   | "evaluations"
   | "staff"
   | "camps"
-  | "regular-season";
+  | "tryouts"
+  | "seasons";
 
 interface NavItem {
   id: ViewType;
@@ -92,8 +94,9 @@ export function Sidebar({ isCollapsed, className }: SidebarProps) {
 
   const navItems: NavItem[] = [
     { id: "camps", label: t('navigation.camps'), icon: Dumbbell, href: "/coach-dashboard/camps" },
-    { id: "regular-season", label: t('navigation.regularSeason'), icon: Calendar, href: "/coach-dashboard/regular-season" },
     { id: "teams", label: t('navigation.teams'), icon: Users, href: "/coach-dashboard/teams" },
+    { id: "tryouts", label: t('navigation.tryouts'), icon: Trophy, href: "/coach-dashboard/tryouts" },
+    { id: "seasons", label: t('navigation.seasons'), icon: Calendar, href: "/coach-dashboard/seasons" },
     { id: "players", label: t('navigation.players'), icon: User, href: "/coach-dashboard/players" },
     { id: "evaluations", label: t('navigation.evaluations'), icon: ClipboardCheck, href: "/coach-dashboard/evaluations" },
     { id: "staff", label: t('navigation.staff'), icon: Users2, href: "/coach-dashboard/staff" },

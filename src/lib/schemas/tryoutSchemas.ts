@@ -66,52 +66,8 @@ export const tryoutFormSchema = z.object({
   path: ["end_date"]
 });
 
-// Tryout update schema (all fields optional except the validation)
-export const tryoutUpdateSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Le nom doit contenir au moins 2 caractères")
-    .max(100, "Le nom ne peut pas dépasser 100 caractères")
-    .trim()
-    .optional(),
-  
-  description: z
-    .string()
-    .max(500, "La description ne peut pas dépasser 500 caractères")
-    .optional(),
-  
-  status: z
-    .enum(TRYOUT_STATUSES as [TryoutStatus, ...TryoutStatus[]])
-    .optional(),
-  
-  start_date: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Format de date invalide (YYYY-MM-DD)")
-    .optional(),
-  
-  end_date: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Format de date invalide (YYYY-MM-DD)")
-    .optional(),
-  
-  location: z
-    .string()
-    .max(200, "Le lieu ne peut pas dépasser 200 caractères")
-    .optional(),
-  
-  level: z
-    .enum(CAMP_LEVELS as [CampLevel, ...CampLevel[]])
-    .optional()
-})
-.refine((data) => {
-  if (data.start_date && data.end_date) {
-    return new Date(data.start_date) <= new Date(data.end_date);
-  }
-  return true;
-}, {
-  message: "La date de fin doit être après la date de début",
-  path: ["end_date"]
-});
+// Tryout update schema (all fields optional)
+export const tryoutUpdateSchema = tryoutFormSchema;
 
 // Type inference from schemas
 export type TryoutFormInput = z.infer<typeof tryoutFormSchema>;

@@ -15,16 +15,10 @@ import { AddTeamModal } from "@/components/teams/AddTeamModal";
 import { TeamFormData } from "@/types/team";
 import { toDatabaseFormat as toTeamDatabaseFormat } from "@/lib/mappers/teamMapper";
 
-interface TeamWithStats extends Team {
-  activeTryouts: number;
-  currentSeasonPlayers: number;
-  hasActiveSeason: boolean;
-}
-
 export default function TeamsPage() {
   const router = useRouter();
   const { addToast } = useToast();
-  const [teams, setTeams] = useState<TeamWithStats[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -35,9 +29,9 @@ export default function TeamsPage() {
     setToastCallback(addToast);
   }, [addToast]);
 
-  // Load teams with stats
+  // Load teams - simplified without stats for v1
   useEffect(() => {
-    const loadTeamsWithStats = async () => {
+    const loadTeams = async () => {
       try {
         setError(null);
         const {
@@ -64,46 +58,10 @@ export default function TeamsPage() {
           return;
         }
 
-        // For each team, get stats
-        const teamsWithStats: TeamWithStats[] = await Promise.all(
-          (teamsData || []).map(async (teamData) => {
-            const team = fromTeamDatabaseFormat(teamData);
+        // Format teams
+        const formattedTeams = (teamsData || []).map(fromTeamDatabaseFormat);
+        setTeams(formattedTeams);
 
-            // Get active tryouts count
-            const { data: tryoutsData } = await supabase
-              .from("tryouts")
-              .select("id")
-              .eq("team_id", team.id)
-              .eq("status", "active");
-
-            // Check for active season
-            const { data: activeSeasonData } = await supabase
-              .from("regular_seasons")
-              .select("id")
-              .eq("team_id", team.id)
-              .eq("status", "active")
-              .maybeSingle();
-
-            // Get current season players count
-            let currentSeasonPlayers = 0;
-            if (activeSeasonData) {
-              const { data: playersData } = await supabase
-                .from("regular_season_players")
-                .select("id")
-                .eq("regular_season_id", activeSeasonData.id);
-              currentSeasonPlayers = playersData?.length || 0;
-            }
-
-            return {
-              ...team,
-              activeTryouts: tryoutsData?.length || 0,
-              currentSeasonPlayers,
-              hasActiveSeason: !!activeSeasonData,
-            };
-          })
-        );
-
-        setTeams(teamsWithStats);
       } catch (error) {
         const appError = handleSupabaseError(error as Error);
         showErrorToast(appError);
@@ -113,7 +71,7 @@ export default function TeamsPage() {
       }
     };
 
-    loadTeamsWithStats();
+    loadTeams();
   }, [addToast]);
 
   const handleAddTeam = async (teamData: TeamFormData) => {
@@ -144,13 +102,7 @@ export default function TeamsPage() {
 
       if (data) {
         const formattedTeam = fromTeamDatabaseFormat(data);
-        const newTeamWithStats: TeamWithStats = {
-          ...formattedTeam,
-          activeTryouts: 0,
-          currentSeasonPlayers: 0,
-          hasActiveSeason: false,
-        };
-        setTeams([newTeamWithStats, ...teams]);
+        setTeams([formattedTeam, ...teams]);
         setIsAddTeamModalOpen(false);
         showSuccessToast("Équipe créée avec succès");
       }
@@ -272,39 +224,16 @@ export default function TeamsPage() {
                 className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all cursor-pointer hover:bg-gray-50 hover:border-blue-200"
               >
                 {/* Team Header */}
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate">
-                      {team.name}
-                    </h3>
-                    <Badge className={getLevelBadgeColor(team.level)}>
-                      {team.level}
-                    </Badge>
-                  </div>
-                  {team.hasActiveSeason && (
-                    <Badge className="bg-green-100 text-green-800 ml-2">
-                      Saison Active
-                    </Badge>
-                  )}
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {team.name}
+                  </h3>
+                  <Badge className={getLevelBadgeColor(team.level)}>
+                    {team.level}
+                  </Badge>
                 </div>
 
-                {/* Team Stats */}
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-blue-600">
-                      {team.activeTryouts}
-                    </div>
-                    <div className="text-xs text-gray-600">Tryouts Actifs</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xl font-bold text-green-600">
-                      {team.currentSeasonPlayers}
-                    </div>
-                    <div className="text-xs text-gray-600">Joueurs Actifs</div>
-                  </div>
-                </div>
-
-                {/* Team Actions Hint */}
+                {/* Team Actions */}
                 <div className="mt-4 pt-4 border-t border-gray-200">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center text-sm text-gray-500">
@@ -330,4 +259,4 @@ export default function TeamsPage() {
       </div>
     </div>
   );
-} 
+}

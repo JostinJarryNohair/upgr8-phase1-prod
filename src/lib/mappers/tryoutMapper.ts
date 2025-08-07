@@ -3,12 +3,13 @@ import { CampLevel } from "@/types/camp";
 import { Database } from "@/types/database";
 
 // Use the generated database types
+type DbTryout = Database["public"]["Tables"]["tryouts"]["Row"];
 type DbTryoutInsert = Database["public"]["Tables"]["tryouts"]["Insert"];
 type TryoutStatusEnum = Database["public"]["Enums"]["tryout_status"];
 type CampLevelEnum = Database["public"]["Enums"]["camp_level"];
 
 // Map database row to frontend format
-export function fromDatabaseFormat(dbRow: any): Tryout {
+export function fromDatabaseFormat(dbRow: DbTryout): Tryout {
   return {
     id: dbRow.id,
     coach_id: dbRow.coach_id,

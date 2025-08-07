@@ -181,7 +181,7 @@ export default function TryoutDetailPage({ params }: PageProps) {
       if (!user) throw new Error("User not authenticated");
 
       console.log("🔄 Creating regular season for team:", tryout?.team_id);
-      console.log("🔄 Full tryout object:", tryout);
+      // Tryout loaded - sensitive data removed from logs
       console.log("🔄 Regular season data:", regularSeasonData);
 
       // 1. Create the regular season in the regular_seasons table
@@ -197,7 +197,7 @@ export default function TryoutDetailPage({ params }: PageProps) {
         team_id: tryout?.team_id, // Link the season to the same team as the tryout
       };
 
-      console.log("🔄 Inserting season data:", seasonInsertData);
+      // Creating season - sensitive data removed from logs
 
       const { data: newSeasonData, error: seasonError } = await supabase
         .from("regular_seasons")
@@ -210,7 +210,7 @@ export default function TryoutDetailPage({ params }: PageProps) {
         throw seasonError;
       }
 
-      console.log("✅ Season created successfully:", newSeasonData);
+      // Season created successfully - sensitive data removed from logs
 
       // 2. Add selected players to the regular_season_players table
       if (selectedPlayers.length > 0) {

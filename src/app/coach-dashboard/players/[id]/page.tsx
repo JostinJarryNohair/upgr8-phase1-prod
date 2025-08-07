@@ -58,11 +58,12 @@ export default function PlayerPage() {
         return;
       }
 
-      // Load player details
+      // Load player details (only if belongs to this coach)
       const { data: playerData, error: playerError } = await supabase
         .from("players")
         .select("*")
         .eq("id", playerId)
+        .eq("coach_id", user.id)
         .single();
 
       if (playerError) {

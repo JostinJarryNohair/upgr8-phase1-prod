@@ -8,12 +8,17 @@ import DynamicInput from "@/components/common/DynamicInput";
 import Image from "next/image";
 import Link from "next/link";
 import DynamicButton from "@/components/common/DynamicButton";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from '@/hooks/useTranslation';
 
 export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { t } = useTranslation();
+  
+  // Get the redirect URL from search params (set by middleware)
+  const redirectTo = searchParams.get('redirectTo') || '/coach-dashboard';
+  
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -80,17 +85,29 @@ export default function LoginForm() {
           console.error("Profile fetch error:", profileError);
           // User exists in auth but no coach profile - redirect to complete setup
           setMessage("Profil incomplet. Redirection...");
-          setTimeout(() => router.push("/complete-profile"), 1500);
+          
+          // Use window.location for hard redirect to ensure cookies are set
+          setTimeout(() => {
+            window.location.href = "/complete-profile";
+          }, 1500);
           return;
         }
 
-        console.log("Login successful:", {
-          user: data.user.email,
-          coach: coachData,
-        });
+        // Login successful - sensitive data removed from logs
 
-        // Success! Redirect to dashboard
-        router.push("/coach-dashboard");
+        setMessage("Connexion réussie! Redirection...");
+        
+        // IMPORTANT: Use window.location.href instead of router.push
+        // This ensures the middleware runs with the new auth state
+        setTimeout(() => {
+          window.location.href = redirectTo;
+        }, 500);
+        
+        // Alternative if you want immediate redirect:
+        // window.location.href = redirectTo;
+        
+        // Don't use router.push here as it doesn't properly refresh auth state
+        // router.push("/coach-dashboard"); // <- This won't work properly with middleware
       }
     } catch (error: unknown) {
       console.error("Login error:", error);
@@ -129,6 +146,14 @@ export default function LoginForm() {
     }
   };
 
+  // Optional: Check if there's a session expiry message from middleware
+  React.useEffect(() => {
+    const sessionMessage = searchParams.get('message');
+    if (sessionMessage === 'session_expired') {
+      setMessage(t('auth.sessionExpired') || 'Votre session a expiré. Veuillez vous reconnecter.');
+    }
+  }, [searchParams, t]);
+
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div>
@@ -164,11 +189,12 @@ export default function LoginForm() {
                 className={`p-3 rounded-lg ${
                   message.includes("Erreur") ||
                   message.includes("incorrect") ||
-                  message.includes("tentatives")
+                  message.includes("tentatives") ||
+                  message.includes("expiré")
                     ? "bg-red-50 border border-red-200 text-red-800"
-                    : message.includes("Redirection")
-                    ? "bg-blue-50 border border-blue-200 text-blue-800"
-                    : "bg-green-50 border border-green-200 text-green-800"
+                    : message.includes("Redirection") || message.includes("réussie")
+                    ? "bg-green-50 border border-green-200 text-green-800"
+                    : "bg-blue-50 border border-blue-200 text-blue-800"
                 }`}
               >
                 <p className="text-sm">{message}</p>

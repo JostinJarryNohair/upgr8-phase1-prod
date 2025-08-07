@@ -63,7 +63,7 @@ export function Topbar({
         } = await supabase.auth.getUser();
 
         if (!user) {
-          router.push("/login");
+          console.log("No user found in Topbar");
           return;
         }
 

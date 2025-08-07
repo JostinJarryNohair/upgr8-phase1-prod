@@ -14,6 +14,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: 'Invalid email format' },
+        { status: 400 }
+      );
+    }
+
     // Validate role
     const validRoles = ['coach', 'player', 'scout', 'parent'];
     if (!validRoles.includes(role)) {
@@ -31,7 +40,8 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (checkError && checkError.code !== 'PGRST116') {
-      console.error('Error checking existing email:', checkError);
+      // Log error without exposing sensitive details
+      console.error('Database check error occurred');
       return NextResponse.json(
         { error: 'Database error' },
         { status: 500 }
@@ -59,7 +69,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error inserting waiting list entry:', error);
+      console.error('Insert operation failed');
       return NextResponse.json(
         { error: 'Failed to join waiting list' },
         { status: 500 }

@@ -16,7 +16,6 @@ import {
   AlertTriangle,
   Plus,
   Trash2,
-  Edit
 } from "lucide-react";
 
 interface GamePlan {

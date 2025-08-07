@@ -67,9 +67,14 @@ export function TeamPlayers({ teamId }: TeamPlayersProps) {
             position,
             jersey_number,
             is_active
+          ),
+          team:teams!inner (
+            id,
+            coach_id
           )
         `)
-        .eq("team_id", teamId);
+        .eq("team_id", teamId)
+        .eq("team.coach_id", user.id);
 
       if (error) {
         console.error("Error loading team players:", error);
@@ -107,11 +112,12 @@ export function TeamPlayers({ teamId }: TeamPlayersProps) {
         return;
       }
 
-      // Get all active players
+      // Get all active players belonging to this coach
       const { data, error } = await supabase
         .from("players")
         .select("id, first_name, last_name, email, phone, position, jersey_number, is_active, created_at, updated_at")
-        .eq("is_active", true);
+        .eq("is_active", true)
+        .eq("coach_id", user.id);
 
       if (error) {
         console.error("Error loading available players:", error);
@@ -180,10 +186,33 @@ export function TeamPlayers({ teamId }: TeamPlayersProps) {
 
   const handleRemovePlayerFromTeam = async (teamPlayerId: string) => {
     try {
+      // Get authenticated user
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        console.error("User not authenticated");
+        return;
+      }
+
+      // First verify the team belongs to this coach
+      const { data: teamCheck, error: teamError } = await supabase
+        .from("teams")
+        .select("id")
+        .eq("id", teamId)
+        .eq("coach_id", user.id)
+        .single();
+
+      if (teamError || !teamCheck) {
+        console.error("Team not found or unauthorized:", teamError);
+        return;
+      }
+
       const { error } = await supabase
         .from("team_players")
         .delete()
-        .eq("id", teamPlayerId);
+        .eq("id", teamPlayerId)
+        .eq("team_id", teamId);
 
       if (error) {
         console.error("Error removing player from team:", error);

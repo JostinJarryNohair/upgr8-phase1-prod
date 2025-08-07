@@ -144,10 +144,21 @@ export default function PlayersPage() {
     id: string,
     updates: Partial<PlayerFormData>
   ) => {
+    // Get authenticated user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      console.error("User not authenticated");
+      return;
+    }
+
     const { data, error } = await supabase
       .from("players")
       .update(updates)
       .eq("id", id)
+      .eq("coach_id", user.id)
       .select()
       .single();
 
@@ -163,7 +174,21 @@ export default function PlayersPage() {
   };
 
   const handleDeletePlayer = async (id: string) => {
-    const { error } = await supabase.from("players").delete().eq("id", id);
+    // Get authenticated user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      console.error("User not authenticated");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("players")
+      .delete()
+      .eq("id", id)
+      .eq("coach_id", user.id);
 
     if (error) {
       console.error("Error deleting player:", error);

@@ -432,11 +432,7 @@ export default function RegularSeasonDetailPage({ params }: PageProps) {
             </div>
           </TabsContent>
 
-          <TabsContent value="teams">
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <RegularSeasonTeams seasonId={regularSeason.id} />
-            </div>
-          </TabsContent>
+  
         </Tabs>
       </div>
 

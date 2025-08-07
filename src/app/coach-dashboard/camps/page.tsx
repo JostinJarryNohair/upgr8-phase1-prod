@@ -11,19 +11,22 @@ export default function CampsPage() {
   const { t } = useTranslation();
   const [camps, setCamps] = useState<Camp[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
 
   // ✅ Load real camps from database
   useEffect(() => {
     const loadCamps = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      // CHANGE: Use getSession instead of getUser
+      const { data: { session } } = await supabase.auth.getSession();
 
-      if (!user) {
+      if (!session) {
         console.error(t('common.notAuthenticated'));
         setLoading(false);
         return;
       }
+
+      const user = session.user;
+      setUserId(user.id); // Store user ID for later use
 
       const { data, error } = await supabase
         .from("camps")
@@ -46,11 +49,8 @@ export default function CampsPage() {
   }, [t]);
 
   const handleAddCamp = async (newCamp: CampFormData) => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
+    // CHANGE: Use stored userId instead of calling getUser again
+    if (!userId) {
       console.error(t('common.notAuthenticated'));
       return;
     }
@@ -60,7 +60,7 @@ export default function CampsPage() {
       .insert([
         {
           ...toDatabaseFormat(newCamp),
-          coach_id: user.id,
+          coach_id: userId, // Use stored userId
         },
       ])
       .select()
@@ -82,10 +82,17 @@ export default function CampsPage() {
     id: string,
     updates: Partial<CampFormData>
   ) => {
+    // CHANGE: Use stored userId
+    if (!userId) {
+      console.error("User not authenticated");
+      return;
+    }
+
     const { data, error } = await supabase
       .from("camps")
       .update(updates)
       .eq("id", id)
+      .eq("coach_id", userId) // Use stored userId
       .select()
       .single();
 
@@ -102,7 +109,17 @@ export default function CampsPage() {
   };
 
   const handleDeleteCamp = async (id: string) => {
-    const { error } = await supabase.from("camps").delete().eq("id", id);
+    // CHANGE: Use stored userId
+    if (!userId) {
+      console.error("User not authenticated");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("camps")
+      .delete()
+      .eq("id", id)
+      .eq("coach_id", userId); // Use stored userId
 
     if (error) {
       console.error(t('camps.errorDeletingCamp'), error);

@@ -61,10 +61,11 @@ export default function EvaluationsPage() {
         return;
       }
 
-      // Load all players
+      // Load players for this coach
       const { data: playersData, error: playersError } = await supabase
         .from("players")
         .select("*")
+        .eq("coach_id", user.id)
         .order("created_at", { ascending: false });
 
       if (playersError) {
@@ -93,10 +94,6 @@ export default function EvaluationsPage() {
     console.log("View evaluation:", evaluationId);
   };
 
-  const handleEditEvaluation = (evaluationId: string) => {
-    // TODO: Open evaluation edit modal
-    console.log("Edit evaluation:", evaluationId);
-  };
 
   if (loading) {
     return (
@@ -112,7 +109,6 @@ export default function EvaluationsPage() {
       evaluations={evaluations}
       onCreateEvaluation={handleCreateEvaluation}
       onViewEvaluation={handleViewEvaluation}
-      onEditEvaluation={handleEditEvaluation}
     />
   );
 } 

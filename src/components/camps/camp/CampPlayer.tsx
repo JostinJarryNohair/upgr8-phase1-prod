@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Search, AlertCircle, CheckCircle, UserPlus } from "lucide-react";
+import { Search, AlertCircle, CheckCircle, UserPlus, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,16 +12,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PlayerWithRegistration, PlayerFormData } from "@/types/player";
+import { PlayerWithRegistration, PlayerFormData, Player } from "@/types/player";
+import { PlayerEvaluationWithScores } from "@/types/evaluation";
 import { supabase } from "@/lib/supabase/client";
 import { AddPlayerModal } from "@/components/players/AddPlayerModal";
+import { PlayerInfoModal } from "@/components/players/PlayerInfoModal";
+import { CampBulkImportModal } from "./CampBulkImportModal";
 import { useTranslation } from '@/hooks/useTranslation';
 
 interface CampPlayersProps {
   campId: string;
+  campName?: string;
 }
 
-export function CampPlayers({ campId }: CampPlayersProps) {
+export function CampPlayers({ campId, campName = "Camp" }: CampPlayersProps) {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedGroup, setSelectedGroup] = useState("all");
@@ -34,6 +38,14 @@ export function CampPlayers({ campId }: CampPlayersProps) {
   const [isAddPlayerModalOpen, setIsAddPlayerModalOpen] = useState(false);
   const [addingPlayer, setAddingPlayer] = useState(false);
   const [addPlayerError, setAddPlayerError] = useState<string | null>(null);
+
+  // CSV Import Modal state
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+
+  // Player Info Modal state
+  const [isPlayerInfoModalOpen, setIsPlayerInfoModalOpen] = useState(false);
+  const [selectedPlayerForInfo, setSelectedPlayerForInfo] = useState<Player | null>(null);
+  const [selectedPlayerEvaluations, setSelectedPlayerEvaluations] = useState<PlayerEvaluationWithScores[]>([]);
 
   // Player search state
   const [allPlayers, setAllPlayers] = useState<{
@@ -390,30 +402,98 @@ export function CampPlayers({ campId }: CampPlayersProps) {
       !currentPlayerIds.includes(player.id) // Exclude already registered players
     );
 
-    console.log('Search query:', query);
-    console.log('All players available:', allPlayers.length);
-    console.log('Available players after filtering current:', availablePlayers.length);
-
     const filtered = availablePlayers.filter(player => {
       const fullName = `${player.first_name || ""} ${player.last_name || ""}`.trim().toLowerCase();
       const query_lower = query.toLowerCase();
       
-      const matches = (
+      return (
         fullName.includes(query_lower) ||
         player.email?.toLowerCase().includes(query_lower) ||
         player.jersey_number?.toString().includes(query)
       );
-      
-      if (matches) {
-        console.log('Found matching player:', fullName);
-      }
-      
-      return matches;
     }).slice(0, 10); // Limit to 10 results
-
-    console.log('Filtered results:', filtered.length);
     setSearchResults(filtered);
     setShowSearchDropdown(filtered.length > 0);
+  };
+
+  // Handle CSV import completion
+  const handleImportComplete = async () => {
+    // Refresh the camp players list to show the newly imported/registered players
+    await loadCampPlayers();
+    setIsImportModalOpen(false);
+  };
+
+  // Handle viewing player details
+  const handleViewPlayerDetails = async (player: PlayerWithRegistration) => {
+    try {
+      // Convert PlayerWithRegistration to Player format
+      const playerForModal: Player = {
+        id: player.id,
+        first_name: player.first_name,
+        last_name: player.last_name,
+        email: player.email,
+        phone: player.phone,
+        birth_date: player.birth_date,
+        position: player.position,
+        jersey_number: player.jersey_number,
+        parent_name: player.parent_name,
+        parent_phone: player.parent_phone,
+        parent_email: player.parent_email,
+        emergency_contact: player.emergency_contact,
+        medical_notes: player.medical_notes,
+        is_active: player.is_active,
+        created_at: player.created_at,
+        updated_at: player.updated_at
+      };
+
+      setSelectedPlayerForInfo(playerForModal);
+
+      // Load player evaluations
+      const { data: evaluationsData, error: evaluationsError } = await supabase
+        .from("player_evaluations")
+        .select(`
+          *,
+          coaches!inner (
+            id,
+            first_name,
+            last_name
+          ),
+          evaluation_scores (
+            *,
+            evaluation_criteria (*)
+          )
+        `)
+        .eq("player_id", player.id)
+        .order("evaluation_date", { ascending: false });
+
+      if (evaluationsError) {
+        console.error("Error loading player evaluations:", evaluationsError);
+        setSelectedPlayerEvaluations([]);
+      } else {
+        // Transform to PlayerEvaluationWithScores format
+        const transformedEvaluations: PlayerEvaluationWithScores[] = (evaluationsData || []).map(evaluation => ({
+          ...evaluation,
+          player: playerForModal,
+          coach: {
+            id: evaluation.coaches.id,
+            first_name: evaluation.coaches.first_name,
+            last_name: evaluation.coaches.last_name,
+          },
+          scores: evaluation.evaluation_scores.map((score: any) => ({
+            ...score,
+            criteria: score.evaluation_criteria,
+          })),
+        }));
+
+        setSelectedPlayerEvaluations(transformedEvaluations);
+      }
+
+      setIsPlayerInfoModalOpen(true);
+    } catch (error) {
+      console.error("Error loading player details:", error);
+      setSelectedPlayerEvaluations([]);
+      setIsPlayerInfoModalOpen(true);
+    }
   };
 
   const getStatusBadge = (status: string | null) => {
@@ -605,6 +685,16 @@ export function CampPlayers({ campId }: CampPlayersProps) {
                 {t('players.moreFilters')}
               </Button>
               <Button
+                variant="outline" 
+                size="sm"
+                className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                onClick={() => setIsImportModalOpen(true)}
+                disabled={addingPlayer}
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Import CSV
+              </Button>
+              <Button
                 size="sm"
                 className="bg-red-600 hover:bg-red-700"
                 onClick={() => setIsAddPlayerModalOpen(true)}
@@ -638,15 +728,27 @@ export function CampPlayers({ campId }: CampPlayersProps) {
               <p className="text-gray-600 mb-4">
                 {t('players.startByAddingPlayers')}
               </p>
-              <Button
-                size="sm"
-                className="bg-red-600 hover:bg-red-700"
-                onClick={() => setIsAddPlayerModalOpen(true)}
-                disabled={addingPlayer}
-                aria-label={t('players.addPlayer')}
-              >
-                {addingPlayer ? t('players.addingPlayer') : `+ ${t('players.addPlayer')}`}
-              </Button>
+              <div className="flex gap-2 justify-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                  onClick={() => setIsImportModalOpen(true)}
+                  disabled={addingPlayer}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Import CSV
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-red-600 hover:bg-red-700"
+                  onClick={() => setIsAddPlayerModalOpen(true)}
+                  disabled={addingPlayer}
+                  aria-label={t('players.addPlayer')}
+                >
+                  {addingPlayer ? t('players.addingPlayer') : `+ ${t('players.addPlayer')}`}
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -693,6 +795,7 @@ export function CampPlayers({ campId }: CampPlayersProps) {
                         variant="outline"
                         className="flex-1"
                         disabled={loading || addingPlayer}
+                        onClick={() => handleViewPlayerDetails(player)}
                       >
                         {t('players.viewDetails')}
                       </Button>
@@ -729,6 +832,33 @@ export function CampPlayers({ campId }: CampPlayersProps) {
         }}
         onSubmit={handleAddPlayer}
         error={addPlayerError}
+      />
+
+      {/* CSV Import Modal */}
+      <CampBulkImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImportComplete={handleImportComplete}
+        campId={campId}
+        campName={campName}
+      />
+
+      {/* Player Info Modal */}
+      <PlayerInfoModal
+        player={selectedPlayerForInfo}
+        evaluations={selectedPlayerEvaluations}
+        isOpen={isPlayerInfoModalOpen}
+        onClose={() => {
+          setIsPlayerInfoModalOpen(false);
+          setSelectedPlayerForInfo(null);
+          setSelectedPlayerEvaluations([]);
+        }}
+        onEvaluationCreated={() => {
+          // Optionally reload evaluations after creating a new one
+          if (selectedPlayerForInfo) {
+            handleViewPlayerDetails(selectedPlayerForInfo as PlayerWithRegistration);
+          }
+        }}
       />
     </>
   );

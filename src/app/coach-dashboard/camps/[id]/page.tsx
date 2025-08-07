@@ -370,7 +370,7 @@ export default function CampDetailPage({ params }: PageProps) {
           </TabsContent>
 
           <TabsContent value="players">
-            <CampPlayers campId={camp.id} />
+            <CampPlayers campId={camp.id} campName={camp.name} />
           </TabsContent>
 
           <TabsContent value="evaluations">

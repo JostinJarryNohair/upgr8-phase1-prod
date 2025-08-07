@@ -1,4 +1,6 @@
-# Claude Development Guide - UpGr8 Platform
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 This document provides comprehensive guidance for Claude AI assistants working with the UpGr8 platform hockey management system.
 
@@ -137,27 +139,40 @@ export function fromDatabaseFormat(dbPlayer: DbPlayer): Player {
 - Season management with teams and players
 - Tryout system integration
 
-## Database Schema Insights
+## Database Architecture
 
-### Row Level Security (RLS)
-- All tables have RLS policies enabled
-- Coaches can only access their own data
-- Policy examples in database ensure data isolation
+### Key Tables & Relationships
+```
+coaches (1) ---> (many) camps
+coaches (1) ---> (many) player_evaluations  
+coaches (1) ---> (many) teams
+coaches (1) ---> (many) regular_seasons
 
-### Key Relationships
-```sql
-coaches (1) -> (many) camps
-coaches (1) -> (many) player_evaluations  
-coaches (1) -> (many) teams
-players (many) <- (many) camps (via camp_registrations)
-players (1) -> (many) player_evaluations
+players (many) <---> (many) camps (via camp_registrations)
+players (1) ---> (many) player_evaluations
+players (many) <---> (many) teams (via team_players)
 ```
 
-### Enums Used
-- `camp_level`: Age groups (U7, U9, U11, U13, U15, U18, M13, M15, M18, Junior, Senior)
-- `player_position`: Hockey positions (forward, defense, goalie)
-- `coach_role`: Organizational roles
-- `registration_status`, `payment_status`, etc.
+### Row Level Security (RLS) 
+- **All tables have RLS enabled** - Data is automatically filtered by coach ownership
+- **Coach isolation enforced** - Coaches can only see/modify their own data
+- **Generated types in `/src/types/database.ts`** - Auto-generated from Supabase schema
+
+### Important Enums
+```typescript
+// Age groups for camps and evaluations
+camp_level: "U7" | "U9" | "U11" | "U13" | "U15" | "U18" | "M13" | "M15" | "M18" | "Junior" | "Senior"
+
+// Hockey positions  
+player_position: "forward" | "defense" | "goalie"
+
+// Coach organizational roles
+coach_role: "coach" | "directeur-general" | "directeur-hockey"
+
+// Payment and registration status tracking
+payment_status: "pending" | "paid" | "overdue" | "refunded"
+registration_status: "pending" | "confirmed" | "cancelled" | "completed"
+```
 
 ## Development Guidelines
 
@@ -185,12 +200,15 @@ players (1) -> (many) player_evaluations
 - Use mapper functions for data transformation
 - Never use `any` type
 
-### 5. **Security Considerations**
-⚠️ **CRITICAL**: This project has identified security vulnerabilities:
-- Authentication middleware needed for protected routes
-- Database queries need proper coach_id filtering
-- File uploads need validation and size limits
-- Refer to `PRODUCTION_READINESS_TODO.md` for complete list
+### 5. **Security Considerations** 🚨
+⚠️ **CRITICAL - DO NOT DEPLOY TO PRODUCTION**: This project has serious security vulnerabilities:
+- **Authentication bypass possible** - No middleware protecting routes
+- **Data isolation issues** - Missing coach_id filtering in queries  
+- **File upload vulnerabilities** - No size/type validation
+- **Exposed credentials** - Supabase keys in repository
+- **Refer to `PRODUCTION_READINESS_TODO.md` for complete critical issues list**
+
+**SECURITY RULE**: Always add `coach_id` filtering to database queries to prevent data leakage between coaches.
 
 ## Common Development Patterns
 
@@ -204,20 +222,32 @@ export function AddPlayerModal({ isOpen, onClose, onPlayerAdded }: Props) {
 }
 ```
 
-### 2. **Data Fetching Hook Pattern**
+### 2. **Data Fetching Pattern**
 ```typescript
-// Common pattern in page components
+// Standard pattern for data fetching with security
 const [players, setPlayers] = useState<Player[]>([]);
 const [loading, setLoading] = useState(true);
+const [error, setError] = useState<string | null>(null);
 
 useEffect(() => {
   const fetchPlayers = async () => {
-    // Supabase query with proper coach filtering
-    // Error handling
-    // State updates
+    try {
+      const { data, error } = await supabase
+        .from('players')
+        .select('*')
+        .eq('coach_id', coachId); // CRITICAL: Always filter by coach_id
+      
+      if (error) throw error;
+      setPlayers(data?.map(fromDatabaseFormat) || []);
+    } catch (err) {
+      setError('Failed to load players');
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
   fetchPlayers();
-}, []);
+}, [coachId]);
 ```
 
 ### 3. **Form Handling**
@@ -233,14 +263,21 @@ const onSubmit = async (data: PlayerFormData) => {
 };
 ```
 
-## Available Scripts
+## Development Commands
 
+### Core Scripts
 ```bash
-npm run dev          # Development server with Turbopack
-npm run build        # Production build
+npm run dev          # Development server with Turbopack (Fast refresh, hot reload)
+npm run build        # Production build (Type checking included)
 npm start            # Production server
-npm run lint         # ESLint checking
+npm run lint         # ESLint checking and code quality
 ```
+
+### Development Workflow
+- **Local Development**: Use `npm run dev` with Turbopack for optimal performance
+- **Before Committing**: Run `npm run lint` to ensure code quality
+- **Testing Build**: Use `npm run build` to verify production compatibility
+- **No Test Suite**: Currently no test framework is configured (see Testing Notes below)
 
 ## Testing Notes
 
@@ -294,7 +331,18 @@ npm run lint         # ESLint checking
 - **UI Components**: shadcn/ui documentation for component usage
 - **Supabase Docs**: For database and authentication patterns
 
+## Current Working State
+
+### Modified Files (per git status)
+- `src/app/coach-dashboard/teams/[id]/page.tsx` - Has local modifications, check before committing
+
+### Git Branch Info
+- **Current Branch**: `main`
+- **Main Branch**: `main` (use for PRs)
+- **Recent Commits**: Focus on data model improvements and navigation restructuring
+
 ## Last Updated
-Created: January 2025
-Status: Evaluation system complete, regular season in development
-Security Status: ⚠️ **Not production ready** - Critical security issues identified
+- **Created**: January 2025  
+- **Status**: Evaluation system complete, regular season in development
+- **Security Status**: ⚠️ **NOT PRODUCTION READY** - Critical security vulnerabilities exist
+- **Next Phase**: Regular season management features

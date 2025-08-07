@@ -164,16 +164,7 @@ export default function TeamDetailPage({ params }: PageProps) {
     loadTeamData();
   }, [loadTeamData]);
 
-  // Auto-switch to season tab when a season becomes available
-  useEffect(() => {
-    if (currentSeason && activeTab === "overview") {
-      // Only auto-switch if we're on overview tab to avoid disrupting user navigation
-      const timer = setTimeout(() => {
-        setActiveTab("season");
-      }, 1000); // Small delay to let the user see the change
-      return () => clearTimeout(timer);
-    }
-  }, [currentSeason, activeTab]);
+
 
   const handleAddTryout = async (tryoutData: TryoutFormData) => {
     try {

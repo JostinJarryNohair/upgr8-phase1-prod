@@ -35,6 +35,25 @@ export function CampPlayers({ campId }: CampPlayersProps) {
   const [addingPlayer, setAddingPlayer] = useState(false);
   const [addPlayerError, setAddPlayerError] = useState<string | null>(null);
 
+  // Player search state
+  const [allPlayers, setAllPlayers] = useState<{
+    id: string;
+    first_name: string;
+    last_name: string;
+    email?: string;
+    position?: string;
+    jersey_number?: number;
+  }[]>([]);
+  const [searchResults, setSearchResults] = useState<{
+    id: string;
+    first_name: string;
+    last_name: string;
+    email?: string;
+    position?: string;
+    jersey_number?: number;
+  }[]>([]);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+
   // Extracted and memoized data loading function
   const loadCampPlayers = useCallback(async () => {
     try {
@@ -104,10 +123,81 @@ export function CampPlayers({ campId }: CampPlayersProps) {
     }
   }, [campId, t]);
 
+  // Load all available players for search functionality
+  const loadAllPlayers = useCallback(async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Get all player IDs associated with this coach through various relationships
+      const playerIds = new Set<string>();
+
+      // 1. Players from camps owned by this coach
+      const { data: campRegistrations } = await supabase
+        .from("camp_registrations")
+        .select(`
+          player_id,
+          camps!inner(coach_id)
+        `)
+        .eq("camps.coach_id", user.id);
+
+      campRegistrations?.forEach(reg => {
+        if (reg.player_id) playerIds.add(reg.player_id);
+      });
+
+      // 2. Players from evaluations by this coach
+      const { data: evaluations } = await supabase
+        .from("player_evaluations")
+        .select("player_id")
+        .eq("coach_id", user.id);
+
+      evaluations?.forEach((evaluation) => {
+        if (evaluation.player_id) playerIds.add(evaluation.player_id);
+      });
+
+      // 3. Players from teams owned by this coach
+      const { data: teamPlayers } = await supabase
+        .from("team_players")
+        .select(`
+          player_id,
+          teams!inner(coach_id)
+        `)
+        .eq("teams.coach_id", user.id);
+
+      teamPlayers?.forEach(tp => {
+        if (tp.player_id) playerIds.add(tp.player_id);
+      });
+
+      // Now get the actual player data
+      if (playerIds.size > 0) {
+        const { data, error } = await supabase
+          .from("players")
+          .select("id, first_name, last_name, email, position, jersey_number")
+          .in("id", Array.from(playerIds))
+          .eq("is_active", true)
+          .order("first_name", { ascending: true });
+
+        if (error) {
+          console.error("Error loading all players:", error);
+          return;
+        }
+
+        setAllPlayers(data || []);
+      } else {
+        setAllPlayers([]);
+      }
+    } catch (error) {
+      console.error("Error loading all players:", error);
+    }
+  }, []);
+
   // Load players for this camp
   useEffect(() => {
     loadCampPlayers();
-  }, [loadCampPlayers]);
+    loadAllPlayers();
+  }, [loadCampPlayers, loadAllPlayers]);
 
   // Handle adding a new player - simple and safe approach
   const handleAddPlayer = async (playerData: PlayerFormData) => {
@@ -232,6 +322,99 @@ export function CampPlayers({ campId }: CampPlayersProps) {
     }
   };
 
+  // Handle adding an existing player to the camp
+  const handleAddExistingPlayer = async (playerId: string) => {
+    try {
+      setAddingPlayer(true);
+      setAddPlayerError(null);
+
+      // Check if player is already registered to this camp
+      const { data: existingRegistration } = await supabase
+        .from("camp_registrations")
+        .select("id")
+        .eq("player_id", playerId)
+        .eq("camp_id", campId)
+        .neq("status", "cancelled")
+        .single();
+
+      if (existingRegistration) {
+        throw new Error(t('players.playerAlreadyRegistered'));
+      }
+
+      // Register player to camp
+      const { error: registrationError } = await supabase
+        .from("camp_registrations")
+        .insert([
+          {
+            camp_id: campId,
+            player_id: playerId,
+            status: "confirmed",
+            payment_status: "paid",
+          },
+        ]);
+
+      if (registrationError) {
+        throw new Error(t('players.errorRegisteringCamp'));
+      }
+
+      // Clear search and reload players
+      setSearchQuery("");
+      setSearchResults([]);
+      setShowSearchDropdown(false);
+      await loadCampPlayers();
+    } catch (error) {
+      console.error("Error adding existing player:", error);
+      setAddPlayerError(
+        error instanceof Error
+          ? error.message
+          : t('players.errorRegisteringCamp')
+      );
+    } finally {
+      setAddingPlayer(false);
+    }
+  };
+
+  // Handle search input changes
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    
+    if (query.trim().length < 2) {
+      setSearchResults([]);
+      setShowSearchDropdown(false);
+      return;
+    }
+
+    // Filter all players based on search query
+    const currentPlayerIds = players.map(p => p.id);
+    const availablePlayers = allPlayers.filter(player => 
+      !currentPlayerIds.includes(player.id) // Exclude already registered players
+    );
+
+    console.log('Search query:', query);
+    console.log('All players available:', allPlayers.length);
+    console.log('Available players after filtering current:', availablePlayers.length);
+
+    const filtered = availablePlayers.filter(player => {
+      const fullName = `${player.first_name || ""} ${player.last_name || ""}`.trim().toLowerCase();
+      const query_lower = query.toLowerCase();
+      
+      const matches = (
+        fullName.includes(query_lower) ||
+        player.email?.toLowerCase().includes(query_lower) ||
+        player.jersey_number?.toString().includes(query)
+      );
+      
+      if (matches) {
+        console.log('Found matching player:', fullName);
+      }
+      
+      return matches;
+    }).slice(0, 10); // Limit to 10 results
+
+    console.log('Filtered results:', filtered.length);
+    setSearchResults(filtered);
+    setShowSearchDropdown(filtered.length > 0);
+  };
 
   const getStatusBadge = (status: string | null) => {
     switch (status) {
@@ -266,13 +449,19 @@ export function CampPlayers({ campId }: CampPlayersProps) {
     }
   };
 
-  // Memoized filtering for performance
+  // Memoized filtering for performance - only for existing camp players
   const filteredPlayers = useMemo(() => {
+    // If there's an active search with results, don't filter existing players as they're for different purposes
+    if (showSearchDropdown && searchQuery.length >= 2) {
+      return players; // Show all existing camp players when searching for new ones
+    }
+
     return players.filter((player) => {
       const fullName = `${player.first_name || ""} ${player.last_name || ""}`
         .trim()
         .toLowerCase();
       const matchesSearch =
+        searchQuery.length < 2 || // If search is too short, show all
         fullName.includes(searchQuery.toLowerCase()) ||
         player.jersey_number?.toString().includes(searchQuery) ||
         player.email?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -283,7 +472,7 @@ export function CampPlayers({ campId }: CampPlayersProps) {
 
       return matchesSearch && matchesGroup && matchesStatus;
     });
-  }, [players, searchQuery, selectedGroup, statusFilter]);
+  }, [players, searchQuery, selectedGroup, statusFilter, showSearchDropdown]);
 
   if (loading) {
     return (
@@ -315,14 +504,70 @@ export function CampPlayers({ campId }: CampPlayersProps) {
         <div className="p-6 border-b border-gray-200">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 z-10" />
               <Input
-                placeholder={t('players.searchPlayer')}
+                placeholder={searchQuery.length < 2 ? t('players.searchPlayer') : "Search existing players to add..."}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                onFocus={() => {
+                  if (searchQuery.length >= 2 && searchResults.length > 0) {
+                    setShowSearchDropdown(true);
+                  }
+                }}
+                onBlur={() => {
+                  // Delay hiding dropdown to allow clicks on results
+                  setTimeout(() => setShowSearchDropdown(false), 200);
+                }}
                 className="pl-10"
                 aria-label={t('players.searchPlayer')}
               />
+              
+              {/* Search Results Dropdown */}
+              {showSearchDropdown && searchResults.length > 0 && (
+                <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-y-auto">
+                  <div className="p-2 border-b border-gray-100 bg-gray-50">
+                    <p className="text-xs text-gray-600 font-medium">
+                      Add existing player to camp ({searchResults.length} found)
+                    </p>
+                  </div>
+                  {searchResults.map((player) => {
+                    const fullName = `${player.first_name || ""} ${player.last_name || ""}`.trim();
+                    return (
+                      <button
+                        key={player.id}
+                        onClick={() => handleAddExistingPlayer(player.id)}
+                        disabled={addingPlayer}
+                        className="w-full px-3 py-2 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed border-b border-gray-100 last:border-b-0"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-sm font-medium text-gray-900">
+                              {fullName || "Unknown Player"}
+                            </div>
+                            <div className="text-xs text-gray-500 flex items-center gap-2">
+                              {player.position && <span>{player.position}</span>}
+                              {player.jersey_number && <span>#{player.jersey_number}</span>}
+                              {player.email && <span>{player.email}</span>}
+                            </div>
+                          </div>
+                          <div className="text-xs text-blue-600">
+                            {addingPlayer ? "Adding..." : "Click to add"}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              
+              {/* No results message */}
+              {showSearchDropdown && searchResults.length === 0 && searchQuery.length >= 2 && (
+                <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+                  <div className="p-3 text-center text-gray-500 text-sm">
+                    No available players found. Players already in this camp are excluded.
+                  </div>
+                </div>
+              )}
             </div>
             <Select value={selectedGroup} onValueChange={setSelectedGroup}>
               <SelectTrigger className="w-48">
@@ -347,9 +592,14 @@ export function CampPlayers({ campId }: CampPlayersProps) {
           </div>
 
           <div className="flex items-center justify-between mt-4">
-            <p className="text-sm text-gray-600">
-              {filteredPlayers.length} {filteredPlayers.length === 1 ? t('players.playerFound') : t('players.playersFound')}
-            </p>
+            <div className="flex flex-col">
+              <p className="text-sm text-gray-600">
+                {filteredPlayers.length} {filteredPlayers.length === 1 ? t('players.playerFound') : t('players.playersFound')}
+              </p>
+              <p className="text-xs text-blue-600 mt-1">
+                💡 Tip: Type 2+ characters to search and add existing players to this camp
+              </p>
+            </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm">
                 {t('players.moreFilters')}

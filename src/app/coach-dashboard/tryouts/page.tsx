@@ -150,7 +150,7 @@ export default function TryoutsPage() {
             <div>
               <h1 className="text-3xl font-bold">Gestion des Tryouts</h1>
               <p className="text-gray-600 mt-2">
-                Vue d'ensemble de tous vos tryouts à travers les équipes.
+                Vue d&apos;ensemble de tous vos tryouts à travers les équipes.
               </p>
             </div>
             <Button

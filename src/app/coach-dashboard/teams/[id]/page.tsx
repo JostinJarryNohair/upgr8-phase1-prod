@@ -383,13 +383,13 @@ export default function TeamDetailPage({ params }: PageProps) {
           <TabsContent value="overview">
             <div className="bg-white rounded-lg shadow-sm p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-6">
-                Aperçu de l'Équipe {team.name}
+                Aperçu de l&apos;Équipe {team.name}
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Team Info */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-gray-900">Informations de l'Équipe</h3>
+                  <h3 className="text-lg font-medium text-gray-900">Informations de l&apos;Équipe</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Nom:</span>
@@ -634,7 +634,7 @@ export default function TeamDetailPage({ params }: PageProps) {
                     Aucune saison active
                   </h3>
                   <p className="text-gray-600 mb-4">
-                    Créez et terminez un tryout pour démarrer une saison régulière et voir l'horaire.
+                    Créez et terminez un tryout pour démarrer une saison régulière et voir l&apos;horaire.
                   </p>
                   <Button
                     onClick={() => setActiveTab("tryouts")}

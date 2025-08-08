@@ -150,7 +150,7 @@ export default function SeasonsPage() {
             <div>
               <h1 className="text-3xl font-bold">Saisons Régulières</h1>
               <p className="text-gray-600 mt-2">
-                Vue d'ensemble de toutes vos saisons régulières.
+                Vue d&apos;ensemble de toutes vos saisons régulières.
               </p>
             </div>
             <Button

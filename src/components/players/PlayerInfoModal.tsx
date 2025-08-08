@@ -12,18 +12,12 @@ import {
   X, 
   User, 
   Calendar, 
-  MapPin, 
   Phone, 
   Mail, 
-  Shield,
-  Trophy,
   TrendingUp,
   Clock,
   Target,
   Activity,
-  Heart,
-  Zap,
-  Users,
   CheckCircle,
   AlertCircle,
   BarChart3,
@@ -136,7 +130,7 @@ export function PlayerInfoModal({ player, evaluations, isOpen, onClose, onEvalua
                 value="overview" 
                 className="bg-transparent text-gray-400 hover:text-white data-[state=active]:text-cyan-400 data-[state=active]:bg-transparent border-b-2 border-transparent data-[state=active]:border-cyan-400 rounded-none px-6 py-4"
               >
-                Vue d'ensemble
+                Vue d&apos;ensemble
               </TabsTrigger>
     
               <TabsTrigger 
@@ -228,7 +222,7 @@ export function PlayerInfoModal({ player, evaluations, isOpen, onClose, onEvalua
 
                       {player.emergency_contact && (
                         <div className="flex justify-between items-center">
-                          <span className="text-gray-400">Contact d'urgence</span>
+                          <span className="text-gray-400">Contact d&apos;urgence</span>
                           <span className="text-white font-medium">{player.emergency_contact}</span>
                         </div>
                       )}
@@ -307,7 +301,7 @@ export function PlayerInfoModal({ player, evaluations, isOpen, onClose, onEvalua
                                 <span className="text-white font-medium">
                                   {evaluation.evaluation_date 
                                     ? new Date(evaluation.evaluation_date).toLocaleDateString()
-                                    : 'Date non spécifiée'
+                                    : "Date non spécifiée"
                                   }
                                 </span>
                                 {evaluation.is_completed ? (
@@ -327,7 +321,7 @@ export function PlayerInfoModal({ player, evaluations, isOpen, onClose, onEvalua
                                 <div className="flex items-center space-x-1">
                                   <User className="w-4 h-4" />
                                   <span>
-                                    {evaluation.coach?.first_name} {evaluation.coach?.last_name || 'Coach'}
+                                    {evaluation.coach?.first_name} {evaluation.coach?.last_name || "Coach"}
                                   </span>
                                 </div>
                                 {evaluation.overall_score && (
@@ -377,7 +371,7 @@ export function PlayerInfoModal({ player, evaluations, isOpen, onClose, onEvalua
                                   <div key={score.id} className="bg-gray-900 rounded p-3">
                                     <div className="flex justify-between items-center mb-2">
                                       <span className="text-sm text-gray-300">
-                                        {score.criteria?.name_fr || score.criteria?.name_en || 'Critère'}
+                                        {score.criteria?.name_fr || score.criteria?.name_en || "Critère"}
                                       </span>
                                       <span className="text-sm font-medium text-white">
                                         {score.score}/{score.criteria?.max_score || 10}
@@ -403,7 +397,7 @@ export function PlayerInfoModal({ player, evaluations, isOpen, onClose, onEvalua
                   <div className="text-center py-12">
                     <TrendingUp className="w-16 h-16 text-gray-600 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold text-white mb-2">Aucune évaluation</h3>
-                    <p className="text-gray-400">Ce joueur n'a pas encore d'évaluations enregistrées.</p>
+                    <p className="text-gray-400">Ce joueur n&apos;a pas encore d&apos;évaluations enregistrées.</p>
                     <Button 
                       className="mt-4 bg-blue-600 hover:bg-blue-700"
                       onClick={() => setIsCreateEvaluationModalOpen(true)}
@@ -427,7 +421,7 @@ export function PlayerInfoModal({ player, evaluations, isOpen, onClose, onEvalua
                 <div className="text-center py-12">
                   <Clock className="w-16 h-16 text-gray-600 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-white mb-2">Historique</h3>
-                  <p className="text-gray-400">Cette section contiendra l'historique du joueur.</p>
+                  <p className="text-gray-400">Cette section contiendra l&apos;historique du joueur.</p>
                 </div>
               </TabsContent>
             </div>

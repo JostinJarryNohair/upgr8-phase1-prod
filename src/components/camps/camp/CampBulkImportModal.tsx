@@ -17,7 +17,6 @@ import { parseCSV, readFileAsText, CSVParseResult } from "@/lib/csvParser";
 import { autoMapFields, applyMapping, MappingResult } from "@/lib/fieldMapping";
 import { supabase } from "@/lib/supabase/client";
 import { toDatabaseFormat, fromDatabaseFormat } from "@/lib/mappers/playerMapper";
-import { useTranslation } from '@/hooks/useTranslation';
 
 interface CampBulkImportModalProps {
   isOpen: boolean;
@@ -52,7 +51,7 @@ export function CampBulkImportModal({
   campId,
   campName
 }: CampBulkImportModalProps) {
-  const { t } = useTranslation();
+  //const { t } = useTranslation();
   const [state, setState] = useState<ImportState>({
     step: 'upload',
     file: null,
@@ -360,10 +359,10 @@ export function CampBulkImportModal({
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-gray-900">
-              Import Players to Camp
+              Importation de joueurs au camp
             </h2>
             <p className="text-sm text-gray-600 mt-1">
-              Bulk import players and automatically register them to "{campName}"
+              Importation en masse de joueurs et enregistrement automatique au camp "{campName}"
             </p>
           </div>
           <Button
@@ -404,7 +403,7 @@ export function CampBulkImportModal({
               <div className="flex items-start">
                 <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 mr-3" />
                 <div>
-                  <h3 className="text-sm font-medium text-red-800 mb-1">Errors detected</h3>
+                  <h3 className="text-sm font-medium text-red-800 mb-1">Erreurs détectées</h3>
                   <ul className="text-sm text-red-700 space-y-1">
                     {state.errors.map((error, index) => (
                       <li key={index}>• {error}</li>
@@ -420,10 +419,10 @@ export function CampBulkImportModal({
             <div className="space-y-6">
               <div className="text-center">
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Upload CSV File
+                  Téléchargement du fichier CSV
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  Drag and drop your CSV file or click to select it. Players will be automatically added to "{campName}".
+                  Glissez-déposez votre fichier CSV ou cliquez pour le sélectionner. Les joueurs seront automatiquement ajoutés au camp "{campName}".
                 </p>
               </div>
 
@@ -441,14 +440,14 @@ export function CampBulkImportModal({
                 <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <div className="space-y-2">
                   <p className="text-lg font-medium text-gray-900">
-                    Drop your CSV file here
+                    Déposez votre fichier CSV ici
                   </p>
-                  <p className="text-gray-600">or</p>
+                  <p className="text-gray-600">ou</p>
                   <Button
                     variant="outline"
                     onClick={() => document.getElementById('csv-file-input')?.click()}
                   >
-                    Choose File
+                    Sélectionner un fichier
                   </Button>
                   <input
                     id="csv-file-input"
@@ -469,10 +468,10 @@ export function CampBulkImportModal({
                   <FileText className="w-5 h-5 text-blue-500 mt-0.5 mr-3" />
                   <div className="flex-1">
                     <h4 className="text-sm font-medium text-blue-800 mb-1">
-                      Need a template?
+                      Besoin d&apos;un modèle ?
                     </h4>
                     <p className="text-sm text-blue-700 mb-3">
-                      Download our CSV template with recommended columns and sample data.
+                      Téléchargez notre modèle CSV avec les colonnes recommandées et des exemples de données.
                     </p>
                     <Button
                       variant="outline"
@@ -481,7 +480,7 @@ export function CampBulkImportModal({
                       className="border-blue-300 text-blue-700 hover:bg-blue-100"
                     >
                       <Download className="w-4 h-4 mr-2" />
-                      Download Template
+                      Télécharger le modèle
                     </Button>
                   </div>
                 </div>
@@ -493,16 +492,16 @@ export function CampBulkImportModal({
             <div className="space-y-6">
               <div className="text-center">
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Field Mapping
+                  Mappage des champs
                 </h3>
                 <p className="text-gray-600">
-                  Verify that your CSV columns are correctly mapped
+                  Vérifiez que vos colonnes CSV sont correctement mappées
                 </p>
               </div>
 
               {/* Mapping Results */}
               <div className="space-y-4">
-                <h4 className="font-medium text-gray-900">Automatically detected fields</h4>
+                <h4 className="font-medium text-gray-900">Champs détectés automatiquement</h4>
                 {state.mappingResult.mappings.map((mapping, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
                     <div className="flex items-center">

@@ -607,7 +607,7 @@ export function CampPlayers({ campId, campName = "Camp" }: CampPlayersProps) {
                 <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-80 overflow-y-auto">
                   <div className="p-2 border-b border-gray-100 bg-gray-50">
                     <p className="text-xs text-gray-600 font-medium">
-                      Add existing player to camp ({searchResults.length} found)
+                      Ajouter un joueur existant au camp ({searchResults.length} trouvés)
                     </p>
                   </div>
                   {searchResults.map((player) => {
@@ -631,7 +631,7 @@ export function CampPlayers({ campId, campName = "Camp" }: CampPlayersProps) {
                             </div>
                           </div>
                           <div className="text-xs text-blue-600">
-                            {addingPlayer ? "Adding..." : "Click to add"}
+                            {addingPlayer ? "Ajout en cours..." : "Cliquer pour ajouter"}
                           </div>
                         </div>
                       </button>
@@ -644,7 +644,7 @@ export function CampPlayers({ campId, campName = "Camp" }: CampPlayersProps) {
               {showSearchDropdown && searchResults.length === 0 && searchQuery.length >= 2 && (
                 <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
                   <div className="p-3 text-center text-gray-500 text-sm">
-                    No available players found. Players already in this camp are excluded.
+                    Aucun joueur disponible trouvé. Les joueurs déjà dans ce camp sont exclus.
                   </div>
                 </div>
               )}
@@ -677,7 +677,7 @@ export function CampPlayers({ campId, campName = "Camp" }: CampPlayersProps) {
                 {filteredPlayers.length} {filteredPlayers.length === 1 ? t('players.playerFound') : t('players.playersFound')}
               </p>
               <p className="text-xs text-blue-600 mt-1">
-                💡 Tip: Type 2+ characters to search and add existing players to this camp
+                💡 Conseil: Tapez 2+ caractères pour rechercher et ajouter des joueurs existants à ce camp
               </p>
             </div>
             <div className="flex gap-2">
@@ -692,7 +692,7 @@ export function CampPlayers({ campId, campName = "Camp" }: CampPlayersProps) {
                 disabled={addingPlayer}
               >
                 <Upload className="w-4 h-4 mr-2" />
-                Import CSV
+                Importer CSV
               </Button>
               <Button
                 size="sm"

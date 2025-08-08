@@ -8,11 +8,11 @@ import DynamicInput from "@/components/common/DynamicInput";
 import Image from "next/image";
 import Link from "next/link";
 import DynamicButton from "@/components/common/DynamicButton";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useTranslation } from '@/hooks/useTranslation';
 
 export default function LoginForm() {
-  const router = useRouter();
+  // const router = useRouter(); // Currently unused - for future navigation features
   const searchParams = useSearchParams();
   const { t } = useTranslation();
   
@@ -81,7 +81,7 @@ export default function LoginForm() {
           .eq("id", data.user.id)
           .single();
 
-        if (profileError) {
+        if (profileError || !coachData) {
           console.error("Profile fetch error:", profileError);
           // User exists in auth but no coach profile - redirect to complete setup
           setMessage("Profil incomplet. Redirection...");

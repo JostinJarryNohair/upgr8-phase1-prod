@@ -198,10 +198,15 @@ export default function TeamDetailPage({ params }: PageProps) {
 
       if (data) {
         const formattedTryout = fromTryoutDatabaseFormat(data);
+        // Only update local tryouts state, don't reload all data to avoid race conditions
         setTryouts([formattedTryout, ...tryouts]);
         showSuccessToast("Tryout créé avec succès pour l&apos;équipe");
-        // Refresh stats
-        await loadTeamData();
+        
+        // Update stats manually instead of full reload to avoid race conditions
+        setStats(prevStats => ({
+          ...prevStats,
+          activeTryouts: formattedTryout.status === "active" ? prevStats.activeTryouts + 1 : prevStats.activeTryouts,
+        }));
       }
     } catch (error) {
       const appError = handleSupabaseError(error as Error);
@@ -237,6 +242,9 @@ export default function TeamDetailPage({ params }: PageProps) {
 
   const handleDeleteTryout = async (id: string) => {
     try {
+      // Find the tryout being deleted to update stats correctly
+      const deletedTryout = tryouts.find(tryout => tryout.id === id);
+      
       const { error } = await supabase.from("tryouts").delete().eq("id", id);
 
       if (error) {
@@ -247,8 +255,15 @@ export default function TeamDetailPage({ params }: PageProps) {
 
       setTryouts(tryouts.filter((tryout) => tryout.id !== id));
       showSuccessToast("Tryout supprimé avec succès");
-      // Refresh stats
-      await loadTeamData();
+      
+      // Update stats manually instead of full reload to avoid race conditions
+      if (deletedTryout) {
+        setStats(prevStats => ({
+          ...prevStats,
+          activeTryouts: deletedTryout.status === "active" ? prevStats.activeTryouts - 1 : prevStats.activeTryouts,
+          completedTryouts: deletedTryout.status === "completed" ? prevStats.completedTryouts - 1 : prevStats.completedTryouts,
+        }));
+      }
     } catch (error) {
       const appError = handleSupabaseError(error as Error);
       showErrorToast(appError);

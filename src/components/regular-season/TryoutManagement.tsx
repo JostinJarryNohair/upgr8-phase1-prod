@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Tryout, TryoutFormData } from "@/types/tryout";
 import { AddTryoutModal } from "./AddTryoutModal";
+import { DeleteTryoutModal } from "./DeleteTryoutModal";
 import { Button } from "@/components/ui/button";
 import { 
   Plus, 
@@ -56,13 +57,35 @@ export function TryoutManagement({
 }: TryoutManagementProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingTryout, setEditingTryout] = useState<Tryout | null>(null);
+  const [tryoutToDelete, setTryoutToDelete] = useState<Tryout | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleEdit = (tryout: Tryout) => {
     setEditingTryout(tryout);
     setIsAddModalOpen(true);
   };
 
+  const handleDeleteClick = (tryout: Tryout) => {
+    setTryoutToDelete(tryout);
+  };
 
+  const handleConfirmDelete = async () => {
+    if (!tryoutToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      await onDeleteTryout(tryoutToDelete.id);
+      setTryoutToDelete(null);
+    } catch (error) {
+      console.error("Error deleting tryout:", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setTryoutToDelete(null);
+  };
 
   const handleCloseModal = () => {
     setIsAddModalOpen(false);
@@ -161,7 +184,7 @@ export function TryoutManagement({
                         Modifier
                       </DropdownMenuItem>
                       <DropdownMenuItem 
-                        onClick={() => onDeleteTryout(tryout.id)}
+                        onClick={() => handleDeleteClick(tryout)}
                         className="text-red-600"
                       >
                         <Trash2 className="mr-2 h-4 w-4" />
@@ -226,13 +249,22 @@ export function TryoutManagement({
           </div>
         )}
 
-                 {/* Add/Edit Tryout Modal */}
-         <AddTryoutModal
-           isOpen={isAddModalOpen}
-           onClose={handleCloseModal}
-           onAdd={handleSave}
-           editingTryout={editingTryout}
-         />
+        {/* Add/Edit Tryout Modal */}
+        <AddTryoutModal
+          isOpen={isAddModalOpen}
+          onClose={handleCloseModal}
+          onAdd={handleSave}
+          editingTryout={editingTryout}
+        />
+
+        {/* Delete Tryout Modal */}
+        <DeleteTryoutModal
+          isOpen={!!tryoutToDelete}
+          onClose={handleCancelDelete}
+          onConfirm={handleConfirmDelete}
+          tryout={tryoutToDelete}
+          isDeleting={isDeleting}
+        />
       </div>
     </div>
   );

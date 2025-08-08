@@ -66,7 +66,7 @@ const mockGamePlan: GamePlan = {
     {
       player: "Antoine Dubois (#12)",
       role: "Centre offensif",
-      instructions: "Créer du jeu, distribuer les passes, tirer au but quand l'occasion se présente"
+      instructions: "Créer du jeu, distribuer les passes, tirer au but quand l&apos;occasion se présente"
     },
     {
       player: "Marie Tremblay (#8)",
@@ -80,7 +80,7 @@ const mockGamePlan: GamePlan = {
     }
   ],
   tactics: {
-    offensive: "Jeu de passes courtes pour progresser, chercher les espaces sur les flancs, tirer de loin si l'occasion se présente",
+    offensive: "Jeu de passes courtes pour progresser, chercher les espaces sur les flancs, tirer de loin si l&apos;occasion se présente",
     defensive: "Pressing haut pour récupérer le puck rapidement, replier en bloc compact si nécessaire",
     specialSituations: "Jeu de puissance: formation 1-3-1. Infériorité numérique: formation en losange"
   },
@@ -89,7 +89,7 @@ const mockGamePlan: GamePlan = {
     weaknesses: ["Faible sur les flancs", "Vulnérable aux tirs de loin", "Discipline défaillante"],
     keyThreats: ["#10 - Simon Lafleur (meilleur buteur)", "#5 - Paul Richard (défenseur physique)"]
   },
-  notes: "L'équipe adverse joue un style très physique. Nos joueurs doivent rester disciplinés et éviter les pénalités. Exploiter leur faiblesse défensive sur les flancs."
+  notes: "L&apos;équipe adverse joue un style très physique. Nos joueurs doivent rester disciplinés et éviter les pénalités. Exploiter leur faiblesse défensive sur les flancs."
 };
 
 export function GamePlanModal({ 
@@ -192,7 +192,7 @@ export function GamePlanModal({
             ].map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
-                onClick={() => setActiveTab(id as any)}
+                onClick={() => setActiveTab(id as "tactics" | "opponent" | "overview" | "players")}
                 className={`py-4 px-2 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors ${
                   activeTab === id
                     ? 'border-blue-500 text-blue-600'
@@ -390,7 +390,7 @@ export function GamePlanModal({
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-green-600">
                     <Target className="w-5 h-5" />
-                    Forces de l'Adversaire
+                    Forces 
                   </CardTitle>
                 </CardHeader>
                 <CardContent>

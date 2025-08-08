@@ -362,7 +362,7 @@ export function CampBulkImportModal({
               Importation de joueurs au camp
             </h2>
             <p className="text-sm text-gray-600 mt-1">
-              Importation en masse de joueurs et enregistrement automatique au camp "{campName}"
+              Importation en masse de joueurs et enregistrement automatique au camp &quot;{campName}&quot;
             </p>
           </div>
           <Button
@@ -422,7 +422,7 @@ export function CampBulkImportModal({
                   Téléchargement du fichier CSV
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  Glissez-déposez votre fichier CSV ou cliquez pour le sélectionner. Les joueurs seront automatiquement ajoutés au camp "{campName}".
+                  Glissez-déposez votre fichier CSV ou cliquez pour le sélectionner. Les joueurs seront automatiquement ajoutés au camp.
                 </p>
               </div>
 
@@ -549,7 +549,7 @@ export function CampBulkImportModal({
                   Data Preview
                 </h3>
                 <p className="text-gray-600">
-                  {state.mappedPlayers.length} player(s) will be imported and registered to "{campName}"
+                  {state.mappedPlayers.length} player(s) will be imported and registered to camp.
                 </p>
               </div>
 
@@ -562,7 +562,7 @@ export function CampBulkImportModal({
                       Automatic Camp Registration
                     </h4>
                     <p className="text-sm text-blue-700">
-                      All imported players will be automatically registered to this camp with "confirmed" status and "paid" payment status. 
+                      All imported players will be automatically registered to this camp with confirmed status and paid payment status. 
                       Existing players will be registered if not already in the camp.
                     </p>
                   </div>

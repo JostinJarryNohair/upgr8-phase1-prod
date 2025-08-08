@@ -12,7 +12,7 @@ export async function middleware(req: NextRequest) {
   }
   
   // Create a response that we can modify
-  let res = NextResponse.next({
+  const res = NextResponse.next({
     request: {
       headers: req.headers,
     },

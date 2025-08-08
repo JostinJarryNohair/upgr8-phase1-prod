@@ -16,6 +16,30 @@ import {
 } from "lucide-react";
 import { GamePlanModal } from "./GamePlanModal";
 
+// Import GamePlan type from GamePlanModal
+interface GamePlan {
+  id: string;
+  matchId: string;
+  formation: string;
+  objectives: string[];
+  keyPlayers: {
+    player: string;
+    role: string;
+    instructions: string;
+  }[];
+  tactics: {
+    offensive: string;
+    defensive: string;
+    specialSituations: string;
+  };
+  opponentAnalysis: {
+    strengths: string[];
+    weaknesses: string[];
+    keyThreats: string[];
+  };
+  notes: string;
+}
+
 // Mock data types
 interface ScheduleEvent {
   id: string;
@@ -151,7 +175,8 @@ const getStatusText = (status: string) => {
 };
 
 export function RegularSeasonSchedule({ seasonId }: RegularSeasonScheduleProps) {
-  const [events, setEvents] = useState<ScheduleEvent[]>(mockScheduleData);
+  console.log("seasonId", seasonId);
+  const [events] = useState<ScheduleEvent[]>(mockScheduleData);
   const [filter, setFilter] = useState<"all" | "match" | "practice" | "tournament">("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "upcoming" | "completed" | "cancelled">("all");
   const [isGamePlanModalOpen, setIsGamePlanModalOpen] = useState(false);
@@ -195,7 +220,7 @@ export function RegularSeasonSchedule({ seasonId }: RegularSeasonScheduleProps) 
     setSelectedMatch(null);
   };
 
-  const handleSaveGamePlan = (gamePlan: any) => {
+  const handleSaveGamePlan = (gamePlan: GamePlan) => {
     console.log("Game plan saved:", gamePlan);
     // In a real app, this would save to the database
   };
@@ -230,7 +255,7 @@ export function RegularSeasonSchedule({ seasonId }: RegularSeasonScheduleProps) 
             <span className="text-sm text-gray-600">Type:</span>
             <select
               value={filter}
-              onChange={(e) => setFilter(e.target.value as any)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilter(e.target.value as "all" | "match" | "practice" | "tournament")}
               className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">Tous</option>
@@ -244,7 +269,7 @@ export function RegularSeasonSchedule({ seasonId }: RegularSeasonScheduleProps) 
             <span className="text-sm text-gray-600">Statut:</span>
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStatusFilter(e.target.value as "all" | "upcoming" | "completed" | "cancelled")}
               className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">Tous</option>
@@ -296,7 +321,7 @@ export function RegularSeasonSchedule({ seasonId }: RegularSeasonScheduleProps) 
                           </Badge>
                           {isToday(event.date) && (
                             <Badge className="bg-orange-100 text-orange-800">
-                              Aujourd'hui
+                              Aujourd&apos;hui
                             </Badge>
                           )}
                         </div>
@@ -370,7 +395,7 @@ export function RegularSeasonSchedule({ seasonId }: RegularSeasonScheduleProps) 
       {/* Quick Stats */}
       <div className="bg-white rounded-lg border p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Statistiques de l'Horaire
+          Statistiques de l&apos;Horaire
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center">

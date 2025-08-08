@@ -74,6 +74,10 @@ const fieldVariations: Record<keyof PlayerFormData, string[]> = {
   is_active: [
     'is_active', 'active', 'actif', 'status', 'statut',
     'Active', 'Actif', 'STATUS', 'enabled'
+  ],
+  coach_id: [
+    'coach_id', 'coachid', 'coach id', 'entraîneur', 'entraineur',
+    'Coach ID', 'Entraîneur', 'ENTRAINEUR', 'coach', 'coachId'
   ]
 };
 

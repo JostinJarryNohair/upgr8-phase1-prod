@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PlayerWithRegistration, PlayerFormData, Player } from "@/types/player";
-import { PlayerEvaluationWithScores } from "@/types/evaluation";
+import { EvaluationCriteria, PlayerEvaluationWithScores } from "@/types/evaluation";
 import { supabase } from "@/lib/supabase/client";
 import { AddPlayerModal } from "@/components/players/AddPlayerModal";
 import { PlayerInfoModal } from "@/components/players/PlayerInfoModal";
@@ -479,7 +479,7 @@ export function CampPlayers({ campId, campName = "Camp" }: CampPlayersProps) {
             first_name: evaluation.coaches.first_name,
             last_name: evaluation.coaches.last_name,
           },
-          scores: evaluation.evaluation_scores.map((score: any) => ({
+          scores: evaluation.evaluation_scores.map((score: { evaluation_criteria: EvaluationCriteria; id: string; criteria_id: string; player_evaluation_id: string; score: number; notes: string | null; created_at: string | null; updated_at: string | null }) => ({
             ...score,
             criteria: score.evaluation_criteria,
           })),

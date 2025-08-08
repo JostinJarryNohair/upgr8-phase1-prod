@@ -41,6 +41,7 @@ interface EvaluationsManagementProps {
   evaluations: PlayerEvaluationWithScores[];
   onCreateEvaluation: (playerId: string) => void;
   onViewEvaluation: (evaluationId: string) => void;
+  onEditEvaluation?: (evaluationId: string) => void;
 }
 
 export function EvaluationsManagement({
@@ -48,6 +49,7 @@ export function EvaluationsManagement({
   evaluations,
   onCreateEvaluation,
   onViewEvaluation,
+  onEditEvaluation,
 }: EvaluationsManagementProps) {
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -117,11 +119,17 @@ export function EvaluationsManagement({
   };
 
   const handleEditEvaluation = (evaluationId: string) => {
-    const evaluation = evaluations.find(e => e.id === evaluationId);
-    if (evaluation) {
-      setSelectedPlayerForEvaluation(evaluation.player_id);
-      setEditingEvaluationId(evaluationId);
-      setIsCreateModalOpen(true);
+    if (onEditEvaluation) {
+      // Use external handler if provided
+      onEditEvaluation(evaluationId);
+    } else {
+      // Fall back to internal handling
+      const evaluation = evaluations.find(e => e.id === evaluationId);
+      if (evaluation) {
+        setSelectedPlayerForEvaluation(evaluation.player_id);
+        setEditingEvaluationId(evaluationId);
+        setIsCreateModalOpen(true);
+      }
     }
   };
 

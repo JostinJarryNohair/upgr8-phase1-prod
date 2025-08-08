@@ -210,6 +210,21 @@ registration_status: "pending" | "confirmed" | "cancelled" | "completed"
 
 **SECURITY RULE**: Always add `coach_id` filtering to database queries to prevent data leakage between coaches.
 
+### 6. **Database Access Pattern**
+Always use the established pattern when working with database queries:
+```typescript
+// CORRECT: Always include coach_id filtering for security
+const { data, error } = await supabase
+  .from('table_name')
+  .select('*')
+  .eq('coach_id', coachId);
+
+// INCORRECT: Missing coach_id filter - security vulnerability
+const { data, error } = await supabase
+  .from('table_name')
+  .select('*');
+```
+
 ## Common Development Patterns
 
 ### 1. **Modal Components**
@@ -279,6 +294,13 @@ npm run lint         # ESLint checking and code quality
 - **Testing Build**: Use `npm run build` to verify production compatibility
 - **No Test Suite**: Currently no test framework is configured (see Testing Notes below)
 
+### Environment Setup
+Required environment variables in `.env.local`:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
 ## Testing Notes
 
 ⚠️ **No testing framework currently configured**
@@ -331,10 +353,24 @@ npm run lint         # ESLint checking and code quality
 - **UI Components**: shadcn/ui documentation for component usage
 - **Supabase Docs**: For database and authentication patterns
 
+## Key File Locations
+
+### Critical Files to Understand
+- `/src/types/database.ts` - Auto-generated Supabase types (DO NOT EDIT MANUALLY)
+- `/src/lib/mappers/` - Data transformation functions between DB and frontend
+- `/src/lib/supabase/client.ts` - Supabase client configuration
+- `/src/components/ui/` - Reusable UI components (shadcn/ui)
+- `/src/locales/` - Translation files (en.json, fr.json)
+
+### Configuration Files
+- `next.config.ts` - Next.js configuration
+- `tsconfig.json` - TypeScript configuration with path mapping
+- `components.json` - shadcn/ui configuration
+
 ## Current Working State
 
 ### Modified Files (per git status)
-- `src/app/coach-dashboard/teams/[id]/page.tsx` - Has local modifications, check before committing
+- `src/app/layout.tsx` - Has local modifications, check before committing
 
 ### Git Branch Info
 - **Current Branch**: `main`

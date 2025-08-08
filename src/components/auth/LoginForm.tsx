@@ -74,40 +74,32 @@ export default function LoginForm() {
       if (error) throw error;
 
       if (data.user) {
-        // Get coach profile to confirm everything is set up
-        const { data: coachData, error: profileError } = await supabase
-          .from("coaches")
-          .select("*")
-          .eq("id", data.user.id)
-          .single();
+        // Check both coach and player profiles to determine user type
+        const [coachResult, playerResult] = await Promise.all([
+          supabase.from("coaches").select("*").eq("id", data.user.id).single(),
+          supabase.from("player_users").select("*").eq("id", data.user.id).single()
+        ]);
 
-        if (profileError || !coachData) {
-          console.error("Profile fetch error:", profileError);
-          // User exists in auth but no coach profile - redirect to complete setup
-          setMessage("Profil incomplet. Redirection...");
-          
-          // Use window.location for hard redirect to ensure cookies are set
+        const { data: coachData, error: coachError } = coachResult;
+        const { data: playerData, error: playerError } = playerResult;
+
+        if (coachData && !coachError) {
+          // User is a coach
+          setMessage("Connexion réussie! Redirection vers le tableau de bord coach...");
           setTimeout(() => {
-            window.location.href = "/complete-profile";
-          }, 1500);
-          return;
+            window.location.href = "/coach-dashboard";
+          }, 500);
+        } else if (playerData && !playerError) {
+          // User is a player
+          setMessage("Connexion réussie! Redirection vers le tableau de bord joueur...");
+          setTimeout(() => {
+            window.location.href = "/player-dashboard";
+          }, 500);
+        } else {
+          // User exists in auth but no profile in either table
+          console.error("No profile found in coaches or player_users tables");
+          setMessage("Profil incomplet. Veuillez contacter le support.");
         }
-
-        // Login successful - sensitive data removed from logs
-
-        setMessage("Connexion réussie! Redirection...");
-        
-        // IMPORTANT: Use window.location.href instead of router.push
-        // This ensures the middleware runs with the new auth state
-        setTimeout(() => {
-          window.location.href = redirectTo;
-        }, 500);
-        
-        // Alternative if you want immediate redirect:
-        // window.location.href = redirectTo;
-        
-        // Don't use router.push here as it doesn't properly refresh auth state
-        // router.push("/coach-dashboard"); // <- This won't work properly with middleware
       }
     } catch (error: unknown) {
       console.error("Login error:", error);

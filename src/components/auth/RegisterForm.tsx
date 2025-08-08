@@ -21,8 +21,10 @@ import {
 import DynamicInput from "@/components/common/DynamicInput";
 import DynamicButton from "@/components/common/DynamicButton";
 import Link from "next/link";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export default function RegisterForm() {
+  const [userType, setUserType] = useState<'coach' | 'player'>('coach');
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -30,6 +32,7 @@ export default function RegisterForm() {
     password: "",
     role: "" as CoachRole,
     coachingLevel: "" as CoachingLevel,
+    profilePicture: "",
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -64,9 +67,12 @@ export default function RegisterForm() {
       newErrors.password =
         "Le mot de passe doit contenir au moins 6 caractères";
     }
-    if (!formData.role) newErrors.role = "Le rôle est requis";
-    if (!formData.coachingLevel)
-      newErrors.coachingLevel = "Le niveau est requis";
+    
+    // Conditional validation based on user type
+    if (userType === 'coach') {
+      if (!formData.role) newErrors.role = "Le rôle est requis";
+      if (!formData.coachingLevel) newErrors.coachingLevel = "Le niveau est requis";
+    }
     setErrors(newErrors);
     return !Object.values(newErrors).some(Boolean);
   };
@@ -84,28 +90,52 @@ export default function RegisterForm() {
     setMessage("");
 
     try {
-      // Add this before the signUp call
-      const { data: existingUser } = await supabase
-        .from("coaches")
-        .select("email")
-        .eq("email", formData.email)
-        .single();
+      // Check for existing user in appropriate table
+      if (userType === 'coach') {
+        const { data: existingUser } = await supabase
+          .from("coaches")
+          .select("email")
+          .eq("email", formData.email)
+          .single();
 
-      if (existingUser) {
-        setMessage("Erreur: Un compte existe déjà avec cette adresse email.");
-        return;
+        if (existingUser) {
+          setMessage("Erreur: Un compte entraîneur existe déjà avec cette adresse email.");
+          return;
+        }
+      } else {
+        const { data: existingUser } = await supabase
+          .from("player_users")
+          .select("email")
+          .eq("email", formData.email)
+          .single();
+
+        if (existingUser) {
+          setMessage("Erreur: Un compte joueur existe déjà avec cette adresse email.");
+          return;
+        }
       }
-      // Single auth.signUp() call with metadata - trigger handles coach profile creation
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
+
+      // Single auth.signUp() call with metadata - trigger handles profile creation
+      const signupData = userType === 'coach' 
+        ? {
+            user_type: 'coach',
             first_name: formData.firstName,
             last_name: formData.lastName,
             role: formData.role,
             coaching_level: formData.coachingLevel,
-          },
+          }
+        : {
+            user_type: 'player',
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            profile_picture: formData.profilePicture,
+          };
+
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: signupData,
         },
       });
 
@@ -128,6 +158,7 @@ export default function RegisterForm() {
         password: "",
         role: "" as CoachRole,
         coachingLevel: "" as CoachingLevel,
+        profilePicture: "",
       });
     } catch (error: unknown) {
       console.error("Registration error:", error);
@@ -183,6 +214,34 @@ export default function RegisterForm() {
               Commencez votre parcours hockey avec UpGr8
             </p>
           </div>
+
+          {/* User Type Tabs */}
+          <Tabs value={userType} onValueChange={(value) => setUserType(value as 'coach' | 'player')} className="mb-6">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="coach" className="text-sm">
+                Entraîneur
+              </TabsTrigger>
+              <TabsTrigger value="player" className="text-sm">
+                Joueur
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="coach">
+              <div className="text-center py-2">
+                <p className="text-sm text-gray-600">
+                  Créez un compte pour gérer vos équipes et évaluer vos joueurs.
+                </p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="player">
+              <div className="text-center py-2">
+                <p className="text-sm text-gray-600">
+                  Rejoignez la communauté hockey et créez votre profil de joueur.
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
@@ -273,71 +332,102 @@ export default function RegisterForm() {
               </p>
             </div>
 
-            <div>
-              <Label
-                htmlFor="role"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Rôle
-              </Label>
-              <Select
-                value={formData.role}
-                onValueChange={(value: CoachRole) => {
-                  setFormData({ ...formData, role: value });
-                  clearError("role");
-                }}
-              >
-                <SelectTrigger
-                  className={
-                    errors.role
-                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                      : ""
-                  }
-                >
-                  <SelectValue placeholder="Sélectionnez votre rôle" />
-                </SelectTrigger>
-                <SelectContent>
-                  {COACH_ROLES.map((role) => (
-                    <SelectItem key={role.value} value={role.value}>
-                      {role.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Coach-specific fields */}
+            {userType === 'coach' && (
+              <>
+                <div>
+                  <Label
+                    htmlFor="role"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Rôle
+                  </Label>
+                  <Select
+                    value={formData.role}
+                    onValueChange={(value: CoachRole) => {
+                      setFormData({ ...formData, role: value });
+                      clearError("role");
+                    }}
+                  >
+                    <SelectTrigger
+                      className={
+                        errors.role
+                          ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                          : ""
+                      }
+                    >
+                      <SelectValue placeholder="Sélectionnez votre rôle" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COACH_ROLES.map((role) => (
+                        <SelectItem key={role.value} value={role.value}>
+                          {role.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div>
-              <Label
-                htmlFor="coachingLevel"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Niveau de coaching
-              </Label>
-              <Select
-                value={formData.coachingLevel}
-                onValueChange={(value: CoachingLevel) => {
-                  setFormData({ ...formData, coachingLevel: value });
-                  clearError("coachingLevel");
-                }}
-              >
-                <SelectTrigger
-                  className={
-                    errors.coachingLevel
-                      ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                      : ""
-                  }
+                <div>
+                  <Label
+                    htmlFor="coachingLevel"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Niveau de coaching
+                  </Label>
+                  <Select
+                    value={formData.coachingLevel}
+                    onValueChange={(value: CoachingLevel) => {
+                      setFormData({ ...formData, coachingLevel: value });
+                      clearError("coachingLevel");
+                    }}
+                  >
+                    <SelectTrigger
+                      className={
+                        errors.coachingLevel
+                          ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                          : ""
+                      }
+                    >
+                      <SelectValue placeholder="Sélectionnez votre niveau" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COACHING_LEVELS.map((level) => (
+                        <SelectItem key={level.value} value={level.value}>
+                          {level.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
+
+            {/* Player-specific fields */}
+            {userType === 'player' && (
+              <div>
+                <Label
+                  htmlFor="profilePicture"
+                  className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  <SelectValue placeholder="Sélectionnez votre niveau" />
-                </SelectTrigger>
-                <SelectContent>
-                  {COACHING_LEVELS.map((level) => (
-                    <SelectItem key={level.value} value={level.value}>
-                      {level.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                  Photo de profil (URL)
+                </Label>
+                <DynamicInput
+                  id="profilePicture"
+                  type="url"
+                  placeholder="https://exemple.com/photo.jpg"
+                  value={formData.profilePicture}
+                  onChange={(e) => {
+                    setFormData({ ...formData, profilePicture: e.target.value });
+                  }}
+                  error=""
+                  className="h-10 text-sm"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Entrez l'URL de votre photo de profil (optionnel)
+                </p>
+              </div>
+            )}
 
             <DynamicButton
               label={loading ? "Création..." : "Créer le compte"}

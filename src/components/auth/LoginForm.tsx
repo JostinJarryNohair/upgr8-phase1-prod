@@ -17,7 +17,6 @@ export default function LoginForm() {
   const { t } = useTranslation();
   
   // Get the redirect URL from search params (set by middleware)
-  const redirectTo = searchParams.get('redirectTo') || '/coach-dashboard';
   
   const [formData, setFormData] = useState({
     email: "",

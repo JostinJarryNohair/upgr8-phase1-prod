@@ -424,7 +424,7 @@ export default function RegisterForm() {
                   className="h-10 text-sm"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Entrez l'URL de votre photo de profil (optionnel)
+                  Entrez URL de votre photo de profil (optionnel)
                 </p>
               </div>
             )}

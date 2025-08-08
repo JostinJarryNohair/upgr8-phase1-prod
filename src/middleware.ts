@@ -41,7 +41,7 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
   const isProtectedRoute = 
     pathname.startsWith('/coach-dashboard') ||
-    pathname.startsWith('/players-dashboard') ||
+    pathname.startsWith('/player-dashboard') ||
     pathname.startsWith('/scout-dashboard')
 
   if (isProtectedRoute) {
@@ -99,7 +99,7 @@ export const config = {
   matcher: [
     // Protected routes
     '/coach-dashboard/:path*',
-    '/players-dashboard/:path*',
+    '/player-dashboard/:path*',
     '/scout-dashboard/:path*',
     // Optional: Add API routes that need protection
     // '/api/protected/:path*',

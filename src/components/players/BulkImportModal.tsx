@@ -234,8 +234,10 @@ export function BulkImportModal({
             }
 
             if (existingPlayer) {
-              // Player already exists, skip
+              // Player already exists, but still add them to the returned list for tryout registration
               results.skipped++;
+              const player = fromDatabaseFormat(existingPlayer);
+              createdPlayers.push(player);
               continue;
             }
 
@@ -581,14 +583,14 @@ export function BulkImportModal({
                 </h3>
                 <p className="text-gray-600">
                   {state.importResults.created > 0 
-                    ? `${state.importResults.created} joueur(s) ont été importés avec succès`
-                    : "Aucun joueur n'a pu être importé"
+                    ? `${state.importResults.created} nouveau(x) joueur(s) créé(s)`
+                    : "Aucun nouveau joueur créé"
                   }
                   {state.importResults.skipped > 0 && 
-                    `, ${state.importResults.skipped} doublons ignorés`
+                    `, ${state.importResults.skipped} joueur(s) existant(s) trouvé(s)`
                   }
                   {state.importResults.errors.length > 0 && 
-                    `, ${state.importResults.errors.length} erreurs`
+                    `, ${state.importResults.errors.length} erreur(s)`
                   }
                 </p>
               </div>
@@ -596,10 +598,13 @@ export function BulkImportModal({
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <h4 className="font-medium text-green-800 mb-2">Résumé de l&apos;import</h4>
                 <ul className="text-sm text-green-700 space-y-1">
-                  <li>• {state.importResults.created} joueurs créés</li>
-                  <li>• {state.importResults.skipped} joueurs ignorés (doublons)</li>
+                  <li>• {state.importResults.created} nouveaux joueurs créés</li>
+                  <li>• {state.importResults.skipped} joueurs existants trouvés</li>
                   <li>• {state.importResults.errors.length} erreurs</li>
                 </ul>
+                <p className="text-sm text-green-600 mt-2">
+                  Tous les joueurs (nouveaux et existants) seront ajoutés au tryout si pas déjà inscrits.
+                </p>
               </div>
 
               {/* Error Details */}

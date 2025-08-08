@@ -229,29 +229,86 @@ export function TryoutPlayers({ tryoutId, onStatsChange }: TryoutPlayersProps) {
 
   const handleImportPlayers = async (importedPlayers: Player[]) => {
     try {
-      // Add players to tryout registrations
-      const registrations = importedPlayers.map(player => ({
-        tryout_id: tryoutId,
-        player_id: player.id,
-        status: 'confirmed' as const
-      }));
+      const results = {
+        registered: 0,
+        alreadyRegistered: 0,
+        errors: [] as { player: string; error: string }[]
+      };
 
-      const { data, error } = await supabase
-        .from("tryout_registrations")
-        .insert(registrations)
-        .select(`
-          *,
-          player:players(*)
-        `);
+      // Process each player individually to handle duplicates gracefully
+      for (const player of importedPlayers) {
+        try {
+          // Check if player is already registered to this tryout
+          const { data: existingRegistration } = await supabase
+            .from("tryout_registrations")
+            .select("id")
+            .eq("tryout_id", tryoutId)
+            .eq("player_id", player.id)
+            .single();
 
-      if (error) {
-        console.error("Error adding players to tryout:", error);
-        return;
+          if (existingRegistration) {
+            // Player already registered, skip
+            results.alreadyRegistered++;
+            continue;
+          }
+
+          // Register player to tryout
+          const { data: registrationData, error: registrationError } = await supabase
+            .from("tryout_registrations")
+            .insert({
+              tryout_id: tryoutId,
+              player_id: player.id,
+              status: 'confirmed' as const
+            })
+            .select(`
+              *,
+              player:players(*)
+            `)
+            .single();
+
+          if (registrationError) {
+            results.errors.push({
+              player: `${player.first_name} ${player.last_name}`,
+              error: registrationError.message
+            });
+            continue;
+          }
+
+          if (registrationData) {
+            // Add to local state
+            const newRegistration = fromTryoutRegistrationDatabaseFormat(registrationData);
+            setRegistrations(prev => [newRegistration, ...prev]);
+            results.registered++;
+          }
+        } catch (playerError) {
+          results.errors.push({
+            player: `${player.first_name} ${player.last_name}`,
+            error: playerError instanceof Error ? playerError.message : 'Unknown error'
+          });
+        }
       }
 
-      // Update local state
-      const newRegistrations = (data || []).map(fromTryoutRegistrationDatabaseFormat);
-      setRegistrations(prev => [...newRegistrations, ...prev]);
+      // Show summary message
+      if (results.registered > 0 || results.alreadyRegistered > 0) {
+        let message = "";
+        if (results.registered > 0) {
+          message += `${results.registered} joueur(s) ajouté(s) au tryout`;
+        }
+        if (results.alreadyRegistered > 0) {
+          if (message) message += ", ";
+          message += `${results.alreadyRegistered} joueur(s) déjà inscrit(s)`;
+        }
+        
+        // Show success message
+        console.log("✅ Import réussi:", message);
+        
+        // Show errors separately if any
+        if (results.errors.length > 0) {
+          console.warn(`⚠️ ${results.errors.length} erreur(s) lors de l'import:`, results.errors);
+        }
+      } else if (results.errors.length > 0) {
+        console.error("❌ Import échoué:", results.errors);
+      }
       
       // Notify parent component to refresh stats
       if (onStatsChange) {

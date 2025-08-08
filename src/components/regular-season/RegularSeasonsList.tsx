@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Trophy, 
   Calendar, 
-  Users, 
   Plus,
   ArrowRight,
   Clock,
@@ -17,11 +16,10 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { fromDatabaseFormat as fromRegularSeasonDatabaseFormat } from "@/lib/mappers/regularSeasonMapper";
-import { handleSupabaseError, showErrorToast, showSuccessToast } from '@/lib/errorHandling';
+import { handleSupabaseError, showErrorToast } from '@/lib/errorHandling';
 
 interface RegularSeasonsListProps {
   team: Team;
-  onStatsChange?: () => void;
 }
 
 interface SeasonStats {
@@ -29,7 +27,7 @@ interface SeasonStats {
   gamesCount: number;
 }
 
-export function RegularSeasonsList({ team, onStatsChange }: RegularSeasonsListProps) {
+export function RegularSeasonsList({ team }: RegularSeasonsListProps) {
   const router = useRouter();
   const [seasons, setSeasons] = useState<RegularSeason[]>([]);
   const [seasonsStats, setSeasonsStats] = useState<Record<string, SeasonStats>>({});
@@ -76,12 +74,16 @@ export function RegularSeasonsList({ team, onStatsChange }: RegularSeasonsListPr
               .select("id")
               .eq("regular_season_id", season.id),
             // Get games count for this season (if games table exists)
-            supabase
-              .from("games")
-              .select("id")
-              .eq("regular_season_id", season.id)
-              .then(result => result)
-              .catch(() => ({ data: [] })) // Games table might not exist yet
+            (async () => {
+              try {
+                return await supabase
+                  .from("games")
+                  .select("id")
+                  .eq("regular_season_id", season.id);
+              } catch {
+                return { data: [] }; // Games table might not exist yet
+              }
+            })()
           ]);
 
           return {
@@ -162,7 +164,7 @@ export function RegularSeasonsList({ team, onStatsChange }: RegularSeasonsListPr
             Saisons Régulières
           </h2>
           <p className="text-gray-600 mt-1">
-            Gérez les saisons régulières de l'équipe {team.name}
+            Gérez les saisons régulières de l&apos;équipe {team.name}
           </p>
         </div>
         <Button

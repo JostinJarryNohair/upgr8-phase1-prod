@@ -42,7 +42,7 @@ export default function CreateSeasonPage({ params }: PageProps) {
         if (teamError) {
           const appError = handleSupabaseError(teamError);
           showErrorToast(appError);
-          setError(`Erreur lors du chargement de l'équipe: ${appError.message}`);
+          setError(`Erreur lors du chargement de l&apos;équipe: ${appError.message}`);
           return;
         }
 
@@ -64,7 +64,7 @@ export default function CreateSeasonPage({ params }: PageProps) {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600">Chargement de l'équipe...</div>
+        <div className="text-gray-600">Chargement de l&apos;équipe...</div>
       </div>
     );
   }
@@ -99,7 +99,7 @@ export default function CreateSeasonPage({ params }: PageProps) {
                 Créer une Saison Régulière
               </h1>
               <p className="text-gray-600 mt-1">
-                pour l'équipe {team.name} ({team.level})
+                pour l&apos;équipe {team.name} ({team.level})
               </p>
             </div>
           </div>
@@ -111,10 +111,10 @@ export default function CreateSeasonPage({ params }: PageProps) {
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="text-center py-12">
             <div className="text-gray-600 mb-4">
-              La création de saisons régulières n'est pas encore implémentée.
+              La création de saisons régulières n&apos;est pas encore implémentée.
             </div>
             <div className="text-sm text-gray-500 mb-6">
-              Pour l'instant, les saisons régulières sont créées automatiquement 
+              Pour l&apos;instant, les saisons régulières sont créées automatiquement 
               lorsque vous terminez un tryout. Vous pouvez ensuite les gérer individuellement.
             </div>
             <div className="flex justify-center gap-4">

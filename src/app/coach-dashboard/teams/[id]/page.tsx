@@ -438,13 +438,7 @@ export default function TeamDetailPage({ params }: PageProps) {
           </TabsContent>
 
           <TabsContent value="seasons">
-            <RegularSeasonsList 
-              team={team} 
-              onStatsChange={() => {
-                // Reload stats when seasons change
-                loadTeamData();
-              }} 
-            />
+            <RegularSeasonsList team={team} />
           </TabsContent>
 
         </Tabs>

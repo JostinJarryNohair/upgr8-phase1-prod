@@ -104,7 +104,7 @@ export default function CampDetailPage({ params }: PageProps) {
           totalRegistrations,
         });
       }
-    } catch (error) {
+    } catch {
       // Error handled by showing "Camp not found" message
     } finally {
       setLoading(false);

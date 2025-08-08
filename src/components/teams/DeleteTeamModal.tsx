@@ -60,7 +60,7 @@ export function DeleteTeamModal({
             </div>
             <div>
               <h2 className="text-lg font-semibold text-gray-900">
-                Supprimer l'équipe
+                Supprimer l&apos;équipe
               </h2>
               <p className="text-sm text-gray-600">
                 Cette action est irréversible
@@ -144,7 +144,7 @@ export function DeleteTeamModal({
                     Attention : Suppression définitive
                   </h4>
                   <p className="text-sm text-red-700">
-                    Cette action supprimera définitivement l'équipe <strong>"{team.name}"</strong> et 
+                    Cette action supprimera définitivement l&apos;équipe <strong>&quot;{team.name}&quot;</strong> et 
                     toutes ses données associées (tryouts, saisons, enregistrements de joueurs). 
                     Cette action ne peut pas être annulée.
                   </p>
@@ -156,7 +156,7 @@ export function DeleteTeamModal({
           {/* Confirmation Input */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tapez le nom de l'équipe pour confirmer la suppression :
+              Tapez le nom de l&apos;équipe pour confirmer la suppression :
             </label>
             <div className="space-y-2">
               <div className="text-sm text-gray-600">
@@ -166,7 +166,7 @@ export function DeleteTeamModal({
                 type="text"
                 value={confirmationText}
                 onChange={(e) => setConfirmationText(e.target.value)}
-                placeholder="Nom de l'équipe"
+                placeholder="Nom de l&apos;équipe"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
                 disabled={isDeleting}
                 autoComplete="off"

@@ -353,7 +353,7 @@ export function CreateEvaluationModal({
                   {categoryCriteria.length === 0 ? (
                     <div className="text-center py-8">
                       <p className="text-gray-500">Aucun critère trouvé pour cette catégorie</p>
-                      <p className="text-sm text-gray-400 mt-2">Catégorie recherchée: "{category.id}"</p>
+                      <p className="text-sm text-gray-400 mt-2">Catégorie recherchée: &quot;{category.id}&quot;</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">

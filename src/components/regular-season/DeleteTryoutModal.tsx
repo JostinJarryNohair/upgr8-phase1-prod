@@ -100,7 +100,7 @@ export function DeleteTryoutModal({
                   </li>
                   <li className="flex items-center space-x-2">
                     <Calendar className="w-4 h-4 flex-shrink-0" />
-                    <span>L'historique complet du tryout</span>
+                    <span>L&apos;historique complet du tryout</span>
                   </li>
                 </ul>
               </div>

@@ -6,12 +6,13 @@ import { Team } from "@/types/team";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Trophy, Plus, Search } from "lucide-react";
+import { Trophy, Plus, Search, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import { fromDatabaseFormat as fromTeamDatabaseFormat } from "@/lib/mappers/teamMapper";
 import { handleSupabaseError, showErrorToast, showSuccessToast, setToastCallback } from '@/lib/errorHandling';
 import { useToast } from '@/components/ui/toast';
 import { AddTeamModal } from "@/components/teams/AddTeamModal";
+import { DeleteTeamModal } from "@/components/teams/DeleteTeamModal";
 import { TeamFormData } from "@/types/team";
 import { toDatabaseFormat as toTeamDatabaseFormat } from "@/lib/mappers/teamMapper";
 
@@ -23,6 +24,13 @@ export default function TeamsPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddTeamModalOpen, setIsAddTeamModalOpen] = useState(false);
+  const [teamToDelete, setTeamToDelete] = useState<Team | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [teamRelatedData, setTeamRelatedData] = useState<{
+    tryouts: number;
+    seasons: number;
+    players: number;
+  } | null>(null);
 
   // Set up toast callback
   useEffect(() => {
@@ -109,6 +117,154 @@ export default function TeamsPage() {
     } catch (error) {
       const appError = handleSupabaseError(error as Error);
       showErrorToast(appError);
+    }
+  };
+
+  // Handle team deletion - load related data first
+  const handleDeleteTeamClick = async (team: Team, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent navigation to team detail
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Load related data counts
+      const [tryoutsResult, seasonsResult] = await Promise.all([
+        // Count tryouts
+        supabase
+          .from("tryouts")
+          .select("id")
+          .eq("team_id", team.id)
+          .eq("coach_id", user.id),
+        
+        // Count regular seasons
+        supabase
+          .from("regular_seasons")
+          .select("id")
+          .eq("team_id", team.id)
+          .eq("coach_id", user.id)
+      ]);
+
+      // Count related player registrations
+      let playersCount = 0;
+      if (tryoutsResult.data && tryoutsResult.data.length > 0) {
+        const tryoutIds = tryoutsResult.data.map(t => t.id);
+        const { count } = await supabase
+          .from("tryout_registrations")
+          .select("*", { count: 'exact', head: true })
+          .in("tryout_id", tryoutIds);
+        playersCount = count || 0;
+      }
+
+      setTeamRelatedData({
+        tryouts: tryoutsResult.data?.length || 0,
+        seasons: seasonsResult.data?.length || 0,
+        players: playersCount,
+      });
+
+      setTeamToDelete(team);
+    } catch (error) {
+      const appError = handleSupabaseError(error as Error);
+      showErrorToast(appError);
+    }
+  };
+
+  // Confirm team deletion
+  const confirmDeleteTeam = async () => {
+    if (!teamToDelete) return;
+    
+    setIsDeleting(true);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        const error = { message: "Utilisateur non authentifié" };
+        showErrorToast(error);
+        return;
+      }
+
+      // Manual cascade delete to ensure data integrity
+      
+      // 1. Delete tryout registrations for tryouts of this team
+      const { data: teamTryouts } = await supabase
+        .from("tryouts")
+        .select("id")
+        .eq("team_id", teamToDelete.id)
+        .eq("coach_id", user.id);
+
+      if (teamTryouts && teamTryouts.length > 0) {
+        const tryoutIds = teamTryouts.map(t => t.id);
+        
+        // Delete tryout registrations
+        await supabase
+          .from("tryout_registrations")
+          .delete()
+          .in("tryout_id", tryoutIds);
+      }
+
+      // 2. Delete regular season players for seasons of this team
+      const { data: teamSeasons } = await supabase
+        .from("regular_seasons")
+        .select("id")
+        .eq("team_id", teamToDelete.id)
+        .eq("coach_id", user.id);
+
+      if (teamSeasons && teamSeasons.length > 0) {
+        const seasonIds = teamSeasons.map(s => s.id);
+        
+        // Delete regular season players
+        await supabase
+          .from("regular_season_players")
+          .delete()
+          .in("regular_season_id", seasonIds);
+
+        // Delete games (if exists)
+        await supabase
+          .from("games")
+          .delete()
+          .in("regular_season_id", seasonIds);
+      }
+
+      // 3. Delete tryouts
+      await supabase
+        .from("tryouts")
+        .delete()
+        .eq("team_id", teamToDelete.id)
+        .eq("coach_id", user.id);
+
+      // 4. Delete regular seasons
+      await supabase
+        .from("regular_seasons")
+        .delete()
+        .eq("team_id", teamToDelete.id)
+        .eq("coach_id", user.id);
+
+      // 5. Finally delete the team
+      const { error: deleteError } = await supabase
+        .from("teams")
+        .delete()
+        .eq("id", teamToDelete.id)
+        .eq("coach_id", user.id);
+
+      if (deleteError) {
+        const appError = handleSupabaseError(deleteError);
+        showErrorToast(appError);
+        return;
+      }
+
+      // Update local state
+      setTeams(teams.filter(team => team.id !== teamToDelete.id));
+      showSuccessToast(`Équipe "${teamToDelete.name}" supprimée avec succès`);
+      
+      // Close modal
+      setTeamToDelete(null);
+      setTeamRelatedData(null);
+      
+    } catch (error) {
+      const appError = handleSupabaseError(error as Error);
+      showErrorToast(appError);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -220,28 +376,43 @@ export default function TeamsPage() {
             {filteredTeams.map((team) => (
               <div
                 key={team.id}
-                onClick={() => router.push(`/coach-dashboard/teams/${team.id}`)}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all cursor-pointer hover:bg-gray-50 hover:border-blue-200"
+                className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all hover:border-blue-200 relative group"
               >
-                {/* Team Header */}
-                <div className="mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {team.name}
-                  </h3>
-                  <Badge className={getLevelBadgeColor(team.level)}>
-                    {team.level}
-                  </Badge>
-                </div>
+                {/* Delete Button */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => handleDeleteTeamClick(team, e)}
+                  className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 z-10"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
 
-                {/* Team Actions */}
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Trophy className="w-4 h-4 mr-1" />
-                      <span>Créée le {new Date(team.createdAt).toLocaleDateString()}</span>
-                    </div>
-                    <div className="text-xs text-blue-600 font-medium">
-                      Gérer →
+                {/* Clickable Area */}
+                <div
+                  onClick={() => router.push(`/coach-dashboard/teams/${team.id}`)}
+                  className="p-6 cursor-pointer"
+                >
+                  {/* Team Header */}
+                  <div className="mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2 pr-8">
+                      {team.name}
+                    </h3>
+                    <Badge className={getLevelBadgeColor(team.level)}>
+                      {team.level}
+                    </Badge>
+                  </div>
+
+                  {/* Team Actions */}
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center text-sm text-gray-500">
+                        <Trophy className="w-4 h-4 mr-1" />
+                        <span>Créée le {new Date(team.createdAt).toLocaleDateString()}</span>
+                      </div>
+                      <div className="text-xs text-blue-600 font-medium">
+                        Gérer →
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -256,6 +427,21 @@ export default function TeamsPage() {
           onClose={() => setIsAddTeamModalOpen(false)}
           onSubmit={handleAddTeam}
         />
+
+        {/* Delete Team Modal */}
+        {teamToDelete && (
+          <DeleteTeamModal
+            isOpen={!!teamToDelete}
+            onClose={() => {
+              setTeamToDelete(null);
+              setTeamRelatedData(null);
+            }}
+            onConfirm={confirmDeleteTeam}
+            team={teamToDelete}
+            isDeleting={isDeleting}
+            relatedDataCount={teamRelatedData || undefined}
+          />
+        )}
       </div>
     </div>
   );

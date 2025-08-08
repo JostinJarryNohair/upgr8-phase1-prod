@@ -67,26 +67,9 @@ export async function middleware(req: NextRequest) {
         return redirectResponse
       }
       
-      // Optional: Add role-based access control
-      const userRole = user.user_metadata?.role
-      
-      // Check role requirements for specific dashboards
-      if (pathname.startsWith('/coach-dashboard') && userRole !== 'coach' && userRole !== 'admin') {
-        return NextResponse.redirect(new URL('/unauthorized', req.url))
-      }
-      
-      if (pathname.startsWith('/scout-dashboard') && userRole !== 'scout' && userRole !== 'admin') {
-        return NextResponse.redirect(new URL('/unauthorized', req.url))
-      }
-      
-      if (pathname.startsWith('/players-dashboard') && userRole !== 'player' && userRole !== 'admin') {
-        return NextResponse.redirect(new URL('/unauthorized', req.url))
-      }
-      
       // Add user info to headers for server components
       res.headers.set('x-user-id', user.id)
       res.headers.set('x-user-email', user.email || '')
-      res.headers.set('x-user-role', userRole || '')
       
       // Security headers
       res.headers.set('x-frame-options', 'DENY')

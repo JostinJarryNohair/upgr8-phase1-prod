@@ -251,10 +251,10 @@ export function CampPlayers({ campId, campName = "Camp" }: CampPlayersProps) {
             throw new Error(t('players.playerAlreadyRegistered'));
           }
         } else {
-          // Create new player
+          // Create new player with coach_id
           const { data: newPlayer, error: playerError } = await supabase
             .from("players")
-            .insert([playerData])
+            .insert([{ ...playerData, coach_id: user.id }])
             .select("id")
             .single();
 
@@ -264,10 +264,10 @@ export function CampPlayers({ campId, campName = "Camp" }: CampPlayersProps) {
           playerId = newPlayer.id;
         }
       } else {
-        // No email, create new player
+        // No email, create new player with coach_id
         const { data: newPlayer, error: playerError } = await supabase
           .from("players")
-          .insert([playerData])
+          .insert([{ ...playerData, coach_id: user.id }])
           .select("id")
           .single();
 
@@ -681,9 +681,7 @@ export function CampPlayers({ campId, campName = "Camp" }: CampPlayersProps) {
               </p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                {t('players.moreFilters')}
-              </Button>
+      
               <Button
                 variant="outline" 
                 size="sm"

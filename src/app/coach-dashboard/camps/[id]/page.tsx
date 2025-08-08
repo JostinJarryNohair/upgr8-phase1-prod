@@ -2,14 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, MapPin, Users, ArrowLeft, Eye, ClipboardCheck } from "lucide-react";
+import { Calendar, MapPin, Users, ArrowLeft, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Camp } from "@/types/camp";
 import { supabase } from "@/lib/supabase/client";
 import { fromDatabaseFormat } from "@/lib/mappers/campMapper";
 import { CampPlayers } from "@/components/camps/camp/CampPlayer";
-import { CampEvaluations } from "@/components/camps/camp/CampEvaluations";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -20,7 +19,6 @@ interface CampStats {
   activePlayers: number;
   pendingPlayers: number;
   totalRegistrations: number;
-  totalEvaluations: number;
 }
 
 export default function CampDetailPage({ params }: PageProps) {
@@ -33,7 +31,6 @@ export default function CampDetailPage({ params }: PageProps) {
     activePlayers: 0,
     pendingPlayers: 0,
     totalRegistrations: 0,
-    totalEvaluations: 0,
   });
 
   const loadCampAndStats = useCallback(async () => {
@@ -45,7 +42,6 @@ export default function CampDetailPage({ params }: PageProps) {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        console.error("No authenticated user");
         return;
       }
 
@@ -58,7 +54,6 @@ export default function CampDetailPage({ params }: PageProps) {
         .single();
 
       if (campError) {
-        console.error("Error loading camp:", campError);
         return;
       }
 
@@ -86,7 +81,6 @@ export default function CampDetailPage({ params }: PageProps) {
           .eq("camp_id", id);
 
       if (registrationsError) {
-        console.error("Error loading registrations:", registrationsError);
         return;
       }
 
@@ -103,30 +97,15 @@ export default function CampDetailPage({ params }: PageProps) {
           (reg) => reg.status !== "cancelled"
         ).length;
 
-        // Get evaluations count for camp players
-        const playerIds = registrationsData
-          .filter(reg => reg.players && reg.status !== "cancelled")
-          .map(reg => reg.players.id);
-
-        let totalEvaluations = 0;
-        if (playerIds.length > 0) {
-          const { data: evaluationsData } = await supabase
-            .from("player_evaluations")
-            .select("id")
-            .in("player_id", playerIds);
-          totalEvaluations = evaluationsData?.length || 0;
-        }
-
         setStats({
           totalPlayers,
           activePlayers,
           pendingPlayers,
           totalRegistrations,
-          totalEvaluations,
         });
       }
     } catch (error) {
-      console.error("Error loading camp:", error);
+      // Error handled by showing "Camp not found" message
     } finally {
       setLoading(false);
     }
@@ -253,27 +232,20 @@ export default function CampDetailPage({ params }: PageProps) {
           onValueChange={setActiveTab}
           className="space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-3 bg-gray-100">
+          <TabsList className="grid w-full grid-cols-2 bg-gray-100 max-w-md">
             <TabsTrigger
               value="overview"
-              className="flex items-center space-x-2"
+              className="flex items-center justify-center space-x-2 py-3"
             >
               <Eye className="w-4 h-4" />
               <span>Overview</span>
             </TabsTrigger>
             <TabsTrigger
               value="players"
-              className="flex items-center space-x-2"
+              className="flex items-center justify-center space-x-2 py-3"
             >
               <Users className="w-4 h-4" />
               <span>Players ({stats.totalPlayers})</span>
-            </TabsTrigger>
-            <TabsTrigger
-              value="evaluations"
-              className="flex items-center space-x-2"
-            >
-              <ClipboardCheck className="w-4 h-4" />
-              <span>Evaluations ({stats.totalEvaluations})</span>
             </TabsTrigger>
           </TabsList>
 
@@ -373,9 +345,6 @@ export default function CampDetailPage({ params }: PageProps) {
             <CampPlayers campId={camp.id} campName={camp.name} />
           </TabsContent>
 
-          <TabsContent value="evaluations">
-            <CampEvaluations campId={camp.id} />
-          </TabsContent>
         </Tabs>
       </div>
     </div>

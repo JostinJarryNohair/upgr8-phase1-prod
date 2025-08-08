@@ -140,8 +140,11 @@ export function CreateEvaluationModal({
   };
 
   const calculateOverallScore = () => {
-    const totalScore = Object.values(scores).reduce((sum, score) => sum + score, 0);
-    const averageScore = totalScore / Object.keys(scores).length;
+    const scoreValues = Object.values(scores);
+    if (scoreValues.length === 0) return 0;
+    
+    const totalScore = scoreValues.reduce((sum, score) => sum + score, 0);
+    const averageScore = totalScore / scoreValues.length;
     return Math.round(averageScore * 10) / 10; // Round to 1 decimal place
   };
 
@@ -347,8 +350,14 @@ export function CreateEvaluationModal({
               return (
                 <div key={category.id} className={`p-6 rounded-xl border-2 ${category.color}`}>
                   <h4 className="text-xl font-semibold text-gray-900 mb-6 text-center">{category.name}</h4>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {categoryCriteria.map((criterion) => (
+                  {categoryCriteria.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">Aucun critère trouvé pour cette catégorie</p>
+                      <p className="text-sm text-gray-400 mt-2">Catégorie recherchée: "{category.id}"</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                      {categoryCriteria.map((criterion) => (
                       <div key={criterion.id} className="bg-white p-5 rounded-lg border shadow-sm hover:shadow-md transition-shadow">
                         <Label htmlFor={`score-${criterion.id}`} className="text-base font-medium text-gray-900 mb-4 block">
                           {criterion.name_fr}
@@ -367,25 +376,33 @@ export function CreateEvaluationModal({
                             <span className="text-base text-gray-500 font-medium">/ 10</span>
                           </div>
                           <div className="flex space-x-0.5">
-                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
-                              <button
-                                key={star}
-                                type="button"
-                                onClick={() => handleScoreChange(criterion.id, star)}
-                                className={`w-5 h-5 transition-colors ${
-                                  (scores[criterion.id] || 0) >= star 
-                                    ? "text-yellow-500 hover:text-yellow-600" 
-                                    : "text-gray-300 hover:text-gray-400"
-                                }`}
-                              >
-                                <Star className="w-full h-full fill-current" />
-                              </button>
-                            ))}
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => {
+                              const isActive = (scores[criterion.id] || 0) >= star;
+                              return (
+                                <button
+                                  key={star}
+                                  type="button"
+                                  onClick={() => handleScoreChange(criterion.id, star)}
+                                  className={`w-6 h-6 transition-all duration-200 hover:scale-110 ${
+                                    isActive 
+                                      ? "text-yellow-400 hover:text-yellow-500" 
+                                      : "text-gray-300 hover:text-yellow-300"
+                                  }`}
+                                  aria-label={`Rate ${star} out of 10`}
+                                >
+                                  <Star 
+                                    className={`w-full h-full ${isActive ? 'fill-yellow-400' : 'fill-gray-200'} stroke-current`}
+                                    strokeWidth={1}
+                                  />
+                                </button>
+                              );
+                            })}
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -396,7 +413,7 @@ export function CreateEvaluationModal({
             <div className="text-center">
               <h4 className="text-xl font-semibold text-gray-900 mb-4">Score global de l&apos;évaluation</h4>
               <div className="flex items-center justify-center space-x-4">
-                <Star className="w-12 h-12 text-yellow-500" />
+                <Star className="w-12 h-12 text-yellow-400 fill-yellow-400 stroke-current" strokeWidth={1} />
                 <span className="text-6xl font-bold text-blue-600">
                   {calculateOverallScore()}/10
                 </span>

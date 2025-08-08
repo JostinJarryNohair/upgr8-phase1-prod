@@ -8,6 +8,7 @@ import { PlayerEvaluationWithScores } from "@/types/evaluation";
 import { AddPlayerModal } from "./AddPlayerModal";
 import { BulkImportModal } from "./BulkImportModal";
 import { PlayerInfoModal } from "./PlayerInfoModal";
+import { DeletePlayerModal } from "./DeletePlayerModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -65,6 +66,8 @@ export function PlayersManagement({
   const [error, setError] = useState<string | null>(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Search filter - search by name or email
   const filteredPlayers = players.filter((player) => {
@@ -100,14 +103,29 @@ export function PlayersManagement({
   };
 
   const handleDeletePlayer = (id: string) => {
-    if (confirm("Êtes-vous sûr de vouloir supprimer ce joueur ?")) {
-      try {
-        onDeletePlayer(id);
-        setError(null);
-      } catch {
-        setError("Erreur lors de la suppression du joueur");
-      }
+    const player = players.find(p => p.id === id);
+    if (player) {
+      setPlayerToDelete(player);
     }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!playerToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      await onDeletePlayer(playerToDelete.id);
+      setPlayerToDelete(null);
+      setError(null);
+    } catch {
+      setError("Erreur lors de la suppression du joueur");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setPlayerToDelete(null);
   };
 
   const handleViewProfile = (player: Player) => {
@@ -406,6 +424,15 @@ export function PlayersManagement({
           isOpen={!!selectedPlayer}
           onClose={() => setSelectedPlayer(null)}
           onEvaluationCreated={onEvaluationCreated}
+        />
+
+        {/* Delete Player Modal */}
+        <DeletePlayerModal
+          isOpen={!!playerToDelete}
+          onClose={handleCancelDelete}
+          onConfirm={handleConfirmDelete}
+          player={playerToDelete}
+          isDeleting={isDeleting}
         />
       </div>
     </div>

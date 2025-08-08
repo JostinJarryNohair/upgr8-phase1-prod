@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Search, AlertCircle, CheckCircle, UserPlus, Upload } from "lucide-react";
+import { Search, AlertCircle, CheckCircle, UserPlus, Upload, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -330,6 +330,38 @@ export function CampPlayers({ campId, campName = "Camp" }: CampPlayersProps) {
         error instanceof Error
           ? error.message
           : t('players.errorModifying')
+      );
+    }
+  };
+
+  const handleRemoveFromCamp = async (playerId: string, playerName: string) => {
+    const confirmed = window.confirm(
+      `Êtes-vous sûr de vouloir supprimer ${playerName} de ce camp? Cette action ne peut pas être annulée.`
+    );
+    
+    if (!confirmed) return;
+
+    try {
+      // Delete the camp registration (not the player)
+      const { error } = await supabase
+        .from("camp_registrations")
+        .delete()
+        .eq("player_id", playerId)
+        .eq("camp_id", campId);
+
+      if (error) {
+        console.error("Error removing player from camp:", error);
+        throw new Error("Erreur lors de la suppression du joueur du camp");
+      }
+
+      // Reload players to reflect the change
+      await loadCampPlayers();
+    } catch (error) {
+      console.error("Error removing player from camp:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Erreur lors de la suppression du joueur"
       );
     }
   };
@@ -797,20 +829,27 @@ export function CampPlayers({ campId, campName = "Camp" }: CampPlayersProps) {
                       >
                         {t('players.viewDetails')}
                       </Button>
+                      {player.registration_status !== "cancelled" && (
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => handleToggleCut(player.id)}
+                          disabled={loading || addingPlayer}
+                          aria-label={`${t('players.cut')} ${fullName}`}
+                          className="bg-orange-100 hover:bg-orange-200 text-orange-700"
+                        >
+                          Couper
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         variant="destructive"
-                        onClick={() => handleToggleCut(player.id)}
-                        disabled={
-                          loading ||
-                          addingPlayer ||
-                          player.registration_status === "cancelled"
-                        }
-                        aria-label={`${t('players.cut')} ${fullName}`}
+                        onClick={() => handleRemoveFromCamp(player.id, fullName)}
+                        disabled={loading || addingPlayer}
+                        aria-label={`Supprimer ${fullName} du camp`}
+                        className="bg-red-100 hover:bg-red-200 text-red-700 border border-red-300"
                       >
-                        {player.registration_status === "cancelled"
-                          ? t('players.cutPlayer')
-                          : t('players.cut')}
+                        <Trash2 className="w-3 h-3" />
                       </Button>
                     </div>
                   </div>
